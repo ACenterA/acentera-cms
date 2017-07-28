@@ -23,13 +23,13 @@ module.exports = {
     port: process.env.DEV_PORT || 8090,
     autoOpenBrowser: true,
     assetsSubDirectory: 'assets',
-    assetsPublicPath: '',
+    assetsPublicPath: '/',
     proxyTable: {
-        '/api': {
-            target: 'http://localhost:8080',
+        '/admin': {
+            target: 'http://localhost:8090',
             changeOrigin: true,
             pathRewrite: {
-                '^/api': 'api'
+                '^/admin': ''
             }
         }
     },
