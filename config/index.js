@@ -31,6 +31,13 @@ module.exports = {
             pathRewrite: {
                 '^/admin': ''
             }
+        },
+        '/dist': {
+            target: 'http://localhost:8091',
+            changeOrigin: true,
+            pathRewrite: {
+                '^/dist': 'dist'
+            }
         }
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"
