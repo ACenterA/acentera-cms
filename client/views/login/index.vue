@@ -120,13 +120,14 @@ export default {
       return null
     },
     username: function () {
+      var self = this
       if (this.$store.state.github !== null) {
         if (this.$store.state.github.user !== null) {
           // Ok great we have usernames, lets check for the ssh keys... ??
           setTimeout(function () {
-            this.testFetch()
+            self.testFetch()
           }, 100)
-          return this.$store.state.github.user.name || this.$store.state.github.user.login
+          return this.$store.state.github.user.name || this.$store.state.github.user.login || this.$store.state.github.user.username
         }
       }
       return null
@@ -238,11 +239,15 @@ export default {
       .catch((error) => {
         console.log('set ssh valid to false??')
         console.log(error)
-        self.sshValid = false
-        if (error.response.status === 500) {
-          self.toggleRepoState(6) // need to setup SSH Key for the user
-        } else {
-          this.$onError(error)
+        if (self.sshValid) {
+          self.sshValid = false
+          console.error(error)
+          console.error('err3')
+          if (error.response.status === 500) {
+            self.toggleRepoState(6) // need to setup SSH Key for the user
+          } else {
+            this.$onError(error)
+          }
         }
       })
     },
@@ -253,24 +258,41 @@ export default {
       var self = this
       // console.log(this.logininfo)
       // ensure to use login credentials first...
-      this.$github.setUserPass(this.logininfo.user, this.logininfo.pass)
-
-      this.$github.get('user', {}, function (next) {
+      console.log('sshkey test a')
+      var userGetPath = 'user'
+      var userPostPath = '/user/keys'
+      var $gitobj = this.$github
+      console.log('type test')
+      if (this.$store.state.github.logininfo.type === 'BitBucket') {
+        $gitobj = this.$bitbucket
+        userGetPath = '1.0/users/' + this.$store.state.github.logininfo.username
+        userPostPath = '1.0/users/' + this.$store.state.github.logininfo.username + '/ssh-keys'
+      }
+      console.log(this.$store.state.github.logininfo)
+      $gitobj.setUserPass(this.logininfo.user, this.logininfo.pass)
+      $gitobj.get(userGetPath, {}, function (next) {
         console.log('success fully got user informations...')
         self.$http.get(window.apiUrl + '/sshkeys?action=create').then((response) => {
           console.log('doing SSH KEY CREATE done')
           if (response.data !== undefined && response.data !== null) {
             self.pubKey = response.data.Data
             if (self.pubKey !== undefined && self.pubKey !== null) {
+              console.log(response.data)
               var githubPush = {
                 key: self.pubKey
               }
-              console.log('will create github key')
+
+              if (self.$store.state.github.logininfo.type === 'BitBucket') {
+                githubPush['accountname'] = self.$store.state.github.logininfo.username
+                githubPush['label'] = 'ServerlessCMS Generated'
+              }
+              console.log('will create ssh key')
               console.log(githubPush)
-              self.$github.post('/user/keys', githubPush, function (resp) {
+
+              $gitobj.post(userPostPath, githubPush, function (resp) {
                 console.log('received git response for ssh key creation')
                 console.log(resp)
-                if (resp.status === 201) {
+                if (resp.status === 201 || resp.status === 200) { // 200 = BitBucket success response, 201 = Github success response
                   // SSH Key got created... NICE! Lets fetch
                   self.testFetch()
                 }
@@ -280,9 +302,12 @@ export default {
               })
             }
           }
-          this.sshKeyCreateError = true
+          self.sshKeyCreateError = true
         })
         .catch((error) => {
+          console.error('got error of')
+          console.error(error)
+          console.error('err4')
           if (error.response.status === 500) {
             this.sshKeyCreateError = true
           } else {

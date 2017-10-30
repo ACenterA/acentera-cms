@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <nprogress-container></nprogress-container>
-    <navbar :show="true"></navbar>
-    <sidebar :show="sidebar.opened && !sidebar.hidden"></sidebar>
-    <app-main></app-main>
+    <navbar :notLoggedIn="websiteAndNotLoggedIn" :projectSelected="projectSelected" :show="true"></navbar>
+    <sidebar :notLoggedIn="websiteAndNotLoggedIn" :projectSelected="!projectSelected" :show="sidebar.opened && !sidebar.hidden"></sidebar>
+    <app-main :notLoggedIn="websiteAndNotLoggedIn" :hasSidebar="sidebar.opened && !sidebar.hidden"></app-main>    
     <footer-bar :show="!sidebartwo.opened"></footer-bar>
   </div>
 </template>
@@ -33,7 +33,11 @@ export default {
         let rect = body.getBoundingClientRect()
         let isMobile = rect.width - RATIO < WIDTH
         this.toggleDevice(isMobile ? 'mobile' : 'other')
-        this.toggleSidebar(!isMobile)
+
+        if (!this.$store.state.website) {
+          this.toggleSidebar(!isMobile)
+        }
+
         // this.toggleSidebartwo(false)
       }
     }
@@ -45,6 +49,8 @@ export default {
 
   computed: mapGetters({
     sidebar: 'sidebar',
+    websiteAndNotLoggedIn: 'websiteAndNotLoggedIn',
+    projectSelected: 'projectSelected',
     sidebartwo: 'sidebartwo'
   }),
 

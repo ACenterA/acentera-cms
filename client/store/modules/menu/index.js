@@ -1,6 +1,6 @@
 import * as types from '../../mutation-types'
 import lazyLoading from './lazyLoading'
-// import admin from './admin'
+import admin from './admin'
 // import tools from './tools'
 import design from './design'
 
@@ -24,8 +24,16 @@ const state = {
       },
       component: lazyLoading('login', true)
     },
-    design
-    // admin,
+    design,
+    {
+      name: 'Versions',
+      path: '/versions',
+      meta: {
+        icon: 'fa-lock'
+      },
+      component: lazyLoading('versions', true)
+    },
+    admin
     // tools
     /*
     {

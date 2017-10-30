@@ -209,12 +209,20 @@ var bm = editor.BlockManager;
          }
     }
 
+    //console.error(window.data.Data);
     var headStart = window.data.Data.indexOf("<head>") + 6
     if (headStart < 7) {
        headStart = window.data.Data.toLowerCase().indexOf("<head>") +6
+       if (headStart < 7) {
+         //headStart = window.data.Data.toLowerCase().indexOf("doctype html>");
+         //alert(headStart);
+         //if (headStart <= 10) {
+         headStart = window.data.Data.toLowerCase().indexOf("<html>") + 6
+         //}
+       }
     }
 
-    if (headStart < 7) {
+    if (headStart < 6) {
       headStart = 0;
     }
 
@@ -231,12 +239,17 @@ var bm = editor.BlockManager;
       bodyStart = 0;
     }
 
+    if (headEnd < headStart) {
+      headEnd = bodyStart - 6;
+    }
+
     var bodyEnd = window.data.Data.lastIndexOf("</body>")
     if (bodyEnd < 0) {
        bodyEnd = window.data.Data.toLowerCase().lastIndexOf("</body>")
     }
     var body = window.data.Data.substring(bodyStart,bodyEnd) // .replaceAll(" href=\"#"," data-href=\"#").replaceAll(" href=\"/#"," data-href=\"/#")
     var head = window.data.Data.substring(headStart, headEnd)
+    // alert(head);
     var htmlContent = body;  //  window.data.Data; //$("body").html()
     var headContent = head;  //  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 

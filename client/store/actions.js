@@ -7,9 +7,12 @@ export const toggleSidebartwo = ({ commit }, opened) => commit(types.TOGGLE_SIDE
 export const toggleSidebarHtmlData = ({ commit }, json) => commit(types.TOGGLE_SIDEBAR_TWO_DATA, json)
 
 export const toggleRepoState = ({ commit }, newState) => commit(types.REPO_STATE_UPATE, newState)
+export const toggleRepo = ({ commit }, newState) => commit(types.REPO_UPATE, newState)
 export const toggleRepoUrl = ({ commit }, newState) => commit(types.REPO_URL_UPATE, newState)
 
 export const toggleDevice = ({ commit }, device) => commit(types.TOGGLE_DEVICE, device)
+
+export const logOut = ({ commit }, vue) => commit(types.LOGOUT, vue)
 
 export const expandMenu = ({ commit }, menuItem) => {
   if (menuItem) {

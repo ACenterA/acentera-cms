@@ -4,6 +4,7 @@ const path = require('path')
 const config = require('../config')
 const utils = require('./utils')
 const projectRoot = path.resolve(__dirname, '../')
+var webpack = require('webpack');
 
 module.exports = {
   entry: {
@@ -17,6 +18,19 @@ module.exports = {
       'vuex-router-sync'
     ]
   },
+  plugins: [
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jquery: 'jquery',
+      'window.jQuery': 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery',
+      Popper: ['popper.js', 'default'],
+      // In case you imported plugins individually, you must also require them here:
+      // Util: "exports-loader?Util!bootstrap/js/dist/util",
+      // Dropdown: "exports-loader?Dropdown!bootstrap/js/dist/dropdown",
+    })
+  ],
   output: {
     path: config.build.assetsRoot,
     publicPath: process.env.NODE_ENV === 'production'

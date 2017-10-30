@@ -1,0 +1,14 @@
+[
+  { "name": "simple-one-pager",
+    "Publisher": "ACenterA Inc.",
+    "License": "MIT",
+    "Title": "Simple One Pager",
+    "ShortDesc": "Simple test template"
+  },
+  { "name": "hugo-agency-theme",
+    "Publisher": "ACenterA Inc.",
+    "License": "MIT",
+    "Title": "Hugo Agency Theme",
+    "ShortDesc": "A minimalist corporate website."
+  }
+]

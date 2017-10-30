@@ -20,9 +20,11 @@ const store = new Vuex.Store({
   },
   state: {
     pkg,
-    github: {},
-    bitbucket: null,
-    session: null
+    github: window.localStorage.getItem('github') || {},
+    bitbucket: window.localStorage.getItem('bitbucket') || {},
+    session: JSON.parse(window.localStorage.getItem('session')) || null,
+    website: false,
+    projectSelected: false
   },
   mutations
 })
