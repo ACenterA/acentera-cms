@@ -36,7 +36,7 @@
           </div>
       </div>
     </div>
-    <div v-else>
+    <div v-else style="height:100%">
 
       <div :class="{ hidden: !show }" class="container is-fluid is-marginless app-content">
       </div>
@@ -87,7 +87,8 @@ export default {
       // Modal error messages
       registerError: '',
       loginError: '',
-      passwordError: ''
+      passwordError: '',
+      show: false
     }
   },
   computed: mapGetters({

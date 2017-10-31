@@ -6,32 +6,122 @@
 
       <!-- For Each Websites -->
 
-
       <section class="">
         <div class="">
-          <nav class="box box-main">
+          <nav class="">
             <div class="box-center-main">
               <div>
-
                   <div class="center-text">
-                      <h4 class="site-title">Welcome AT YOUR TEMPLATES</h4>
-
-                      <br/>
-                      <br/>
-                      It happears that you have not yet created your first AWESOME website<br/>
-
-                      <br/>
-                      <br/>
-                      <br/>
-                      <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
-                          <span>Create my website</span>
-                      </div>
+                      <h4 class="site-title">Choosea template for your website</h4>
                   </div>
               </div>
             </div>
           </nav>
         </div>
       </section>
+
+
+      <div class="width-full">&nbsp;</div>
+
+
+      <section class="">
+        <div class="">
+
+        <div class="box box-template">
+          <div class="template-thumbnails">
+              <div class=""
+                    style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
+                      <img src="https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023" class="mw-100">
+              </div>
+              <div class="width-full">
+                <div class="float-left width-50">
+                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                    Edit site
+                  </div>
+                </div>
+                <div class="float-right width-50 small-leftmargin">
+                  <router-link to="/templates/template-01/preview" :exact="true">
+                    <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                      Preview
+                    </div>
+                  </router-link>
+                </div>
+              </div>
+          </div>
+        </div>
+
+
+
+        <div class="box box-template">
+          <div class="template-thumbnails">
+              <div class=""
+                    style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
+                      <img src="https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023" class="mw-100">
+              </div>
+              <div class="width-full">
+                <div class="float-left width-50">
+                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                    Edit site
+                  </div>
+                </div>
+                <div class="float-right width-50 small-leftmargin">
+                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                    Preview
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+
+        <div class="box box-template">
+          <div class="template-thumbnails">
+              <div class=""
+                    style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
+                      <img src="https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023" class="mw-100">
+              </div>
+              <div class="width-full">
+                <div class="float-left width-50">
+                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                    Edit site
+                  </div>
+                </div>
+                <div class="float-right width-50 small-leftmargin">
+                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                    Preview
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+
+
+        <div class="box box-template">
+          <div class="template-thumbnails">
+              <div class=""
+                    style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
+                      <img src="https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023" class="mw-100">
+              </div>
+              <div class="width-full">
+                <div class="float-left width-50">
+                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                    Edit site
+                  </div>
+                </div>
+                <div class="float-right width-50 small-leftmargin">
+                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                    Preview
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+
+
+        </div>
+      </section>
+
+
+
 
 <!--
       <section class="">
@@ -246,6 +336,30 @@ export default {
     justify-content: flex-end;
 }
 
+.background-box {
+  background-color: white;
+  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  color: #4a4a4a;
+  display: block;
+  padding: 1.25rem;
+  width: 20%;
+}
+
+.width-50 {
+  // width: 30%;
+  width: 100%;
+}
+
+.small-leftmargin {
+  margin-left:30px;
+}
+
+
+.width-full {
+  width: 100%;
+  display: inline-flex;
+}
+
 .line {
   height: 100%;
   position: relative;
@@ -253,6 +367,15 @@ export default {
   height: auto;
   border-left: 1px solid #efefef;
   height: 100%;
+}
+
+.box-template {
+  width:25%;
+  margin-left:30px;
+}
+
+.template-thumbnails {
+   width:100%;
 }
 
 .box-center-main {
@@ -297,6 +420,14 @@ export default {
   float:left;
 }
 
+.center-text-template {
+  position: relative;
+  text-align: center;
+  display: inline-block; /* changed this line */
+  // color: white;
+  // text-shadow: 0 1px 5px grey;
+  clear: both;
+}
 .center-text {
     position: relative;
     top: 50%;

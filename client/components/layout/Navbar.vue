@@ -6,10 +6,10 @@
           <a class="nav-item is-hidden-tablet" @click="toggleSidebar(!sidebar.opened)">
             <i class="fa fa-bars" aria-hidden="true"></i>
           </a>
-          <div v-if="isManual()">
-            <router-link :to="{name: manual}">
-              <i class="fa fa-fw fa-question"></i>
-              {{manual}}
+          <div v-if="isManual()" class="inline-display">
+            <router-link :to="{name: backRoute}">
+              <i class="fa fa-2x fa-arrow-left back-button"></i>
+                  <div class="back-text">{{manual}}</div>
             </router-link>
           </div>
           <div v-if="isOffline()">
@@ -75,6 +75,8 @@
               Logout
           </a>
 
+          <div style="margin:5px">&nbsp;</div>
+
         </div>
       </nav>
     </div>
@@ -111,7 +113,9 @@ export default {
       showModalComment: false,
       showModalReviewComment: false,
       title: 'Title',
-      selectedItemInfo: null
+      selectedItemInfo: null,
+      manual: null,
+      backRoute: null
     }
   },
 
@@ -262,7 +266,13 @@ export default {
       console.log('manualttt')
       console.log(this.$route.path)
       if ((('' + this.$route.path)).indexOf('/template') >= 0) {
-        this.manual = 'Home'
+        if ((('' + this.$route.path)).indexOf('/preview') >= 0) {
+          this.manual = 'Preview'
+          this.backRoute = 'Templates'
+        } else {
+          this.manual = 'Create a site'
+          this.backRoute = 'Home'
+        }
         return true
       }
       return false
@@ -612,6 +622,29 @@ export default {
 
 <style lang="scss">
 @import '~bulma/sass/utilities/variables';
+
+.inline-display {
+    display: inline;
+}
+
+
+.back-button {
+  height: 100%;
+  border-right: 1px solid black;
+  float: left;
+  padding-top:10px;
+  padding-left:20px;
+  padding-right:20px;
+}
+
+.back-text {
+  height: 100%;
+  border-right: 1px solid black;
+  float: left;
+  padding-top:15px;
+  padding-left:20px;
+  padding-right:20px;
+}
 
 .app-navbar {
   position: fixed;

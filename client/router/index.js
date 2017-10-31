@@ -18,6 +18,11 @@ export default new Router({
       path: '/templates',
       component: require('../views/Templates')
     },
+    {
+      name: 'Templates-01',
+      path: '/templates/:id/preview',
+      component: require('../views/TemplatesPreview')
+    },
     ...generateRoutesFromMenu(menuModule.state.items),
     {
       path: '*',
