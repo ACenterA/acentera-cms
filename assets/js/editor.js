@@ -217,7 +217,7 @@ var bm = editor.BlockManager;
     if (headStart < 7) {
       headStart = 0;
     }
-    
+
     var headEnd = window.data.Data.indexOf("</head>")
     if (headEnd < 0) {
        headEnd = window.data.Data.toLowerCase().indexOf("</head>") +7
@@ -305,11 +305,15 @@ var bm = editor.BlockManager;
        isDev = isDev.substring(0,isDev.indexOf('&'))
        window.editoradminindev = isDev;//+ tmp
        if (isDev.indexOf("8091") < 0) {
-	 window.editoradminindev = null;
+	        window.editoradminindev = null;
        }
        jqTag.id="acentera_js_ignore",
        jqTag.type = 'text/javascript';
-       jqTag.src = tmp + '/assets/js/jquery-2.0.3.min.js';
+       if (window.editoradminindev) {
+         jqTag.src = window.editoradminindev.replace('8091','8090') + tmp + '/assets/js/jquery-2.0.3.min.js';
+       } else {
+         jqTag.src = tmp + '/assets/js/jquery-2.0.3.min.js';
+       }
        jqTag.onload = myJQueryCode;
        headTag.appendChild(jqTag);
    } else {

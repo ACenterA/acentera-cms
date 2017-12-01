@@ -63,7 +63,7 @@ app.use(hotMiddleware)
 const staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
 app.use(staticPath, express.static('./assets'))
 
-const uri = 'http://localhost:' + port
+const uri = 'http://localhost:' + port + '/admin/'
 
 devMiddleware.waitUntilValid(() => {
   console.log('> Listening at ' + uri + '\n')

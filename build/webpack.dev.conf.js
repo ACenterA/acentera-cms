@@ -36,6 +36,6 @@ module.exports = merge(baseWebpackConfig, {
       template: 'index.html',
       inject: true,
       favicon: 'client/assets/logo.png'
-    })
+    }),
   ]
 })
