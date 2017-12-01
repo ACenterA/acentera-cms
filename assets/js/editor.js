@@ -85,7 +85,7 @@ function getParameterByName(name, url) {
     }
 
     var editor = grapesjs.init({
-        allowScripts: 0,
+        allowScripts: 1,
         showOffsets: 1,
         autorender: 0,
 	tagEditorOnly: tagEditOnly,
@@ -304,13 +304,13 @@ var bm = editor.BlockManager;
        var isDev = document.getElementById("acentera_ignore").innerHTML.substring(document.getElementById("acentera_ignore").innerHTML.indexOf("indev=")+6)
        isDev = isDev.substring(0,isDev.indexOf('&'))
        window.editoradminindev = isDev;//+ tmp
-       if (isDev.indexOf("8091") < 0) {
+       if (isDev.indexOf("8090") < 0) {
 	        window.editoradminindev = null;
        }
        jqTag.id="acentera_js_ignore",
        jqTag.type = 'text/javascript';
        if (window.editoradminindev) {
-         jqTag.src = window.editoradminindev.replace('8091','8090') + tmp + '/assets/js/jquery-2.0.3.min.js';
+         jqTag.src = window.editoradminindev + tmp + '/assets/js/jquery-2.0.3.min.js';
        } else {
          jqTag.src = tmp + '/assets/js/jquery-2.0.3.min.js';
        }
