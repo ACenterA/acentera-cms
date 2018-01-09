@@ -8,10 +8,21 @@ export default {
   },
   children: [
     {
-      name: 'Users',
-      path: '/users',
-      component: lazyLoading('admin/Users')
+      name: 'Site',
+      path: '/site',
+      component: lazyLoading('admin/Sites')
     },
+    {
+      name: 'Theme',
+      path: '/theme',
+      component: lazyLoading('admin/Themes')
+    },
+    {
+      name: 'Items Type',
+      path: '/items',
+      component: lazyLoading('admin/Items')
+    }
+/*
     {
       name: 'Policies',
       path: '/policies',
@@ -27,5 +38,6 @@ export default {
       path: '/requests',
       component: lazyLoading('admin/Requests')
     }
+    */
   ]
 }

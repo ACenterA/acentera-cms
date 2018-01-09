@@ -1,0 +1,319 @@
+<template>
+  <!-- Home -->
+  <div class="content has-text-centered">
+
+    <div v-if="isWebsite">
+
+      <!-- For Each Websites -->
+
+
+      <section class="">
+        <div class="">
+          <nav class="box box-main">
+            <div class="box-center-main">
+              <div>
+
+                  <div class="center-text">
+                      <h4 class="site-title">Welcome AT YOUR TEMPLATES</h4>
+
+                      <br/>
+                      <br/>
+                      It happears that you have not yet created your first AWESOME website<br/>
+
+                      <br/>
+                      <br/>
+                      <br/>
+                      <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                          <span>Create my website</span>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </section>
+
+<!--
+      <section class="">
+        <div class="">
+          <nav class="box">
+            <div class="box-left">
+              <div>
+              <div class="imageloader loaded site-details--thumbnail desktop"
+              style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
+                <img src="https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023" class="mw-100"
+              ></div>
+              </div>
+            </div>
+            <div class="line">&nbsp;</div>
+            <div class="box-center">
+              <div>
+                <div class="col-md-8 col-sm-12"><div class="site-details--content">
+                  <div class="site-details--content--header clearfix">
+                    <div class="float-left">
+                      <h4 class="site-title">mytestsite03</h4>
+                      <span class="status--subscription-status"><span class="status--subscription-status published">Published</span>
+                    </span>
+                  </span>
+                </div>
+                </div>
+                </div>
+                </div>
+              </div>
+            </div>
+            <div class="box-right">
+              <div>
+                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                      <span>Edit site</span>
+                  </div>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </section>
+-->
+
+    </div>
+    <div v-else>
+      <h1 class="is-title is-bold">{{ pkg.name.replace('-', ' ') }}</h1>
+
+      <p>
+        <strong>{{ pkg.description }}</strong>
+      </p>
+
+      <div v-if="isRepoUpdating()">
+        <p>Please wait, we are trying to gather latest updates on your website...</p>
+      </div>
+
+      <div v-if="isRepoUpdated()">
+        <p>Start designing your website by using the left toolbar in the design section.</p>
+      </div>
+      <div v-if="isRepoMissing()">
+        <p>There is an error with your repository. You do not have a .git/config file.</p>
+      </div>
+
+      <br/>
+      <div v-if="repoUrl">
+      Repository Information: {{ repoUrl }}
+      </div>
+
+      <div v-if="isKeyMissing()">
+        <br/>
+        <p class="blue">SSH Key is missing. &nbsp;<router-link to="/login" :exact="true"><b>Click here to configure.</b></router-link></p>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+import { mapActions } from 'vuex'
+// import Vue from 'vue'
+
+export default {
+
+  data () {
+    console.log(this.$store.state)
+    return {
+      pkg: this.$store.state.pkg
+    }
+  },
+  computed: {
+    repoState: function () {
+      return this.$store.state.app.repoState
+    },
+    repoUrl: function () {
+      if (this.$store.state.app.repoState.hasOwnProperty('url')) {
+        if (this.$store.state.app.repoState.hasOwnProperty('url') !== undefined && this.$store.state.app.repoState.hasOwnProperty('url') !== null && this.$store.state.app.repoState.hasOwnProperty('url') !== '') {
+          return this.$store.state.app.repoState.url
+        }
+      }
+    }
+  },
+  mounted () {
+    console.log('toggle test')
+    /*
+    this.toggleRepoState(1)
+    var self = this
+
+    this.$http.get(window.apiUrl + '/git?action=config').then((response) => {
+      this.toggleRepoUrl(response.data.Data)
+      console.log('toggle repo data')
+      if (response !== null && response.data !== null) {
+        this.toggleRepo(response.data)
+      }
+
+      if (self.$store.state.app.inet) {
+        this.$http.get(window.apiUrl + '/git?action=pull').then((response) => {
+          console.log('doing pull done')
+          console.log(response.data.Data)
+          self.toggleRepoState(0) // all good
+        })
+        .catch((error) => {
+          console.error(error)
+          console.error('err1')
+          if (error.response.status === 500) {
+            self.toggleRepoState(6) // need to setup SSH Key for the user
+          } else {
+            this.$onError(error)
+          }
+        })
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+      console.error('err2')
+      if (error.response.status === 500) {
+        self.toggleRepoState(5) // State 5 = no .git/config file....
+      } else {
+        this.$onError(error)
+      }
+    })
+    */
+  },
+
+  methods: {
+    ...mapActions([
+      'toggleRepoState',
+      'toggleRepo',
+      'toggleRepoUrl',
+      'isWebsite'
+    ]),
+    isRepoUpdating () {
+      return (this.repoState.updating === 1)
+    },
+    isRepoUpdated () {
+      return (this.repoState.updating === 0)
+    },
+    isRepoMissing () {
+      return (this.repoState.updating === 5)
+    },
+    isKeyMissing () {
+      return (this.repoState.updating === 6)
+    }
+  }
+
+}
+</script>
+
+<style lang="scss" scoped>
+
+@import '~bulma/sass/utilities/variables';
+
+.is-title {
+  text-transform: capitalize;
+}
+.box {
+  min-height:120px;
+  display: inline-block;
+}
+
+.box-left {
+    float: left;
+    height:100%;
+    // margin-right:50px;
+    width:40%;
+    -webkit-overflow-scrolling: touch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    max-width: 100%;
+    overflow: auto;
+    justify-content: flex-start;
+    white-space: nowrap;
+    -ms-flex-pack: start;
+}
+
+.box-right {
+
+    -webkit-overflow-scrolling: touch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    max-width: 100%;
+    overflow: auto;
+    -ms-flex-pack: end;
+    justify-content: flex-end;
+}
+
+.line {
+  height: 100%;
+  position: relative;
+  float: left;
+  height: auto;
+  border-left: 1px solid #efefef;
+  height: 100%;
+}
+
+.box-center-main {
+  width:100%;
+  padding-left:10px;
+  float: left;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-positive: 0;
+  flex-grow: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  -ms-flex-pack: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.box-center {
+    padding-left:10px;
+    float: left;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-positive: 0;
+    flex-grow: 0;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    -ms-flex-pack: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.button-site {
+  min-width:100px;
+}
+
+.float-left {
+  float:left;
+}
+
+.center-text {
+    position: relative;
+    top: 50%;
+    display: inline;
+    left: 50%; /* added this line and changed the next four lines */
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: inline-block; /* changed this line */
+    // color: white;
+    // text-shadow: 0 1px 5px grey;
+    clear: both;
+}
+.box-main {
+  width:80%;
+  text-align:center;
+}
+</style>

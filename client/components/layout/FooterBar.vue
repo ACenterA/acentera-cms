@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer" :class="{ hidden: !show }">
+  <footer class="footer" :class="{ hidden: true }">
     <div class="container">
       <div class="content has-text-centered">
         <p>Code licensed under <a :href="'https://github.com/' + repository + '/blob/master/LICENSE'">{{ license }}</a>.</p>

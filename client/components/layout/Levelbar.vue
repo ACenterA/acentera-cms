@@ -35,9 +35,12 @@ export default {
 
   data () {
     return {
-      list: null,
-      show: true
+      list: null
     }
+  },
+
+  props: {
+    show: Boolean
   },
 
   created () {
@@ -62,6 +65,8 @@ export default {
       console.log('route is')
       console.log(this.$route)
       if ((('' + this.$route.path)).indexOf('/Pages') >= 0) {
+        this.$data.show = false
+      } else if ((('' + this.$route.path)).indexOf('/items') >= 0) {
         this.$data.show = false
       } else if ((('' + this.$route.path)).indexOf('/widget') >= 0) {
         this.$data.show = false

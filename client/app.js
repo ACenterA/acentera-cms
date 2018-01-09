@@ -6,7 +6,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import * as filters from './filters'
-import { TOGGLE_SIDEBAR, TOGGLE_SIDEBAR_TWO } from 'vuex-store/mutation-types'
+import { LOGOUT, TOGGLE_SIDEBAR, TOGGLE_SIDEBAR_TWO } from 'vuex-store/mutation-types'
 import Notification from 'vue-bulma-notification'
 import Message from 'vue-bulma-message'
 import hljs from 'highlight.js'
@@ -19,11 +19,26 @@ window.apiUrl = window.apiUrl || 'http://localhost:8081/api'
 window.apiHost = window.apiHost || 'http://localhost:8081'
 window.goHostUrl = window.goHostUrl || 'http://localhost:8081'
 
+window.websiteapiUrl = window.websiteapiUrl || 'http://localhost:8083'
+
 import GitHubAPI from './GitHubAPI'
 Vue.use(GitHubAPI, { http: axios, token: 'app.js provided token' })
 
+import BitBucketAPI from './BitBucketAPI'
+Vue.use(BitBucketAPI, { http: axios, token: 'app.js provided token' })
+
+import Base64 from './Base64'
+Vue.use(Base64, { http: axios })
+
+// const base64 = Vue.prototype.Base64
+// Vue.prototype.$Base64 = base64
+// Vue.prototype.$base64 = base64
+
 const githubapi = Vue.prototype.GitHubAPI
 Vue.prototype.$GitHub = githubapi
+
+const bitbucketapi = Vue.prototype.BitBucketAPI
+Vue.prototype.$BitBucket = bitbucketapi
 
 // Enable devtools
 Vue.config.devtools = true
@@ -34,6 +49,12 @@ const nprogress = new NProgress({ parent: '.nprogress-container' })
 
 const { state } = store
 
+// if (!window.location.href.indexOf('.com') > 0) {
+
+// TODO:......
+store.commit('setWebsite', true) // weird ?
+// store.commit('setProjectSelected', false)
+
 Vue.prototype.$checkInet = function () {
   axios.get(
     'https://api.github.com/',
@@ -42,16 +63,24 @@ Vue.prototype.$checkInet = function () {
     console.log(response)
     store.commit('setInet', true)
   }, (error) => {
-    if (error.response === undefined || error.response === null) {
-      store.commit('setInet', false)
-      return
+    console.error('got response test of error')
+    console.error(error)
+    if (error.response.status === 403) {
+      // TODO: Should we check if we were supposed to check with bitbucket??
+      // all is good.. internet work cred doesnt.. its ok..
+      store.commit('setInet', true) // weird ?
     } else {
-      if (error.response.status === 0) {
+      if (error.response === undefined || error.response === null) {
         store.commit('setInet', false)
         return
+      } else {
+        if (error.response.status === 0) {
+          store.commit('setInet', false)
+          return
+        }
       }
+      store.commit('setInet', false) // weird ?
     }
-    store.commit('setInet', false) // weird ?
   })
 }
 Vue.prototype.$checkInet()
@@ -67,10 +96,19 @@ router.beforeEach((route, redirect, next) => {
     }
   }
   */
-  if (state.app.device.isMobile && state.app.sidebar.opened) {
+
+  if (state.website) {
     store.commit(TOGGLE_SIDEBAR, false)
+
+    if (state.session && window.localStorage.getItem('session') === null) {
+      store.commit(LOGOUT, Vue)
+    }
+  } else {
+    if (state.app.device.isMobile && state.app.sidebar.opened) {
+      store.commit(TOGGLE_SIDEBAR, false)
+    }
+    store.commit(TOGGLE_SIDEBAR_TWO, false)
   }
-  store.commit(TOGGLE_SIDEBAR_TWO, false)
   next()
 })
 
@@ -102,6 +140,8 @@ const openNotification = (propsData = {
 }
 
 Vue.prototype.$github = githubapi
+// Vue.prototype.$base64 = base64
+Vue.prototype.$bitbucket = bitbucketapi
 Vue.prototype.$notify = openNotification
 
 function handleError (error) {

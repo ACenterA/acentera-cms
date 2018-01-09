@@ -14,37 +14,81 @@
         </div>
         <div v-if="!isLogIn()">
               <p>
-              <strong>Login with GitHub</strong>
-                <article class="tile is-child box">
 
-                    <label class="label">User</label>
-                    <div class="field has-addons">
-                      <p class="control is-expanded">
-                        <input class="input" type="text"
-                               placeholder="Github user"
-                               v-model="tmpUsername">
-                      </p>
-                    </div>
+              <strong>Choose provider</strong>
+                <article class="tile">
 
-                    <label class="label">Password</label>
-                    <div class="field has-addons">
-                      <p class="control is-expanded">
-                        <input class="input" type="password"
-                               placeholder="password"
-                               v-model="password">
-                      </p>
-                    </div>
-
-
-                    <p class="control">
-                    <a class="button rightfloat is-primary"
-                    @click="validateGithubLogin()"
-                    :disabled="!isGithubValid()">
-                    <span>Login with Github</span>
+                  <p class="control">
+                    <a class="button leftfloat is-primary"
+                      @click="selectGitHub()">
+                          <span>Github</span>
                     </a>
-                    </p>
+                  </p>
+
+                  <p class="control">
+                    <a class="button leftfloat is-primary" style="margin-left:30px"
+                      @click="selectBitBucket()">
+                          <span>Bitbucket</span>
+                    </a>
+                  </p>
+
 
                 </article>
+              </p>
+
+              </article>
+              <br/><br/>
+
+
+                  <article class="tile is-child box">
+
+                      <label class="label">User</label>
+                      <div class="field has-addons">
+                        <p class="control is-expanded">
+                          <input class="input" type="text"
+                                 :placeholder="userPlaceHolder()"
+                                 v-model="tmpUsername">
+                        </p>
+                      </div>
+
+                      <label class="label">Password</label>
+                      <div class="field has-addons">
+                        <p class="control is-expanded">
+                          <input class="input" type="password"
+                                 placeholder="password"
+                                 v-model="password"
+                                 v-on:keypress="monitorkey($event)">
+                        </p>
+                      </div>
+
+
+
+                      <div v-if="!isBitBucket()">
+
+                        <p class="control">
+                        <a class="button rightfloat is-primary"
+                        @click="validateGithubLogin()"
+                        :disabled="!isGithubValid()">
+                        <span>Login with Github</span>
+                        </a>
+                        </p>
+
+                      </div>
+
+                      <div v-if="isBitBucket()">
+
+                        <p class="control">
+                        <a class="button rightfloat is-primary"
+                        @click="validateBitBucketLogin()"
+                        :disabled="!isBitBucketValid()">
+                        <span>Login with BitBucket</span>
+                        </a>
+                        </p>
+
+                      </div>
+
+                  </article>
+
             </p>
           </div>
     </div>
@@ -61,6 +105,13 @@
       return {
         parallelData: {},
         password: '',
+        github: function () {
+          if (this.$store.state) {
+            return this.$store.state.github || {}
+          }
+          return {}
+        },
+        bitbucket: false,
         tmpUsername: ''
       }
     },
@@ -69,23 +120,41 @@
     },
 
     computed: {
+      githubA: function () {
+        if (this.$store.state) {
+          return this.$store.state.github || {}
+        }
+        return {}
+      },
       username: function () {
-        if (this.parallelData.user) {
-          return this.parallelData.user.name || this.parallelData.user.login
+        let tmpGithub = this.github()
+        if (tmpGithub.user) {
+          if (tmpGithub.logininfo.type === 'BitBucket') {
+            return tmpGithub.user.display_name || this.parallelData.user.username
+          } else {
+            return tmpGithub.user.name || this.parallelData.user.login
+          }
         }
         return null
       }
     },
 
     mounted: function () {
-      let raw = window.localStorage.getItem('github')
-      console.log(raw)
-      if (raw !== null) {
-        console.log('arse aa')
+      /*
+        let raw = window.localStorage.getItem('github')
         console.log(raw)
-        this.parallelData = JSON.parse(raw)
-      } else {
-        // this.$github.get('user', {}, [this.parallelData, 'user'], this.gitError) <-- auto set but will not save store?
+        if (raw !== null) {
+          console.log('arse aa')
+          console.log(raw)
+          this.parallelData = JSON.parse(raw)
+        } else {
+          // this.$github.get('user', {}, [this.parallelData, 'user'], this.gitError) <-- auto set but will not save store?
+          this.$github.get('user', {}, this.updateGituser, this.gitError)
+        }
+      */
+      if (this.github() !== undefined) {
+        let raw = this.github()
+        this.parallelData = raw
         this.$github.get('user', {}, this.updateGituser, this.gitError)
       }
     },
@@ -95,7 +164,9 @@
         console.log(param)
         var loginfo = {
           user: this.tmpUsername,
-          pass: this.password
+          username: this.tmpUsername,
+          pass: this.password,
+          type: 'GitHub'
         }
         Vue.set(this.parallelData, 'user', param)
         Vue.set(this.parallelData, 'logininfo', loginfo)
@@ -117,7 +188,58 @@
         console.log('window set local storage of')
         console.log(this.parallelData)
         window.localStorage.setItem('github', JSON.stringify(this.parallelData))
-        this.$store.commit('setGithub', this.parallelData)
+        this.$store.commit('setGit', this.parallelData)
+
+        window.localStorage.setItem('default_git_provider', 'github')
+        this.$store.commit('setDefaultGitProvider', 'github')
+        this.password = ''
+      },
+
+      updateBitbucketuser: function (param) {
+        console.log('updating bitbucket data')
+        console.log(param)
+        var loginfo = {
+          user: this.tmpUsername,
+          username: param.username,
+          pass: this.password,
+          type: 'BitBucket'
+        }
+
+        Vue.set(this.parallelData, 'user', param)
+        Vue.set(this.parallelData, 'logininfo', loginfo)
+
+        /*
+        var gitHub = {
+          user: param
+        }
+        */
+        /*
+        // Vue.set(this.$store.getters.github, 'github', gitHub)
+        if (gitHub) {
+          // d
+        }
+        */
+        // Vue.set(this.$github, 'github', gitHub)
+        // = gitHub
+        // store session data in localstorage
+        console.log('bitbucket window set local storage of')
+        console.log(this.parallelData)
+        window.localStorage.setItem('github', JSON.stringify(this.parallelData))
+        this.$store.commit('setGit', this.parallelData)
+
+        window.localStorage.setItem('default_git_provider', 'bitbucket')
+        this.$store.commit('setDefaultGitProvider', 'bitbucket')
+        this.password = ''
+      },
+
+      isBitBucket: function () {
+        return this.bitbucket === true
+      },
+      selectBitBucket: function () {
+        this.bitbucket = true
+      },
+      selectGitHub: function () {
+        this.bitbucket = false
       },
       isLogIn: function () {
         console.log('aaa')
@@ -132,7 +254,30 @@
         this.$github.setUserPass(this.tmpUsername, this.password)
         this.$github.get('user', {}, this.updateGituser, this.gitError)
       },
+      validateBitBucketLogin: function () {
+        console.log('validate githbu user')
+        console.log(this.tmpUsername)
+        console.log(this.password)
+
+        this.$bitbucket.setUserPass(this.tmpUsername, this.password)
+        this.$bitbucket.get('/2.0/user', {}, this.updateBitbucketuser, this.gitError)
+      },
+      userPlaceHolder: function () {
+        if (this.isBitBucket()) {
+          return 'BitBucket Username'
+        }
+        return 'GitHub Username'
+      },
       isGithubValid: function () {
+        console.log('difjkslfjl a : ' + ((this.tmpUsername === undefined)) + ' vs ' + this.tmpUsername)
+        if ((this.tmpUsername === undefined || this.tmpUsername === '') || (this.password === undefined || this.password === '')) {
+          console.log('AA')
+          return false
+        }
+        console.log('BBB')
+        return true
+      },
+      isBitBucketValid: function () {
         console.log('difjkslfjl a : ' + ((this.tmpUsername === undefined)) + ' vs ' + this.tmpUsername)
         if ((this.tmpUsername === undefined || this.tmpUsername === '') || (this.password === undefined || this.password === '')) {
           console.log('AA')
@@ -144,12 +289,21 @@
       logoutGithub: function () {
         window.localStorage.removeItem('github')
         Vue.set(this.parallelData, 'user', {})
-        this.$store.commit('clearGithub')
+        this.$store.commit('clearGit')
       },
       gitError: function (e) {
         console.log('error')
         if (e.toString().indexOf('code 401')) {
           // Invalid user
+        }
+      },
+      monitorkey: function (e) {
+        if (e.code === 'Enter') {
+          if (this.bitbucket) {
+            this.validateBitBucketLogin()
+          } else {
+            this.validateGithubLogin()
+          }
         }
       }
     },
