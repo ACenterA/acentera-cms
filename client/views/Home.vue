@@ -42,8 +42,8 @@
             <div class="box-left">
               <div>
               <div class="imageloader loaded site-details--thumbnail desktop"
-              style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
-                <img src="https://storage.googleapis.com/wzsitethumbnails/site-500426/800x500.jpg?1491902023" class="mw-100"
+              style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
+                <img src="https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023" class="mw-100"
               ></div>
               </div>
             </div>
