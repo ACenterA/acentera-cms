@@ -3,7 +3,7 @@
     <nprogress-container></nprogress-container>
     <navbar :notLoggedIn="websiteAndNotLoggedIn" :projectSelected="projectSelected" :show="true"></navbar>
     <sidebar :notLoggedIn="websiteAndNotLoggedIn" :projectSelected="!projectSelected" :show="sidebar.opened && !sidebar.hidden"></sidebar>
-    <app-main :notLoggedIn="websiteAndNotLoggedIn" :hasSidebar="sidebar.opened && !sidebar.hidden"></app-main>    
+    <app-main :notLoggedIn="websiteAndNotLoggedIn" :hasSidebar="sidebar.opened && !sidebar.hidden"></app-main>
     <footer-bar :show="!sidebartwo.opened"></footer-bar>
   </div>
 </template>
@@ -85,6 +85,18 @@ pre > code {
 html, body {
   height: 100%;
   background-color: whitesmoke;
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+
+body.overflow-hidden {
+  -ms-overflow-style: none;  // IE 10+
+  overflow: -moz-scrollbars-none;  // Firefox
+}
+
+body.overflow-hidden::-webkit-scrollbar {
+  display: none;  // Safari and Chrome
 }
 
 #app {

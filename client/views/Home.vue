@@ -25,7 +25,7 @@
                       <br/>
                       <router-link :to="{name: 'Templates'}">
                       <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
-                          <span>Create my website</span>
+                          <span>Create your website</span>
                       </div>
                       </router-link>
                   </div>

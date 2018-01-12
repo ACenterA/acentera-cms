@@ -88,6 +88,7 @@ Vue.prototype.$checkInet()
 router.beforeEach((route, redirect, next) => {
   console.log('test route a')
   console.log(route)
+  $('body').removeClass('overflow-hidden')
   /*
   //TODO: Find a better way, in case user is offline...
   if (!(route.name === 'Home')) {
