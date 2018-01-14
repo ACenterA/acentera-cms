@@ -1,5 +1,7 @@
 <template>
   <section class="hero is-bold app-navbar animated" :class="{ hidden: notLoggedIn, slideInDown: show, slideOutDown: !show }">
+
+    <!-- Navbar Content -->
     <div class="hero-head">
       <nav class="nav">
         <div class="nav-left">
@@ -12,6 +14,10 @@
                   <div class="back-text">{{manual}}</div>
             </router-link>
           </div>
+
+          <!-- Force Refresh -->
+          <div v-if="getSelectedWebsite" class="nav-item">Editing: {{getSelectedWebsite.title }}</div>
+
           <div v-if="isOffline()">
             <p class="blue">No internet.</p>
           </div>
@@ -24,19 +30,29 @@
             </p>
           </div>
           <div v-else>
-            <div v-if="isProjectSelected()">
-              <div v-if="hasSession() && isRepoInError()">
-                <p class="red">Error with repo...</p>
+            <div v-if="isWebsiteSelected()">
+              <!-- TODO:                      -->
+
+              <div v-if="!getSelectedWebsite">
+                <p class="red" @click="GitLogin">Click here for Git Login...</p>
               </div>
-              <div v-if="hasSession() && isRepoUpdating()">
-                <p class="blue">Updating...</p>
+
+
+              <div v-if="getSelectedWebsite">
+                <div v-if="hasSession() && isRepoInError()">
+                  <p class="red">Error with repo...</p>
+                </div>
+                <div v-if="hasSession() && isRepoUpdating()">
+                  <p class="blue">Updating...</p>
+                </div>
+                <div v-if="hasSession() && isKeyMissing()">
+                  <p class="blue">Missng SSH Key.<router-link to="/login" :exact="true"><b>Click here.</b></router-link></p>
+                </div>
+                <div v-if="isRepoMissing()">
+                  <p class="blue">Could not validate Git conenction.</p>
+                </div>
               </div>
-              <div v-if="hasSession() && isKeyMissing()">
-                <p class="blue">Missng SSH Key.<router-link to="/login" :exact="true"><b>Click here.</b></router-link></p>
-              </div>
-              <div v-if="isRepoMissing()">
-                <p class="blue">Could not validate Git conenction.</p>
-              </div>
+
             </div>
           </div>
           <a class="nav-item hero-brand" href="/">
@@ -55,7 +71,7 @@
             Logged in as: {{session.display_name}}
           </a>
 
-          <div v-if="hasSession() && isProjectSelected()">
+          <div v-if="hasSession() && isWebsiteSelected()">
             <a v-if="hasSession() && isTestMissing()" @click="createPreviewSite()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 Create Preview Site
             </a>
@@ -84,11 +100,15 @@
     <modalComment :visible="showModalComment" @close="closeModalSaveBasic($event)"></modalComment>
     <Modalreviewcomment :visible="showModalReviewComment" @close="closeModalSaveReview($event)"></Modalreviewcomment>
 
+    <!-- gitModal :visible="showCreateModal" @nextStep="nextStep($event)" @close="closeCreateSiteModal"></gitModal -->
+
   </section>
 
 </template>
 
 <script>
+
+// import GitModal from './modals/GitLogin'
 import Modal from './modals/InfoModal'
 import ModalComment from './modals/SaveModal'
 import Modalreviewcomment from './modals/SaveReviewModal'
@@ -100,6 +120,7 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
 
   components: {
+    // GitModal,
     Tooltip,
     Modal,
     ModalComment,
@@ -115,95 +136,29 @@ export default {
       title: 'Title',
       selectedItemInfo: null,
       manual: null,
-      backRoute: null
+      backRoute: null,
+      showCreateModal: false
     }
   },
 
   props: {
     show: Boolean,
-    notLoggedIn: Boolean
+    notLoggedIn: Boolean,
+    selectedWebsite: Object
   },
 
   mounted: function () {
     this.toggleRepoState(1)
     var self = this
     // var state = self.$store.state
-    if (self.$store.state.website) {
-      console.log('selfslkajflak')
-      console.log(self.session)
-      if (self.session && self.session.token) {
-        console.log('test sesion 1')
-        var h = { 'Authorization': 'Bearer ' + self.$store.state.session.token }
-        // request it with headers an params
-        self.$http.get(window.websiteapiUrl + '/customer/v1/websites/me',
-          {
-            headers: h
-          }
-        ).then((response) => {
-          /*
+    console.error('IS WEBSITE?? HOSTED VERSION?')
+    console.error(this.getSelectedWebsite)
 
-          self.$notify({
-            title: 'Token validated.',
-            message: 'We de-activated your current session.',
-            type: 'success'
-          })
-
-          */
-        })
-        .catch((error) => {
-          console.error(error)
-          var msg = ''
-          if (error.response && error.response.data) {
-            msg = error.response.data.errorMessage
-          }
-          if (msg.indexOf('Token is invalid') >= 0) {
-            console.error('CLEAR SESSION HEREA')
-            this.$store.commit('clearSession')
-          } else {
-            self.$notify({
-              title: 'Error retreiving account.',
-              message: msg,
-              type: 'danger'
-            })
-          }
-        })
-      }
+    if (self.$store.state.app.website && !this.selectedWebsite) {
+      console.error('IS WEBSITE?? HOSTED VERSION YES ?')
     } else {
-      this.$http.get(window.apiUrl + '/git?action=config').then((response) => {
-        this.toggleRepoUrl(response.data.Data)
-        if (response !== null && response.data !== null) {
-          this.toggleRepo(response.data)
-        }
-
-        if (self.$store.state.app.inet) {
-          this.$http.get(window.apiUrl + '/git?action=pull').then((response) => {
-            self.toggleRepoState(0) // all good
-          })
-          .catch((error) => {
-            console.error(error)
-            console.error('err1')
-            if (error.response.status === 500) {
-              self.toggleRepoState(6) // need to setup SSH Key for the user
-            } else {
-              this.$onError(error)
-            }
-          })
-        }
-      })
-      .catch((error) => {
-        console.error(error)
-        console.error('err2a')
-        console.error(error)
-        try {
-          if (error.response.status === 500) {
-            self.toggleRepoState(5) // State 5 = no .git/config file....
-          } else {
-            this.$onError(error)
-          }
-        } catch (ee) {
-          self.toggleRepoState(5) // State 5 = no .git/config file....
-        }
-      })
+      // nothing
+      // not good this.getSelectedWebsite()
     }
 
     console.log('nav mounted a')
@@ -251,7 +206,65 @@ export default {
       sidebar: 'sidebar',
       app: 'app',
       repoState: 'repoState'
-    })
+    }),
+    getSelectedWebsite: function () {
+      console.error('IS WEBSITE?? HOSTED VERSION WORKABLE?' + this.selectedWebsite)
+      console.error(this)
+      if (this.selectedWebsite !== null) {
+        if (this.$store.state.github == null || this.$store.state.github.logininfo == null) {
+          return
+        }
+        var self = this
+
+        var $gitobj = this.$github
+        console.error('this store.')
+        console.error(this)
+        console.error(window.vm.$store.state.github)
+        if (this.$store.state.github.logininfo.type === 'BitBucket') {
+          $gitobj = this.$bitbucket
+        }
+        console.error('USER ASS' + this.$store.state.github.logininfo.user)
+        $gitobj.setUserPass(this.$store.state.github.logininfo.user, this.$store.state.github.logininfo.pass)
+
+        this.$httpApi.get(window.apiUrl + '/git?action=config').then((response) => {
+          this.toggleRepoUrl(response.data.Data)
+          if (response !== null && response.data !== null) {
+            this.toggleRepo(response.data)
+          }
+
+          if (self.$store.state.app.inet) {
+            this.$httpApi.get(window.apiUrl + '/git?action=pull', { headers: { 'Authorization': $gitobj.getBasicAuth() } }).then((response) => {
+              self.toggleRepoState(0) // all good
+            })
+            .catch((error) => {
+              console.error(error)
+              console.error('err1')
+              if (error.response.status === 500) {
+                self.toggleRepoState(6) // need to setup SSH Key for the user
+              } else {
+                this.$onError(error)
+              }
+            })
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+          console.error('err2a')
+          console.error(error)
+          try {
+            if (error.response.status === 500) {
+              self.toggleRepoState(5) // State 5 = no .git/config file....
+            } else {
+              this.$onError(error)
+            }
+          } catch (ee) {
+            self.toggleRepoState(5) // State 5 = no .git/config file....
+          }
+        })
+      }
+
+      return this.selectedWebsite
+    }
   },
 
   methods: {
@@ -278,7 +291,7 @@ export default {
       return false
     },
     hasSession () {
-      if (this.$store.state.website) {
+      if (this.$store.state.app.website) {
         if (this.session && this.session.display_name) {
           return true
         }
@@ -295,8 +308,18 @@ export default {
     isRepoMissing () {
       return (this.repoState.updating === 5)
     },
-    isProjectSelected () {
-      return this.$store.state.projectSelected
+    isWebsiteSelected () {
+      // Is hosted Version
+      if (!this.$store.state.app.website) {
+        // Hosted version.
+        return false
+      }
+
+      // Is local Version
+      if (this.$store.state.app.websiteId) {
+        return true
+      }
+      return false
     },
     isRepoInError () {
       if (!this.repoState.isLoaded) {
@@ -330,7 +353,7 @@ export default {
       }
     },
     isLoggedIn () {
-      if (this.$store.state.website) {
+      if (this.$store.state.app.website) {
         if (this.session && this.session.display_name !== undefined) {
           return true
         }
@@ -340,6 +363,7 @@ export default {
         return false
       }
       console.log('is loggedi n test 1 ')
+      console.error(this.$store.state.github)
       if (this.$store.state.github.logininfo == null) {
         return false
       }
@@ -386,6 +410,17 @@ export default {
     saveAndPushModal () {
       console.log('save and push')
       this.showModalComment = true
+    },
+    closeCreateSiteModal () {
+      this.selectedIndex = -1
+      this.showCreateModal = false
+    },
+    nextStep (nextstep) {
+      console.error('next step')
+    },
+    GitLogin () {
+      // console
+
     },
     closeModalSaveReview (obj) {
       console.log('close modal review here')
@@ -534,12 +569,12 @@ export default {
       // TODO: Create Pull Request Here
       // var self = this
       /*
-      this.$http.post(window.apiUrl + '/git?action=save',
+      this.$httpApi.post(window.apiUrl + '/git?action=save',
       querystring.stringify(obj), {
         headers: {'X-CSRF-Token': this.csrf}
       })
       */
-      this.$http.post(window.apiUrl + '/git?action=save',
+      this.$httpApi.post(window.apiUrl + '/git?action=save',
       obj, {
       })
       .then((response) => {
@@ -576,12 +611,12 @@ export default {
       // TODO: Create Pull Request Here
       // var self = this
       /*
-      this.$http.post(window.apiUrl + '/git?action=create_pull',
+      this.$httpApi.post(window.apiUrl + '/git?action=create_pull',
       querystring.stringify(obj), {
         headers: {'X-CSRF-Token': this.csrf}
       })
       */
-      this.$http.post(window.apiUrl + '/git?action=create_pull',
+      this.$httpApi.post(window.apiUrl + '/git?action=create_pull',
       obj, {
 
       })

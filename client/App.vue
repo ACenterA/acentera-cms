@@ -1,28 +1,31 @@
 <template>
   <div id="app">
     <nprogress-container></nprogress-container>
-    <navbar :notLoggedIn="websiteAndNotLoggedIn" :projectSelected="projectSelected" :show="true"></navbar>
-    <sidebar :notLoggedIn="websiteAndNotLoggedIn" :projectSelected="!projectSelected" :show="sidebar.opened && !sidebar.hidden"></sidebar>
+    <navbar :notLoggedIn="websiteAndNotLoggedIn" :selectedWebsite="selectedWebsite" :show="true"></navbar>
+    <sidebar :notLoggedIn="websiteAndNotLoggedIn" :selectedWebsite="!selectedWebsite" :show="sidebar.opened && !sidebar.hidden"></sidebar>
+    <sidebar-global :hide="sidebarglobal.hidden" :show="sidebarglobal.opened && !sidebarglobal.hidden"></sidebar-global>
     <app-main :notLoggedIn="websiteAndNotLoggedIn" :hasSidebar="sidebar.opened && !sidebar.hidden"></app-main>
+    GEEZ: {{selectedWebsite}}
     <footer-bar :show="!sidebartwo.opened"></footer-bar>
   </div>
 </template>
 
 <script>
 import NprogressContainer from 'vue-nprogress/src/NprogressContainer'
-import { Navbar, Sidebar, Sidebartwo, AppMain, FooterBar } from 'components/layout/'
+import { Navbar, Sidebar, SidebarGlobal, AppMain, FooterBar } from 'components/layout/'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: {
     Navbar,
     Sidebar,
-    Sidebartwo,
+    SidebarGlobal,
     AppMain,
     FooterBar,
     NprogressContainer
   },
-
+  mounted () {
+  },
   beforeMount () {
     const { body } = document
     const WIDTH = 768
@@ -33,8 +36,10 @@ export default {
         let rect = body.getBoundingClientRect()
         let isMobile = rect.width - RATIO < WIDTH
         this.toggleDevice(isMobile ? 'mobile' : 'other')
-
-        if (!this.$store.state.website) {
+        if (!this.$store.state.app.website) {
+          console.error('are we modbile')
+          console.error(!isMobile)
+          console.error('NO : ' + (!isMobile))
           this.toggleSidebar(!isMobile)
         }
 
@@ -45,19 +50,46 @@ export default {
     document.addEventListener('visibilitychange', handler)
     window.addEventListener('DOMContentLoaded', handler)
     window.addEventListener('resize', handler)
+
+    console.log('toggle test')
+
+    var self = this
+    this.refreshUser({ vue: this,
+      callback: function () {
+        console.error('callll back is called 03')
+        if (self.project && self.project.websites) {
+          // Only if no project is selected..
+          console.error('callll back is called 03 A')
+          // window.vm.$store.state.app.isLoaded
+          if (!self.$store.state.app.isLoaded) {
+            console.error('callll back is called 03 AC')
+            console.error('callll back is called 03 AD')
+            self.$store.state.app.sidebarglobal.opened = true
+            self.$store.state.app.sidebarglobal.hidden = false
+          }
+        } else {
+          // NO PROJECT YET ??
+          console.error('callll back is called 03 B')
+          self.$store.state.app.sidebarglobal.opened = false
+          self.$store.state.app.sidebarglobal.hidden = true
+        }
+      }
+    })
   },
 
   computed: mapGetters({
     sidebar: 'sidebar',
+    sidebarglobal: 'sidebarglobal',
     websiteAndNotLoggedIn: 'websiteAndNotLoggedIn',
-    projectSelected: 'projectSelected',
+    selectedWebsite: 'selectedWebsite',
     sidebartwo: 'sidebartwo'
   }),
 
   methods: mapActions([
     'toggleDevice',
     'toggleSidebar',
-    'toggleSidebartwo'
+    'toggleSidebartwo',
+    'refreshUser'
   ])
 }
 </script>

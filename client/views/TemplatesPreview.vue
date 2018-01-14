@@ -1,5 +1,5 @@
 <template>
-  <iframe class="fullIframe" src="https://www.cmpb.co/"  width=100% height=100% marginwidth=0 marginheight=0 frameborder=0></iframe>
+  <iframe v-if="selectedTheme" class="fullIframe" :src="selectedTheme.Preview"  width=100% height=100% marginwidth=0 marginheight=0 frameborder=0></iframe>
 </template>
 
 <script>
@@ -10,6 +10,8 @@ export default {
 
   data () {
     return {
+      themes: [],
+      selectedTheme: null,
       pkg: this.$store.state.pkg
     }
   },
@@ -17,8 +19,23 @@ export default {
   },
   mounted () {
     $('body').addClass('overflow-hidden')
-  },
 
+    var self = this
+    this.$http.get('/assets/themes.json').then((response) => {
+    // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
+      console.log('got monuted raw json')
+      self.themes = response.data
+      for (var idx in self.themes) {
+        if (self.themes[idx].Name === self.$route.params.id) {
+          self.selectedTheme = self.themes[idx]
+          break
+        }
+      }
+      // TODO: if (self.selectedTheme is null... then.. show error
+    }).catch((error) => {
+      this.$onError(error)
+    })
+  },
   methods: {
     ...mapActions([
       'toggleRepoState',

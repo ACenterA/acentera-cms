@@ -19,9 +19,14 @@ export default new Router({
       component: require('../views/Templates')
     },
     {
-      name: 'Templates-01',
+      name: 'TemplatesPreview',
       path: '/templates/:id/preview',
       component: require('../views/TemplatesPreview')
+    },
+    {
+      name: 'TemplatesEdit',
+      path: '/templates/:id/edit',
+      component: require('../views/TemplatesEdit')
     },
     ...generateRoutesFromMenu(menuModule.state.items),
     {

@@ -127,7 +127,14 @@ export default {
       this.tabName = TabNames[index]
       var self = this
 
-      this.$http.get(window.apiUrl + '/settings').then((response) => {
+      if (!this.$store.state.app.isLoaded) {
+        console.error('not loaded')
+        return setTimeout(function () {
+          self.switchTab(index)
+        }, 1000)
+      }
+
+      this.$httpApi.get(window.apiUrl + '/settings').then((response) => {
         console.log('got http get')
         console.log(response)
         let result = response.data
@@ -196,7 +203,7 @@ export default {
     },
     save () {
       console.log(this.allSettings)
-      this.$http.post(window.apiUrl + '/settings', this.allSettings, {}).then((response) => {
+      this.$httpApi.post(window.apiUrl + '/settings', this.allSettings, {}).then((response) => {
         console.log('SAVED')
       })
       .catch((error) => {

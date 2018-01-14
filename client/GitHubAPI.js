@@ -393,6 +393,100 @@
         })
       },
 
+      getBasicAuth: function () {
+        if (isToken) {
+          /*
+          var h = {
+            'Authorization': 'token ' + token
+          }
+          */
+          return token
+        } else {
+          var auth = Base64.encode(username + ':' + pass)
+          // var h = { 'Authorization': 'Basic ' + auth }
+          return auth
+        }
+      },
+
+      /**
+       * Issue a DELETE request on 'https://api.github.com' with params and a variable to fill in
+       * @param  {String}                  uri     The GitHub API uri to consume such as '/user/repos'
+       * @param  {(Array|requestCallback)} fillIn  The Vue.js defined data to fill in with results from GitHub API, or a callback function fed with full response
+       * @param  {errorCallback}           errorCb A callback function in case of error (response is passed to callback)
+       * @example
+       * // from anywhere in the global Vue scope
+       * Vue.GitHubAPI.post('/repos/OWNER_NAME/REPO_NAME/issues', {
+       *   title: 'My new issues from vue-github-api'
+       * }, (response) => { console.log('posted it!', response) })
+       *
+       * // from a .vue component
+       * this.GitHubAPI.post('/repos/OWNER_NAME/REPO_NAME/issues', {
+       *   title: 'My new issues from vue-github-api'
+       * }, (response) => { console.log('posted it!', response) })
+       */
+      delete: function (uri, fillIn, errorCb) {
+        // verifying what user sends to fill in
+        if (this._verifyFillIn(fillIn) !== true) {
+          return
+        }
+
+        // ensure leading slash on uri
+        uri = uri.replace(/^\/?/, '/')
+
+        // downloading starts now
+        this._updateStore('downloading')
+
+        var h = {
+        }
+
+        if (isToken) {
+          h = {
+            'Authorization': 'token ' + token
+          }
+        } else {
+          var auth = Base64.encode(username + ':' + pass)
+          h = { 'Authorization': 'Basic ' + auth }
+        }
+        // request it with headers an params
+        console.log('posting start')
+        vv.$http.delete(
+          apiUrl + uri,
+          {
+            headers: h
+          }
+        ).then((response) => {
+          // no more downloading
+
+          this._updateStore('downloaded')
+          console.log('posting response fillin?')
+          if (typeof fillIn === 'function') {
+            // sending back the full response
+            fillIn(response)
+          } else {
+            // fill in the data from the response body
+            if (response.data !== undefined) {
+              Vue.set(fillIn[0], fillIn[1], response.data)
+            } else {
+              Vue.set(fillIn[0], fillIn[1], response.body)
+            }
+            // Vue.set(fillIn[0], fillIn[1], response.body)
+          }
+        }, (response) => {
+          // no more downloading
+          console.log('got error here')
+          console.log(response)
+          this._updateStore('downloaded')
+
+          if (typeof errorCb === 'function') {
+            // user defined an error callback function, calling it with response
+            errorCb(response)
+          } else {
+            // no errorCb function defined, default to console error
+            console.error('[vue-github-api] POST ' + uri + ' failed: "' + response.body.message + '" on ' + apiUrl + ' (using token "' + token + '")')
+          }
+        })
+      },
+
       /**
        * Register your application Vuex store to improve it with GitHubAPI Vuex store module
        * @param  {Object} store Your application Vuex store

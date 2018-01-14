@@ -105,8 +105,16 @@ export default {
 
   methods: {
     refreshData () {
+      var self = this
+      if (!this.$store.state.app.isLoaded) {
+        console.error('not loaded')
+        return setTimeout(function () {
+          self.refreshData()
+        }, 1000)
+      }
+
       console.log('get file listing')
-      this.$http.get(window.apiUrl + '/widgets').then((response) => {
+      this.$httpApi.get(window.apiUrl + '/widgets').then((response) => {
         this.$data.chart = response.data
         // this.$store.commit('TOGGLE_SIDEBAR', false)
         this.$store.commit('TOGGLE_SIDEBAR_TWO', true)
@@ -152,7 +160,7 @@ export default {
       }
 
       var self = this
-      this.$http.post(window.apiUrl + '/widgetupload', postData, {
+      this.$httpApi.post(window.apiUrl + '/widgetupload', postData, {
         headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {

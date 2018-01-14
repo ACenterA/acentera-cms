@@ -118,9 +118,11 @@ export default {
       return this.editing === true
     },
     isDir () {
+      if (!this.object) return false
       return (this.object.subtype === 'Dir')
     },
     isFile () {
+      if (!this.object) return false
       return (this.object.subtype === 'File')
     },
     cancel () {

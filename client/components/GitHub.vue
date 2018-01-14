@@ -3,8 +3,10 @@
     <div class="col-md-12">
 
         <div v-if="isLogIn()">
-        <p><strong>Logged in as </strong> {{ username }} <em>(hey there, have fun!)</em></p>
+        <p><strong>Logged in as </strong> {{ username }} <em><br/>(hey there, have fun!)</em></p>
         <br/><br/>
+        <br/>
+        &nbsp;
         <p class="control">
         <a class="button rightfloat is-primary"
         @click="logoutGithub()">
@@ -154,7 +156,13 @@
       */
       if (this.github() !== undefined) {
         let raw = this.github()
-        this.parallelData = raw
+        console.error('SET OF PARRALEL DATA TEST OF.... ')
+        console.error(typeof raw)
+        if (typeof raw === 'string') {
+          this.parallelData = JSON.parse(raw)
+        } else {
+          this.parallelData = raw
+        }
         this.$github.get('user', {}, this.updateGituser, this.gitError)
       }
     },
@@ -196,8 +204,6 @@
       },
 
       updateBitbucketuser: function (param) {
-        console.log('updating bitbucket data')
-        console.log(param)
         var loginfo = {
           user: this.tmpUsername,
           username: param.username,
@@ -208,20 +214,6 @@
         Vue.set(this.parallelData, 'user', param)
         Vue.set(this.parallelData, 'logininfo', loginfo)
 
-        /*
-        var gitHub = {
-          user: param
-        }
-        */
-        /*
-        // Vue.set(this.$store.getters.github, 'github', gitHub)
-        if (gitHub) {
-          // d
-        }
-        */
-        // Vue.set(this.$github, 'github', gitHub)
-        // = gitHub
-        // store session data in localstorage
         console.log('bitbucket window set local storage of')
         console.log(this.parallelData)
         window.localStorage.setItem('github', JSON.stringify(this.parallelData))

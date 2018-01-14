@@ -58,7 +58,7 @@
 
 <script>
 import Levelbar from './Levelbar'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 var modalSubmitRegister = 'Register'
 var modalSubmitPassword = 'Reset Password'
@@ -107,6 +107,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'selectWebsite',
+      'refreshUser'
+    ]),
     close: function (e) {
       e.preventDefault()
       if (e.target === this.$el) {
@@ -284,6 +288,29 @@ export default {
               // store session data in localstorage
               window.localStorage.setItem('session', JSON.stringify(session))
               this.$store.commit('setSession', session)
+
+              var self = this
+              this.refreshUser({ vue: this,
+                callback: function () {
+                  console.error('callll back is called 03')
+                  if (self.project && self.project.websites) {
+                    // Only if no project is selected..
+                    console.error('callll back is called 03 A')
+                    // window.vm.$store.state.app.isLoaded
+                    if (!self.$store.state.app.isLoaded) {
+                      console.error('callll back is called 03 AC')
+                      console.error('callll back is called 03 AD')
+                      self.$store.state.app.sidebarglobal.opened = true
+                      self.$store.state.app.sidebarglobal.hidden = false
+                    }
+                  } else {
+                    // NO PROJECT YET ??
+                    console.error('callll back is called 03 B')
+                    self.$store.state.app.sidebarglobal.opened = false
+                    self.$store.state.app.sidebarglobal.hidden = true
+                  }
+                }
+              })
             })
             .catch((error) => {
               console.error(error)

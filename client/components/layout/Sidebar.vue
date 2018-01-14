@@ -1,5 +1,5 @@
 <template>
-  <aside class="menu app-sidebar animated" :class="{ hidden: notLoggedIn, hidden: projectSelected, slideInLeft: show, slideOutLeft: !show }">
+  <aside class="menu app-sidebar animated" :class="{ hidden: notLoggedIn, hidden: websiteSelected, slideInLeft: show, slideOutLeft: !show }">
     <p class="menu-label">
       General
     </p>
@@ -46,7 +46,7 @@ export default {
   props: {
     show: Boolean,
     notLoggedIn: Boolean,
-    projectSelected: Boolean
+    websiteSelected: Boolean
   },
 
   data () {
