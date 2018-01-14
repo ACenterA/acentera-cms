@@ -1,0 +1,65 @@
+
+.plekan-template{
+	&:after,&:before{
+		content: "";
+		clear: both;
+		display: table;
+		float: none;
+	}	
+	font-family: 'Titillium Web', sans-serif;
+	img{
+		width: 100%;
+		max-width: 100%;
+	}
+}
+
+.p-text-center{
+	text-align: center;
+}
+
+section.plekan-module-1{
+}
+
+section.plekan-module-2{
+}
+
+section.plekan-module-3{
+	.desc{
+		text-align: center;
+		p{
+			margin-bottom: 0;
+		}
+	}
+	img{
+		display: block;
+		width: 100px;
+		margin: auto;
+		-webkit-border-radius: 50%;
+		        border-radius: 50%;
+	}
+}
+
+section.plekan-module-4{
+	img{
+		width: 200px;
+		-webkit-border-radius: 50%;
+		        border-radius: 50%;
+	    display: block;
+	    margin: auto;
+	}
+	h4{
+		display: inline-block;
+		margin-bottom: 0;
+		border-bottom: 1px solid #444;
+		padding-bottom: 6px;
+	}
+}
+
+section.plekan-module-5{
+}
+
+section.plekan-module-6{
+}
+
+section.plekan-module-7{
+}

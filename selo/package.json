@@ -1,0 +1,29 @@
+{
+  "name": "selo",
+  "version": "1.1.1",
+  "description": "This repository contains of text selection custom event.",
+  "main": "build/selo.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack --watch selo.js  build/selo.min.js --babel-loader --output-library-target='umd' --output-library='Selo' -d",
+    "release": "webpack  selo.js  build/selo.min.js --babel-loader --output-library-target='umd' --output-library='Selo' -p"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://abdullah@github.com/abdullah/selo.git"
+  },
+  "keywords": [
+    "selectiononend",
+    "selection",
+    "event"
+  ],
+  "author": " <zull.mara00@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abdullah/selo/issues"
+  },
+  "homepage": "https://github.com/abdullah/selo#readme",
+  "dependencies": {
+    "webpack": "^1.13.2"
+  }
+}
