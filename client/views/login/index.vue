@@ -127,7 +127,9 @@ export default {
           setTimeout(function () {
             self.testFetch()
           }, 100)
-          return this.$store.state.github.user.name || this.$store.state.github.user.login || this.$store.state.github.user.username
+          if (this.$store.state.github && this.$store.state.github.user) {
+            return this.$store.state.github.user.name || this.$store.state.github.user.login || this.$store.state.github.user.username
+          }
         }
       }
       return null
@@ -224,7 +226,7 @@ export default {
     },
     testFetch: function () {
       var self = this
-      this.$http.get(window.apiUrl + '/sshkeys?action=test').then((response) => {
+      this.$httpApi.get(window.apiUrl + '/sshkeys?action=test').then((response) => {
         // console.log('ssh key test is')
         // console.log(response)
         // console.log(response.data.Data.indexOf('SSH Is Valid'))

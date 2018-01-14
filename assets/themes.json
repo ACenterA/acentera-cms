@@ -1,14 +1,18 @@
 [
-  { "name": "simple-one-pager",
-    "Publisher": "ACenterA Inc.",
+  { "Name": "simple-one-pager",
+    "Author": "jweslley",
     "License": "MIT",
     "Title": "Simple One Pager",
+    "Repository": "https://github.com/jweslley/hugo-conference/",
+    "Preview": "https://jweslley.github.io/hugo-conference/",
     "ShortDesc": "Simple test template"
   },
-  { "name": "hugo-agency-theme",
-    "Publisher": "ACenterA Inc.",
+  { "Name": "hugo-agency-theme",
+    "Author": "digitalcraftsman",
     "License": "MIT",
     "Title": "Hugo Agency Theme",
+    "Repository": "https://github.com/digitalcraftsman/hugo-agency-theme/",
+    "Preview": "https://themes.gohugo.io/theme/agency/",
     "ShortDesc": "A minimalist corporate website."
   }
 ]

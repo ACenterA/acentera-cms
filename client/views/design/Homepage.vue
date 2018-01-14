@@ -46,7 +46,7 @@ export default {
       testTitle: '',
       selectedObject: null,
       type: 'Static',
-      selectedPage: window.apiHost,
+      selectedPage: window.goHostUrl, // window.apiHost,
       cipher: '',
       userTransitKey: '',
       extra: '?editMode=widget&apiPort=8081&jsPort=8091',
@@ -98,7 +98,15 @@ export default {
   methods: {
     refreshData () {
       console.log('get file listing')
-      this.$http.get(window.apiUrl + '/widgets').then((response) => {
+
+      var self = this
+      if (!this.$store.state.app.isLoaded) {
+        return setTimeout(function () {
+          self.refreshData()
+        }, 1000)
+      }
+
+      this.$httpApi.get(window.apiUrl + '/widgets').then((response) => {
         this.$data.chart = response.data
         // this.$store.commit('TOGGLE_SIDEBAR', false)
         this.$store.commit('TOGGLE_SIDEBAR_TWO', true)
@@ -144,7 +152,7 @@ export default {
       }
 
       var self = this
-      this.$http.post(window.apiUrl + '/widgetupload', postData, {
+      this.$httpApi.post(window.apiUrl + '/widgetupload', postData, {
         headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {

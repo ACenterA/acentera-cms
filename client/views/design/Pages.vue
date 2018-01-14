@@ -105,12 +105,23 @@ export default {
 
   methods: {
     refreshData () {
+      var self = this
+      if (!this.$store.state.app.isLoaded) {
+        console.error('not loaded')
+        return setTimeout(function () {
+          self.refreshData()
+        }, 1000)
+      }
       console.log('get file listing')
-      this.$http.get(window.apiUrl + '/filelist').then((response) => {
+      console.error('CALLED REFRESH DATA HERE.... using ' + window.apiUrl)
+      this.$httpApi.get(window.apiUrl + '/filelist').then((response) => {
         this.$data.chart = response.data
         // this.$store.commit('TOGGLE_SIDEBAR', false)
+        console.error('GOT FILE LIST DATA .....')
+        console.error(response)
+        // this.$store.commit('TOGGLE_SIDEBAR_TWO_DATA', response.data.StaticHtml) // response.data)
+        this.$store.commit('TOGGLE_SIDEBAR_TWO_DATA', response.data) // response.data)
         this.$store.commit('TOGGLE_SIDEBAR_TWO', true)
-        this.$store.commit('TOGGLE_SIDEBAR_TWO_DATA', response.data)
       })
       .catch((error) => {
         this.$onError(error)
@@ -152,7 +163,7 @@ export default {
       }
 
       var self = this
-      this.$http.post(window.apiUrl + '/fileupload', postData, {
+      this.$httpApi.post(window.apiUrl + '/fileupload', postData, {
         headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {

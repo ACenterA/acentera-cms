@@ -252,6 +252,8 @@ var bm = editor.BlockManager;
     // alert(head);
     var htmlContent = body;  //  window.data.Data; //$("body").html()
     var headContent = head;  //  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    window.headContent = head;
+    window.htmlContent = body;
 
 
  //   var htmlContent = $("body").html()

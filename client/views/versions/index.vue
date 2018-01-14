@@ -569,7 +569,7 @@ export default {
 
       // TODO: Switch branch here
       // var self = this
-      this.$http.post(window.apiUrl + '/git?action=switch_branch',
+      this.$httpApi.post(window.apiUrl + '/git?action=switch_branch',
       obj, {
 
       })

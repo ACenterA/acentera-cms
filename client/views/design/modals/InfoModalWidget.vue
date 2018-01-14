@@ -122,7 +122,7 @@ export default {
       editing: false,
       action: '',
       pageTitle: '',
-      widgetCategory: '',
+      // widgetCategory: '',
       errorMsg: null,
       filename: ''
     }
@@ -191,9 +191,11 @@ export default {
       return this.editing === true
     },
     isDir () {
+      if (!this.object) return false
       return (this.object.subtype === 'Dir')
     },
     isFile () {
+      if (!this.object) return false
       return (this.object.subtype === 'File')
     },
     cancel () {

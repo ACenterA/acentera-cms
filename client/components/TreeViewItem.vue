@@ -87,6 +87,9 @@
       isDir: function (value) {
         console.log('check if is dir')
         console.log(value)
+
+        if (!value) return false
+
         console.log((value.subtype === 'dir' || value.subtype === 'Dir'))
         return (value.subtype === 'dir' || value.subtype === 'Dir')
       },

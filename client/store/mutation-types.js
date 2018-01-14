@@ -13,5 +13,6 @@ export const SWITCH_EFFECT = 'SWITCH_EFFECT'
 export const LOGOUT = 'LOGOUT'
 
 export const REPO_STATE_UPATE = 'REPO_STATE_UPATE'
-export const REPO_URL_UPATE = 'REPO_URL_UPATE'
+export const REPO_URL_UPDATE = 'REPO_URL_UPDATE'
+export const SELECT_WEBSITE = 'SELECT_WEBSITE'
 export const REPO_UPATE = 'REPO_UPATE'

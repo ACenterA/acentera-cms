@@ -2,7 +2,7 @@
   <!-- Home -->
   <div class="content has-text-centered">
 
-    <div v-if="isWebsite">
+    <div v-if="isWebsite && !showSiteBeingCreated">
 
       <!-- For Each Websites -->
 
@@ -27,90 +27,36 @@
       <section class="">
         <div class="">
 
-        <div class="box box-template">
+        <div class="box box-template" v-for="item in themes">
           <div class="template-thumbnails">
+              {{ item.Name }}
               <div class=""
                     style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
-                      <img src="https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023" class="mw-100">
+
+                      <img v-if="item.Repository" :src="item.Repository + 'raw/master/images/screenshot.png'" class="mw-100">
               </div>
               <div class="width-full">
                 <div class="float-left width-50">
-                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+
+                  <div v-if="isLoggedIn" class="button button-site is-primary is-outlined nav-item is-hidden-mobile" @click="nextStep(item)">
                     Edit site
                   </div>
+                <!--
+                <router-link :to="{ path: '/templates/' + item.Name + '/edit'}" :exact="true">
+                </router-link>
+                -->
+                <div v-else class="button button-site is-primary is-outlined nav-item is-hidden-mobile" @click="loginGitBit(item)">
+                  Edit site
+                </div>
+
                 </div>
                 <div class="float-right width-50 small-leftmargin">
-                  <router-link to="/templates/template-01/preview" :exact="true">
+                  <router-link :to="{ path: '/templates/' + item.Name + '/preview'}" :exact="true">
                     <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
                       Preview
                     </div>
                   </router-link>
-                </div>
-              </div>
-          </div>
-        </div>
 
-
-
-        <div class="box box-template">
-          <div class="template-thumbnails">
-              <div class=""
-                    style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
-                      <img src="https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023" class="mw-100">
-              </div>
-              <div class="width-full">
-                <div class="float-left width-50">
-                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
-                    Edit site
-                  </div>
-                </div>
-                <div class="float-right width-50 small-leftmargin">
-                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
-                    Preview
-                  </div>
-                </div>
-              </div>
-          </div>
-        </div>
-
-        <div class="box box-template">
-          <div class="template-thumbnails">
-              <div class=""
-                    style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
-                      <img src="https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023" class="mw-100">
-              </div>
-              <div class="width-full">
-                <div class="float-left width-50">
-                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
-                    Edit site
-                  </div>
-                </div>
-                <div class="float-right width-50 small-leftmargin">
-                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
-                    Preview
-                  </div>
-                </div>
-              </div>
-          </div>
-        </div>
-
-
-        <div class="box box-template">
-          <div class="template-thumbnails">
-              <div class=""
-                    style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
-                      <img src="https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023" class="mw-100">
-              </div>
-              <div class="width-full">
-                <div class="float-left width-50">
-                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
-                    Edit site
-                  </div>
-                </div>
-                <div class="float-right width-50 small-leftmargin">
-                  <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
-                    Preview
-                  </div>
                 </div>
               </div>
           </div>
@@ -164,7 +110,22 @@
 -->
 
     </div>
-    <div v-else>
+
+    <div v-if="showSiteBeingCreated">
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+
+      Your site is being created....
+      <br/>
+      <br/>
+      Please standby...
+      <br/>
+    </div>
+
+    <div v-if="!isWebsite">
       <h1 class="is-title is-bold">{{ pkg.name.replace('-', ' ') }}</h1>
 
       <p>
@@ -193,22 +154,57 @@
       </div>
     </div>
 
+    <gitModal :visible="showLoginModal" :template="selectedItem" @nextStep="nextStep($event)" @close="closeGitModal"></gitModal>
+
+    <createSiteModal :visible="showCreateModal" :template="selectedItem" @changePage="changePage($event)" @close="closeCreateSiteModal"></createSiteModal>
   </div>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
-// import Vue from 'vue'
+import GitModal from './modals/GitLogin'
+import createSiteModal from './modals/CreateSiteModal'
 
 export default {
-
+  components: {
+    GitModal,
+    createSiteModal
+  },
   data () {
     console.log(this.$store.state)
     return {
-      pkg: this.$store.state.pkg
+      themes: [],
+      pkg: this.$store.state.pkg,
+      selectedItem: null,
+      selectedItemName: null,
+      showLoginModal: false,
+      showCreateModal: false,
+      showSiteBeingCreated: false
     }
   },
   computed: {
+    isLoggedIn: function () {
+      if (this.$store.state.github == null) {
+        return false
+      }
+      console.log('is loggedi n test 1 ')
+      if (this.$store.state.github.logininfo == null) {
+        return false
+      }
+      console.log('is loggedi n test 2 ')
+      if (this.$store.state.github.logininfo.username == null) {
+        return false
+      }
+
+      console.log('is loggedi n test3')
+      if (!(this.$store.session === null || this.$store.session === undefined)) {
+        if (!(this.$store.session.display_name === null || this.$store.session.display_name === undefined)) {
+          return false
+        }
+      }
+      console.log('is loggedi n test4')
+      return true
+    },
     repoState: function () {
       return this.$store.state.app.repoState
     },
@@ -221,45 +217,20 @@ export default {
     }
   },
   mounted () {
-    console.log('toggle test')
-    /*
-    this.toggleRepoState(1)
     var self = this
+    self.$store.state.app.sidebarglobal.opened = false
 
-    this.$http.get(window.apiUrl + '/git?action=config').then((response) => {
-      this.toggleRepoUrl(response.data.Data)
-      console.log('toggle repo data')
-      if (response !== null && response.data !== null) {
-        this.toggleRepo(response.data)
-      }
+    // better not to set UX is nicer
+    // self.$store.state.app.sidebarglobal.hidden = true
 
-      if (self.$store.state.app.inet) {
-        this.$http.get(window.apiUrl + '/git?action=pull').then((response) => {
-          console.log('doing pull done')
-          console.log(response.data.Data)
-          self.toggleRepoState(0) // all good
-        })
-        .catch((error) => {
-          console.error(error)
-          console.error('err1')
-          if (error.response.status === 500) {
-            self.toggleRepoState(6) // need to setup SSH Key for the user
-          } else {
-            this.$onError(error)
-          }
-        })
-      }
+    this.$http.get('/assets/themes.json').then((response) => {
+    // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
+      console.log('got monuted raw json')
+      self.themes = response.data
+      this.switchTab(0)
+    }).catch((error) => {
+      this.$onError(error)
     })
-    .catch((error) => {
-      console.error(error)
-      console.error('err2')
-      if (error.response.status === 500) {
-        self.toggleRepoState(5) // State 5 = no .git/config file....
-      } else {
-        this.$onError(error)
-      }
-    })
-    */
   },
 
   methods: {
@@ -269,6 +240,20 @@ export default {
       'toggleRepoUrl',
       'isWebsite'
     ]),
+    loginGitBit: function (item) {
+      this.showLoginModal = true
+      this.selectedItem = item
+    },
+    switchTab: function (index) {
+    },
+    closeGitModal () {
+      this.selectedIndex = -1
+      this.showLoginModal = false
+    },
+    closeCreateSiteModal () {
+      this.selectedIndex = -1
+      this.showCreateModal = false
+    },
     isRepoUpdating () {
       return (this.repoState.updating === 1)
     },
@@ -280,6 +265,131 @@ export default {
     },
     isKeyMissing () {
       return (this.repoState.updating === 6)
+    },
+    nextStep (nextStepData) {
+      console.error('RECEIVED NEXT STEP OF')
+      console.error(nextStepData)
+      // Theme => nextStepData.Name
+      // next route => '/templates/' + nextStepData.Name + '/edit'
+      this.selectedIndex = -1
+      this.showLoginModal = false
+      this.showCreateModal = true
+      // work but not this .. this.$router.push({ 'path': '/templates/' + nextStepData.Name + '/edit' })
+    },
+    changePage (nextStepData) {
+      var self = this
+      console.error('GREAT THE SITE GOT CREATED.. AND WE HAVE AN WEBSITE ID')
+      console.error(nextStepData)
+      // Theme => nextStepData.Name
+      // next route => '/templates/' + nextStepData.Name + '/edit'
+      this.showCreateModal = false
+
+      this.showSiteBeingCreated = true
+
+      var websiteId = nextStepData.websiteId // '12c47ce0-ccc5-11e7-b808-bd4f405609c4'
+      this.$notify({
+        title: 'Creating site.',
+        message: 'Your site is being created...',
+        type: 'success'
+      })
+
+      var projectId = nextStepData.projectId
+
+      var initSite = {
+        'projectId': projectId,
+        'websiteId': websiteId
+      }
+
+      // websiteId
+
+      var ready = function () {
+        var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/' + initSite.projectId + '/' + initSite.websiteId + '/state/ready'
+        console.error('posting to ' + initSiteRepoCall)
+        var h = { 'authorization': 'Bearer ' + self.$store.state.session.token }
+        // console.error(' TEST AUTHORIZATION ')
+        // console.error(h)
+
+        console.error('SENDINT POST A 01')
+        self.$http.post(initSiteRepoCall, initSite, {
+          headers: h
+        }).then((response) => {
+          self.$notify({
+            title: 'Website ready.',
+            message: 'Your website has been created.',
+            type: 'success'
+          })
+          setTimeout(function () {
+            self.$router.push({ 'path': '/sites/' + websiteId + '/edit' })
+          }, 300)
+        }, function (errr) {
+          self.$notify({
+            title: 'Website ready.',
+            message: 'We could not update your website state :(.  Please contact us.',
+            type: 'danger'
+          })
+        })
+      }
+      var fctCheckNewSite = function (itr) {
+        console.log('http://' + websiteId + '.web.acentera.com/?' + new Date())
+        $.ajax({
+          url: 'http://' + websiteId + '.web.acentera.com/?' + new Date(),
+          type: 'GET',
+          crossDomain: true,
+          // dataType: 'jsonp',
+          success: function () {
+            ready()
+          },
+          error: function (e) {
+            // error?
+            try {
+              if (e.readyState === 0) {
+                // All Good but Cross Domain Error. We assume the website is alive.
+                ready()
+                return
+              }
+              console.error(e)
+              if (e.response === undefined) {
+                e.response = e
+              }
+              if (e.response.status === 404) {
+                console.error('404?')
+                if (itr <= 30) {
+                  setTimeout(function () {
+                    fctCheckNewSite(++itr)
+                  }, 5000)
+                } else {
+                  self.$notify({
+                    title: 'Creating site.',
+                    message: 'Your site could not be created...',
+                    type: 'danger'
+                  })
+
+                  setTimeout(function () {
+                    self.$router.push({ 'path': '/' })
+                  }, 5000)
+                }
+              } else {
+                console.error('404?')
+              }
+            } catch (ff) {
+              if (itr <= 30) {
+                setTimeout(function () {
+                  fctCheckNewSite(++itr)
+                }, 5000)
+              } else {
+                setTimeout(function () {
+                  self.$router.push({ 'path': '/' })
+                }, 5000)
+              }
+            }
+          }
+        })
+      }
+      fctCheckNewSite(0)
+
+      //
+
+      // work but not this .. this.$router.push({ 'path': '/templates/' + nextStepData.Name + '/edit' })
     }
   }
 
