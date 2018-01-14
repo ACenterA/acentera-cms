@@ -1,0 +1,55 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		#arena{
+			padding: 100px;
+		}
+	</style>
+</head>
+<body>
+	<div class="arena" contenteditable>
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+	</div>
+	<div class="arenax" contenteditable>
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate blanditiis, dolor quod totam est consectetur harum voluptatum aut ab neque enim, saepe veniam dolore doloribus itaque maiores error eligendi corporis?
+	</div>
+	<hr>
+	<span></span>
+	<script src="./build/selo.min.js"></script>
+	<script>
+
+
+		var Selo = new Selo({
+			log:false,
+			els : '.arena'
+		});
+
+
+		document.addEventListener('selectionEnd',function () {
+			console.log("End",Selo.getPositionRange())
+			document.querySelector('span').innerText = "End"
+		})
+
+		document.addEventListener('selectionStart',function () {
+			console.log("Start")
+			document.querySelector('span').innerText = "Start"
+		})
+
+		document.addEventListener('selectionBeforeStart',function () {
+			console.log("Before Start")
+			document.querySelector('span').innerText = "Before Start"
+		})
+
+	</script>
+</body>
+</html>
