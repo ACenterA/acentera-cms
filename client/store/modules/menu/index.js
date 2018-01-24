@@ -26,6 +26,14 @@ const state = {
     },
     design,
     {
+      name: 'Blogs',
+      path: '/blogs',
+      meta: {
+        icon: 'fa-edit'
+      },
+      component: lazyLoading('blogs', true)
+    },
+    {
       name: 'Versions',
       path: '/versions',
       meta: {

@@ -4,20 +4,25 @@
       <div class="plekan-modal-title">Edit</div>
     </header>
     <div slot="body">
-      <div v-for="e in getElementPropertyArray"
-           class="plekan-editable-element-fields-container">
-        <div class="plekan-editable-element-fields"
-             v-show="elementEditableProperties[e.prop] != undefined">
-          <span>{{e.title}}</span>
-          <input type="text"
-                 v-model="elementEditableProperties[e.prop]"
-                 :placeholder="e.placeholder">
-        </div>
+
+      <div v-if="isParamEditable()">
       </div>
-      <file-upload :clean="shown"
-                   types="png|jpg|jpeg|gif"
-                   :fileChange="fileChange"
-                   v-if="elementIsImage"></file-upload>
+      <div v-if="!isParamEditable()">
+        <div v-for="e in getElementPropertyArray"
+             class="plekan-editable-element-fields-container">
+          <div class="plekan-editable-element-fields"
+               v-show="elementEditableProperties[e.prop] != undefined">
+            <span>{{e.title}}</span>
+            <input type="text"
+                   v-model="elementEditableProperties[e.prop]"
+                   :placeholder="e.placeholder">
+          </div>
+        </div>
+        <file-upload :clean="shown"
+                     types="png|jpg|jpeg|gif"
+                     :fileChange="fileChange"
+                     v-if="elementIsImage"></file-upload>
+       </div>
     </div>
     <footer slot="footer"
             class="plekan-clearfix">
@@ -105,6 +110,11 @@ export default {
         console.error(p.prop)
         if (el[p.prop] !== undefined) {
           tmp[p.prop] = el[p.prop]
+
+          if (el.nodeName === 'A') {
+            // TODO:: Do we need to do this...
+            // Remove window baesURL from el[p.prop] value ?
+          }
         }
         return true
       })
@@ -113,6 +123,12 @@ export default {
     }
   },
   methods: {
+    isParamEditable () {
+      if (!this.element) {
+        return false
+      }
+      return (this.element.attributes.hasOwnProperty('parameditable'))
+    },
     /**
      * Bu method file-upload componentine property olarak pass edilir.
      * file-upload'da geri dönen değer file objesi local scope'a alınır

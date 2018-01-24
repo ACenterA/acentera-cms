@@ -80,8 +80,16 @@ export default {
     }
   },
   mounted () {
+  /*
+    var offset = function (el) {
+      // var rect = el.getBoundingClientRect()
+      var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      return { top: scrollTop, left: scrollLeft }
+    }
+*/
     /** @type {Array} Düzenlenebilir DOM elementleri */
-    const editableTag = ['IFRAME', 'IMG', 'A', 'SCRIPT']
+    const editableTag = ['DIV', 'IFRAME', 'IMG', 'A', 'SCRIPT']
     const d = document.getElementsByTagName('iframe')[0].contentWindow.document
 
     const editButton = document.querySelector('.plekan-editable-elements-button')
@@ -100,6 +108,9 @@ export default {
 
     self.store.commit('editorStart')
 
+    var scrollYOffsetBase = 0
+    var oldTarget = null
+    var oldIframe = null
     d.addEventListener('mouseover', (e) => {
       console.error('zzz3a')
       console.error(window.editorElementDynamic)
@@ -115,6 +126,8 @@ export default {
       tagname = target.tagName
       calc = target.getBoundingClientRect()
 
+
+
       if (editableTag.indexOf(tagname) !== -1) {
         parents = hasParent(e.target, 'plekan-row-item')
 
@@ -123,17 +136,104 @@ export default {
           console.error(d)
           console.error(e.target)
           const st = target.scrollTop
+
+          console.error('test aaaa')
+          console.error(target)
+          // console.error(target.attributes.hasOwnProperty('parameditable'))
+          if (! target.attributes.hasOwnProperty('parameditable')) {
+            return
+          }
+
           self.editableModalElement = target
           editButton.style.display = 'block'
+          editButton.classList.add('is-visible')
           editButton.style.visibility = 'visible'
 
-          editButton.style.top = `${calc.height / 2 + st + calc.top - editButtonHeight / 2}px`
+          var target_body = $(target).parents('body')
+
+          // find the corresponding iframe container
+          var iframe = $('.arenatest').filter(function () {
+            var iframe_body = $(this).contents().find('body')
+            return target_body.get(0) === iframe_body.get(0)
+          })
+          oldTarget = target
+          oldIframe = iframe
+          // Need to adjust the iframe target position by current document scrolling
+          editButton.style.top = `${calc.height / 2 + st + calc.top - editButtonHeight / 2 + window.pageYOffset}px`
+          editButton.style.top = `${calc.height / 2 + st + calc.top - editButtonHeight / 2 + window.pageYOffset}px`
+
+          window.editorElementDynamic.attributes['top'] = `${calc.height / 2 + st + calc.top - editButtonHeight / 2 + window.pageYOffset}`
+          window.editorElementDynamic.attributes['scrolltop'] = $(d).scrollTop()
+          console.error(window.editorElementDynamic.attributes)
+          var left = $(oldIframe).offset().left + $(oldTarget).offset().left - $(d).scrollLeft()
+
+          // This was used when using position: fixed ....
+            // var top = $(oldIframe).offset().top + $(oldTarget).offset().top - $(d).scrollTop()
+            // editButton.style.top = `${top - editButtonHeight / 2}px`
+            // editButton.style.top = `${top - editButtonHeight / 2}px`
+
+          console.error('calc is ...')
+          console.error(calc)
+
+          console.error('let window editor?')          
           editButton.style.left = `${calc.width / 2 + calc.left - editButtonWidth / 2}px`
         }
       } else if (target.parentNode !== editButton && target !== editButton) {
         editButton.style.display = 'none'
+        editButton.classList.remove('is-visible')
       }
     })
+
+
+
+    // window.scroll = null; // unbind the event before scrolling
+    d.addEventListener('scroll', function (event) {
+
+      console.error('scroll test A')
+      console.error(window.editorElementDynamic.classList)
+      console.error(editButton.classList)
+      if (editButton.classList.contains('is-visible')) { // window.editorElementDynamic.classList.contains('active')) {
+        console.error('scroll test B')
+        // This was used when using position: fixed ....
+
+        // var top = $(oldIframe).offset().top + $(oldTarget).offset().top - $(d).scrollTop()
+        var oldTmpTop = $(d).scrollTop()
+        console.error('TEST ...')
+        console.error(oldTmpTop)
+        console.error(window.editorElementDynamic.attributes['top'])
+        var orig = window.editorElementDynamic.attributes['top']
+        var scrollOrig = window.editorElementDynamic.attributes['scrolltop']
+        var newScrollDiff = parseInt(scrollOrig) - oldTmpTop
+        if (parseInt(scrollOrig) > oldTmpTop) {
+          scrollOrig = scrollOrig - oldTmpTop
+        }
+        console.error('set new top from ' + orig + ' to ' + newScrollDiff)
+        //  scrollOrig = scrollOrig - oldTmpTop
+        var _top = parseInt(orig) + parseInt(newScrollDiff)
+        console.error('TEST NEW TOP...' + _top)
+        window.editorElementDynamic.style.top = `${_top}px`
+        console.error('update to ' + _top)
+        editButton.style.top = `${_top}px`
+        // editButton.style.top = `${_top}px`
+        /*
+        console.error('scroll test C')
+        const st = oldTarget.scrollTop
+        console.error('scroll test D')
+        calc = oldTarget.getBoundingClientRect()
+        console.error('scroll test E')
+        //editButton.style.top = `newScrollDiff}px`
+        */
+      }
+      /*
+      if (editButton.style.display !== 'none') {
+        var left = $(oldIframe).offset().left + $(oldTarget).offset().left - $(d).scrollLeft()
+        var top = $(oldIframe).offset().top + $(oldTarget).offset().top - $(d).scrollTop()
+        editButton.style.top = `${top - editButtonHeight / 2}px`
+      }
+      */
+    }, true /*Capture event*/);
+    // window.onscroll = makeCallv
+
     /* eslint-enable */
 
     //

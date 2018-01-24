@@ -21,7 +21,7 @@
             <div class="tabs is-medium is-boxed is-fullwidth">
               <ul>
                 <li v-bind:class="tabName === 'configuration' ? 'is-active' : ''" v-on:click="switchTab(0)"><a>{{selectedLang}} Configuration</a></li>
-                <li v-bind:class="tabName === 'metadata' ? 'is-active' : ''" v-on:click="switchTab(1)"><a>Metadata</a></li>
+                <!-- <li v-bind:class="tabName === 'metadata' ? 'is-active' : ''" v-on:click="switchTab(1)"><a>Metadata</a></li> -->
                 <!-- <li v-bind:class="tabName === 'approle' ? 'is-active' : ''" v-on:click="switchTab(2)"><a>Approle</a></li> -->
                 <!-- <li disabled><a>Certificates</a></li> -->
               </ul>
@@ -63,7 +63,8 @@
 </template>
 
 <script>
-var TabNames = ['configuration', 'metadata', 'approle']
+// var TabNames = ['configuration', 'metadata', 'approle']
+var TabNames = ['configuration']
 
 export default {
 

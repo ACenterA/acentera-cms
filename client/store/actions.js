@@ -17,6 +17,17 @@ export const toggleDevice = ({ commit }, device) => commit(types.TOGGLE_DEVICE, 
 
 export const logOut = ({ commit }, vue) => commit(types.LOGOUT, vue)
 
+export const selectPost = ({ commit }, obj) => {
+  if (obj.item) {
+    obj.item.selected = true
+    commit(types.SELECT_POST, obj.item)
+    console.error('frame a')
+    console.error(obj)
+    console.error(obj.$bus)
+    obj.vue.$bus.$emit('updateEditFrame', {})
+  }
+}
+
 export const expandMenu = ({ commit }, menuItem) => {
   if (menuItem) {
     menuItem.expanded = menuItem.expanded || false
@@ -91,6 +102,16 @@ export const refreshUser = ({ commit }, obj) => {
             console.error('TEST LOADED SITE: ' + state.app.isLoaded)
             if (state.app.websiteId !== null) {
               if (!state.app.isLoaded) {
+                let raw = state.github || window.localStorage.getItem('github')
+                console.error('SET OF PARRALEL DATA TEST OF.... ')
+                console.error(typeof raw)
+                if (typeof raw === 'string') {
+                  state.github = JSON.parse(raw)
+                } else {
+                  state.github = raw
+                }
+                // var $gitobj = this.$github
+
                 console.error('WTFA AA')
                 state.app.sidebarglobal.opened = false
                 state.app.sidebarglobal.hidden = true

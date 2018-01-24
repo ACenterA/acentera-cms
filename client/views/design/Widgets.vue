@@ -161,7 +161,7 @@ export default {
 
       var self = this
       this.$httpApi.post(window.apiUrl + '/widgetupload', postData, {
-        headers: {'TmpHeader': 'tmp'}
+        // headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {
         console.log('got response')

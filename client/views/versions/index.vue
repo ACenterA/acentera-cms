@@ -4,7 +4,14 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical">
         <article class="tile is-child box">
+        <div v-if="invalidRepo">
+          Error with repository. Contact us, and provide us with following error: <br/><br/>Invalid Repository {{websiteId}}<br/>
 
+          <br/>
+          Apologize for the issue.
+          <br/>
+        </div>
+        <div v-if="!invalidRepo">
           <!-- Tab navigation -->
           <div class="tabs is-medium is-boxed is-fullwidth">
             <ul>
@@ -155,15 +162,24 @@
                   </span>
                   </td>
                   <td v-if="entry" v-for="key in tableColumns">
-                    {{ entry[key] }}
+                    <span v-if="key == 'desc'">
+                     <span v-if="entry['branch'] == 'master'">
+                        Production website
+                      </span>
+                    </span>
+
+                      {{ entry[key] }}
                   </td>
                   <td v-else>
                     ERROR: An invalid token-accessor has been found
                   </td>
                   <td width="34">
                   <span class="icon">
-                    <a @click="openDeleteModal(index)">
+                    <a v-if="entry['branch'] !== 'master'" @click="openDeleteModal(index)">
                       <i class="fa fa-trash-o"></i>
+                    </a>
+                    <a v-if="entry['branch'] == 'master'">
+                      <i style="color: black; cursor: default" class="fa fa-trash-o"></i>
                     </a>
                   </span>
                   </td>
@@ -247,6 +263,7 @@
           <!-- Certificates tab -->
           <!-- To be implemented -->
 
+        </div>
         </article>
       </div>
     </div>
@@ -308,6 +325,8 @@ export default {
       ],
       showModal: false,
       showDeleteModal: false,
+      repoState: this.$store.state.app.repoState,
+      websiteId: this.$store.state.app.websiteId,
       selectedIndex: -1,
       currentPage: 1,
       lastPage: 1,
@@ -346,6 +365,12 @@ export default {
   },
 
   computed: {
+    invalidRepo: function () {
+      if (this.repoState && this.repoState.url !== 'hidden') {
+        return false
+      }
+      return true
+    },
     selectedItemTitle: function () {
       if (this.selectedIndex !== -1) {
         return String(this.tableData[this.selectedIndex][this.tableColumns[0]])
@@ -449,6 +474,8 @@ export default {
       })
       */
 
+      console.error('TMP GIT TEST...')
+      console.error(this.$store.state.app.repoState)
       var tmpGit = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).lastIndexOf('/') + 1)
       tmpGit = tmpGit.substring(0, tmpGit.lastIndexOf('.git'))
       console.log(tmpGit)
@@ -474,7 +501,7 @@ export default {
         isGitHub = false
       }
 
-      $gitobj.setUserPass(this.$store.state.github.logininfo.user, this.$store.state.github.logininfo.pass)
+      $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
       $gitobj.get(userPostPath, {}, function (next) {
         console.log('success fully POSTED PULL informations...')
         if (isGitHub) {
@@ -611,8 +638,49 @@ export default {
       this.selectedIndex = -1
       this.showDeleteModal = false
     },
-
     deleteItem (index) {
+      var self = this
+      // var fullGitPath = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).indexOf('/') + 1)
+      // fullGitPath = fullGitPath.substring(0, fullGitPath.lastIndexOf('.git'))
+      var tmpGit = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).lastIndexOf('/') + 1)
+      var repoRef = ('' + this.$store.state.app.repoState.ref)
+      tmpGit = tmpGit.substring(0, tmpGit.lastIndexOf('.git'))
+      console.log(tmpGit)
+      var $gitobj = this.$github
+      var userDeletePath = 'repos/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/git/' + repoRef
+
+      if (this.$store.state.github.logininfo.type === 'BitBucket') {
+        $gitobj = this.$bitbucket
+        $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+        userDeletePath = '1.0/repositories/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/_branch/' + self.tableData[index].branch
+      } else {
+        // this.closeDeleteModal()
+        $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+      }
+
+      $gitobj.delete(userDeletePath, function (next) {
+        self.closeDeleteModal()
+        self.$notify({
+          title: 'Success',
+          message: 'Deletion successful',
+          type: 'success'
+        })
+        self.switchTab(0)
+      }, function (err) {
+        self.$onError(err)
+        self.closeDeleteModal()
+        self.switchTab(0)
+      })
+      /*
+      // $gitobj.post(userPostPath, githubPush, function (resp) {
+      $gitobj.post(userPostPath, pullReqObj, function (next) {
+        console.log('success fully POSTED PULL informations...')
+
+        // success fully POSTED PULL informations.
+        //  {"merge_commit": null, "description": "Desc here", "links": {"decline": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/decline"}, "commits": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/commits"}, "self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3"}, "comments": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/comments"}, "merge": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/merge"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/pull-requests/3"}, "activity": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/activity"}, "diff": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/diff"}, "approve": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/approve"}, "statuses": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/statuses"}}, "title": "a faf 32 f3 2", "close_source_branch": false, "reviewers": [], "destination": {"commit": {"hash": "1addbeecd463", "links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/commit/1addbeecd463"}}}, "repository": {"links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/avatar/32/"}}, "type": "repository", "name": "test-simple-website", "full_name": "Gizmodo1/test-simple-website", "uuid": "{a1526fe3-4e13-4d6f-bc36-b4eb55e45300}"}, "branch": {"name": "master"}}, "state": "OPEN", "closed_by": null, "source": {"commit": {"hash": "1ad4ff49dd3d", "links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/commit/1ad4ff49dd3d"}}}, "repository": {"links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/avatar/32/"}}, "type": "repository", "name": "test-simple-website", "full_name": "Gizmodo1/test-simple-website", "uuid": "{a1526fe3-4e13-4d6f-bc36-b4eb55e45300}"}, "branch": {"name": "Demo_Nelify"}}, "comment_count": 0, "author": {"username": "Gizmodo1", "display_name": "francis Lavalliere", "type": "user", "uuid": "{d1f483aa-fb4b-4a10-b7df-e58bd6a7500f}", "links": {"self": {"href": "https://api.bitbucket.org/2.0/users/Gizmodo1"}, "html": {"href": "https://bitbucket.org/Gizmodo1/"}, "avatar": {"href": "https://bitbucket.org/account/Gizmodo1/avatar/32/"}}}, "created_on": "2017-09-15T02:33:43.353448+00:00", "participants": [], "reason": "", "updated_on": "2017-09-15T02:33:43.398141+00:00", "type": "pullrequest", "id": 3, "task_count": 0}
+        // console.log(next)
+      }, this.gitError)
+
       this.$http.post('/api/users/revoke', {
         Type: this.tabName.toLowerCase(),
         ID: this.tableData[index][this.tableColumns[0]]
@@ -632,6 +700,7 @@ export default {
         this.closeDeleteModal()
         this.$onError(error)
       })
+      */
     },
 
     loadPage: function (pageNumber) {

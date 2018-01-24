@@ -16,12 +16,14 @@ export default {
       name: 'Theme',
       path: '/theme',
       component: lazyLoading('admin/Themes')
-    },
+    }
+    /*
     {
       name: 'Items Type',
       path: '/items',
       component: lazyLoading('admin/Items')
     }
+    */
 /*
     {
       name: 'Policies',

@@ -1,10 +1,12 @@
 <template>
-  <div class="app-inner-content">
+  <div v-if="loaded" class="app-inner-content">
     <div v-if="isRepoError()">
       <div class="tile is-ancestor is-vertical fullheight">
 
           <article class="padleft tile is-child box">
-              <label class="label">Your current repository is in error. <br/><br/>Validate if you have a .git/config file, in your folder or ask for help on our gitter channel.</label>
+
+              <label v-if="!isWebsite" class="label">Your current repository is in error. <br/><br/>Validate if you have a .git/config file, in your folder or ask for help on our gitter channel.</label>
+              <label v-else class="label">Please go to the left section, and proceed with Logout / Login and try again.</label>
           </article>
 
       </div>
@@ -93,7 +95,9 @@ export default {
       github: 'github',
       pkginfo: 'pkg',
       sidebartwo: 'sidebartwo',
-      repoState: 'repoState'
+      repoState: 'repoState',
+      loaded: 'loaded',
+      isWebsite: 'isWebsite'
     })
   },
 
@@ -164,7 +168,7 @@ export default {
 
       var self = this
       this.$httpApi.post(window.apiUrl + '/fileupload', postData, {
-        headers: {'TmpHeader': 'tmp'}
+        // headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {
         console.log('got response')

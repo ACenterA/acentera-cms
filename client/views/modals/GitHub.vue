@@ -16,7 +16,6 @@
         </div>
         <div v-if="!isLogIn()">
               <p>
-
               <strong>Choose provider</strong>
                 <article class="tile">
 
@@ -199,6 +198,7 @@
 
       updateBitbucketuser: function (param) {
         console.log('A2 updating bitbucket data')
+        console.log('UPDATING GIT TEST 01- CC ')
         console.log(param)
         var loginfo = {
           user: this.tmpUsername,

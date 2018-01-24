@@ -165,7 +165,7 @@ export default {
           {
             'name': 'awesomecomponentBody9',
             'group': 'image',
-            'thumbnail': 'https://vuejs.org/images/logo.png',
+            'thumbnail': 'https://vuejs.org/images/logoZ.png',
             context: tmpA,
             newContext: {
               /*

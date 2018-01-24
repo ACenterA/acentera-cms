@@ -14,29 +14,24 @@
                   <div class="back-text">{{manual}}</div>
             </router-link>
           </div>
-
           <!-- Force Refresh -->
-          <div v-if="getSelectedWebsite" class="nav-item">Editing: {{getSelectedWebsite.title }}</div>
+          <div v-if="getSelectedWebsiteName" class="nav-item">Editing: {{getSelectedWebsiteName.title }} &nbsp;&nbsp;
+              <span v-if="getSelectedWebsite" class="blue" style="cursor:hand;" @click='selectVersion()'>[ {{ repoState.Branch }} ]</span>
+            </div>
 
           <div v-if="isOffline()">
             <p class="blue">No internet.</p>
           </div>
         </div>
         <div class="nav-center">
-
-          <div v-if="!isLoggedIn()">
+          <div v-if="!isLoggedIn && isWebsiteSelected()">
             <p class="red">
-              You must Login to your account first.
+              You must Login to your 'Git' account first. (Login on the left menu)
             </p>
           </div>
           <div v-else>
             <div v-if="isWebsiteSelected()">
               <!-- TODO:                      -->
-
-              <div v-if="!getSelectedWebsite">
-                <p class="red" @click="GitLogin">Click here for Git Login...</p>
-              </div>
-
 
               <div v-if="getSelectedWebsite">
                 <div v-if="hasSession() && isRepoInError()">
@@ -45,8 +40,10 @@
                 <div v-if="hasSession() && isRepoUpdating()">
                   <p class="blue">Updating...</p>
                 </div>
-                <div v-if="hasSession() && isKeyMissing()">
-                  <p class="blue">Missng SSH Key.<router-link to="/login" :exact="true"><b>Click here.</b></router-link></p>
+                <div v-if="!isWebsiteSelected()">
+                  <div v-if="hasSession() && isKeyMissing()">
+                    <p class="blue">Missng SSH Key.<router-link to="/login" :exact="true"><b>Click here.</b></router-link></p>
+                  </div>
                 </div>
                 <div v-if="isRepoMissing()">
                   <p class="blue">Could not validate Git conenction.</p>
@@ -72,9 +69,11 @@
           </a>
 
           <div v-if="hasSession() && isWebsiteSelected()">
+            <!--
             <a v-if="hasSession() && isTestMissing()" @click="createPreviewSite()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 Create Preview Site
             </a>
+            -->
 
             <!-- this is same .. as Save.. -->
             <a v-if="hasSession() && isSavePushAvail()" @click="saveAndPreviewAndPushModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
@@ -86,10 +85,17 @@
             </a>
           </div>
 
+          <div v-if="isWebsiteSelected()">
+            <a v-if="hasSession()" @click="selectWebsite()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
+                change site
+            </a>
+          </div>
 
           <a v-if="hasSession()" @click="executeLogout()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
               Logout
           </a>
+
+
 
           <div style="margin:5px">&nbsp;</div>
 
@@ -99,6 +105,7 @@
     <modal :visible="showModal" :title="title" :info="selectedItemInfo" @close="closeModalBasic($event)"></modal>
     <modalComment :visible="showModalComment" @close="closeModalSaveBasic($event)"></modalComment>
     <Modalreviewcomment :visible="showModalReviewComment" @close="closeModalSaveReview($event)"></Modalreviewcomment>
+    <!-- <modal :visible="showModal" :title="title" :info="selectedItemInfo" @close="closeModalBasic($event)"></modal> -->
 
     <!-- gitModal :visible="showCreateModal" @nextStep="nextStep($event)" @close="closeCreateSiteModal"></gitModal -->
 
@@ -205,41 +212,55 @@ export default {
       pkginfo: 'pkg',
       sidebar: 'sidebar',
       app: 'app',
-      repoState: 'repoState'
+      repoState: 'repoState',
+      isLoggedIn: 'isLoggedIn',
+      getBasicAuth: 'getBasicAuth'
     }),
+    getSelectedWebsiteName: function () {
+      return this.selectedWebsite
+    },
     getSelectedWebsite: function () {
-      console.error('IS WEBSITE?? HOSTED VERSION WORKABLE?' + this.selectedWebsite)
-      console.error(this)
+      var self = this
+      console.error('TEST LOADED AA')
+      console.error(this.$store.state.app.isLoaded)
+      if (!this.$store.state.app.isLoaded) {
+        console.error('not loaded')
+        /*
+        return setTimeout(function () {
+          self.getSelectedWebsite()
+        }, 1000)
+        */
+        return
+      }
+      console.error('taaa')
       if (this.selectedWebsite !== null) {
-        if (this.$store.state.github == null || this.$store.state.github.logininfo == null) {
-          return
-        }
-        var self = this
-
-        var $gitobj = this.$github
-        console.error('this store.')
-        console.error(this)
-        console.error(window.vm.$store.state.github)
-        if (this.$store.state.github.logininfo.type === 'BitBucket') {
-          $gitobj = this.$bitbucket
-        }
-        console.error('USER ASS' + this.$store.state.github.logininfo.user)
-        $gitobj.setUserPass(this.$store.state.github.logininfo.user, this.$store.state.github.logininfo.pass)
-
-        this.$httpApi.get(window.apiUrl + '/git?action=config').then((response) => {
+        this.$httpApi.get(window.apiUrl + '/git?action=config&loc=nav').then((response) => {
           this.toggleRepoUrl(response.data.Data)
           if (response !== null && response.data !== null) {
             this.toggleRepo(response.data)
           }
 
           if (self.$store.state.app.inet) {
-            this.$httpApi.get(window.apiUrl + '/git?action=pull', { headers: { 'Authorization': $gitobj.getBasicAuth() } }).then((response) => {
+            console.error('pull here 01')
+
+            var basicAuth = self.getBasicAuth
+            console.error('taa 3a ')
+            console.error(self.$store.state.github)
+            if (this.$store.state.github === null || this.$store.state.github.logininfo === null) {
+              return
+            }
+            self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', { headers: { 'Authorization': basicAuth } }).then((response) => {
               self.toggleRepoState(0) // all good
             })
             .catch((error) => {
-              console.error(error)
-              console.error('err1')
               if (error.response.status === 500) {
+                if (error.response.data.Data === 'reference not found') {
+                  self.$notify({
+                    title: 'Website Version',
+                    message: 'This website version does not exists anymore... Please select a new version.',
+                    type: 'warning'
+                  })
+                }
                 self.toggleRepoState(6) // need to setup SSH Key for the user
               } else {
                 this.$onError(error)
@@ -262,7 +283,7 @@ export default {
           }
         })
       }
-
+      console.error('taa 3')
       return this.selectedWebsite
     }
   },
@@ -273,7 +294,8 @@ export default {
       'toggleRepo',
       'logOut',
       'toggleRepoUrl',
-      'toggleSidebar'
+      'toggleSidebar',
+      'selectWebsite'
     ]),
     isManual () {
       console.log('manualttt')
@@ -352,43 +374,14 @@ export default {
         return false
       }
     },
-    isLoggedIn () {
-      if (this.$store.state.app.website) {
-        if (this.session && this.session.display_name !== undefined) {
-          return true
-        }
-      }
-      console.log('is loggedi n test')
-      if (this.$store.state.github == null) {
-        return false
-      }
-      console.log('is loggedi n test 1 ')
-      console.error(this.$store.state.github)
-      if (this.$store.state.github.logininfo == null) {
-        return false
-      }
-      console.log('is loggedi n test 2 ')
-      if (this.$store.state.github.logininfo.username == null) {
-        return false
-      }
-
-      console.log('is loggedi n test3')
-      if (!(this.$store.session === null || this.$store.session === undefined)) {
-        if (!(this.$store.session.display_name === null || this.$store.session.display_name === undefined)) {
-          return false
-        }
-      }
-      console.log('is loggedi n test4')
-      return true
-    },
     isSavePushAvailOrisTestMissing () {
-      if (!this.isLoggedIn()) {
+      if (!this.isLoggedIn) {
         return false
       }
       return (this.isTestMissing() || this.isSavePushAvail())
     },
     isSavePushAvail () {
-      if (!this.isLoggedIn()) {
+      if (!this.isLoggedIn) {
         return false
       }
       if (this.isTestMissing()) {
@@ -493,7 +486,7 @@ export default {
         if (pullReqObj) {
         }
         console.log(this.$store.state.github.logininfo)
-        $gitobj.setUserPass(this.$store.state.github.logininfo.user, this.$store.state.github.logininfo.pass)
+        $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
 
         console.log(pullReqObj)
         // $gitobj.post(userPostPath, githubPush, function (resp) {
@@ -503,52 +496,6 @@ export default {
           // success fully POSTED PULL informations.
           //  {"merge_commit": null, "description": "Desc here", "links": {"decline": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/decline"}, "commits": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/commits"}, "self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3"}, "comments": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/comments"}, "merge": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/merge"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/pull-requests/3"}, "activity": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/activity"}, "diff": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/diff"}, "approve": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/approve"}, "statuses": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/statuses"}}, "title": "a faf 32 f3 2", "close_source_branch": false, "reviewers": [], "destination": {"commit": {"hash": "1addbeecd463", "links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/commit/1addbeecd463"}}}, "repository": {"links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/avatar/32/"}}, "type": "repository", "name": "test-simple-website", "full_name": "Gizmodo1/test-simple-website", "uuid": "{a1526fe3-4e13-4d6f-bc36-b4eb55e45300}"}, "branch": {"name": "master"}}, "state": "OPEN", "closed_by": null, "source": {"commit": {"hash": "1ad4ff49dd3d", "links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/commit/1ad4ff49dd3d"}}}, "repository": {"links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/avatar/32/"}}, "type": "repository", "name": "test-simple-website", "full_name": "Gizmodo1/test-simple-website", "uuid": "{a1526fe3-4e13-4d6f-bc36-b4eb55e45300}"}, "branch": {"name": "Demo_Nelify"}}, "comment_count": 0, "author": {"username": "Gizmodo1", "display_name": "francis Lavalliere", "type": "user", "uuid": "{d1f483aa-fb4b-4a10-b7df-e58bd6a7500f}", "links": {"self": {"href": "https://api.bitbucket.org/2.0/users/Gizmodo1"}, "html": {"href": "https://bitbucket.org/Gizmodo1/"}, "avatar": {"href": "https://bitbucket.org/account/Gizmodo1/avatar/32/"}}}, "created_on": "2017-09-15T02:33:43.353448+00:00", "participants": [], "reason": "", "updated_on": "2017-09-15T02:33:43.398141+00:00", "type": "pullrequest", "id": 3, "task_count": 0}
           // console.log(next)
-
-          /*
-          self.$http.get(window.apiUrl + '/sshkeys?action=create').then((response) => {
-            console.log('doing SSH KEY CREATE done')
-            if (response.data !== undefined && response.data !== null) {
-              self.pubKey = response.data.Data
-              if (self.pubKey !== undefined && self.pubKey !== null) {
-                console.log(response.data)
-                var githubPush = {
-                  key: self.pubKey
-                }
-
-                if (self.$store.state.github.logininfo.type === 'BitBucket') {
-                  githubPush['accountname'] = self.$store.state.github.logininfo.username
-                  githubPush['label'] = 'ServerlessCMS Generated'
-                }
-                console.log('will create ssh key')
-                console.log(githubPush)
-
-                $gitobj.post(userPostPath, githubPush, function (resp) {
-                  console.log('received git response for ssh key creation')
-                  console.log(resp)
-                  if (resp.status === 201 || resp.status === 200) { // 200 = BitBucket success response, 201 = Github success response
-                    // SSH Key got created... NICE! Lets fetch
-                    self.testFetch()
-                  }
-                }, function (err) {
-                  console.log('recieved github error?')
-                  console.log(err)
-                })
-              }
-            }
-
-            // self.sshKeyCreateError = true
-          })
-          .catch((error) => {
-            console.error('got error of')
-            console.error(error)
-            console.error('err4')
-            if (error.response.status === 500) {
-              this.sshKeyCreateError = true
-            } else {
-              this.$onError(error)
-            }
-          })
-          */
         }, this.gitError)
 
         this.selectedIndex = -1
@@ -560,37 +507,38 @@ export default {
       this.logOut(this)
     },
     closeModalSaveBasic (obj) {
-      console.log('close modal basic here')
-      console.log('got obj of')
-      console.log(obj)
-
-      console.log('got title of ' + obj.title)
-
-      // TODO: Create Pull Request Here
-      // var self = this
-      /*
-      this.$httpApi.post(window.apiUrl + '/git?action=save',
-      querystring.stringify(obj), {
-        headers: {'X-CSRF-Token': this.csrf}
-      })
-      */
+      if (!obj) {
+        return
+      }
       this.$httpApi.post(window.apiUrl + '/git?action=save',
       obj, {
+        headers: {
+          'Authorization': this.getBasicAuth
+        }
       })
       .then((response) => {
+        this.$notify({
+          title: 'Saving website.',
+          message: 'Successfully saved changes',
+          type: 'success'
+        })
+
+        /*
         this.$message({
           message: 'Your change ID is: ' + response.data.result,
           type: 'success',
           duration: 0,
           showCloseButton: true
         })
-
+        */
         if (response.data.error !== '') {
+          /*
           this.$notify({
             title: 'Slack webhook',
             message: response.data.error,
             type: 'warning'
           })
+          */
         }
       })
 
@@ -600,6 +548,9 @@ export default {
 
       this.selectedIndex = -1
       this.showModalComment = false
+    },
+    selectVersion () {
+      console.error('please select new version modal....')
     },
     closeModalBasic (obj) {
       console.log('close modal basic here')
@@ -616,9 +567,14 @@ export default {
         headers: {'X-CSRF-Token': this.csrf}
       })
       */
+
+      // getBasicAuth
+
       this.$httpApi.post(window.apiUrl + '/git?action=create_pull',
       obj, {
-
+        headers: {
+          'Authorization': this.getBasicAuth
+        }
       })
       .then((response) => {
         /*

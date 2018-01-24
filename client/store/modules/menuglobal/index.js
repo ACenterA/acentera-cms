@@ -50,7 +50,6 @@ const state = {
     */
   ]
 }
-
 const mutations = {
   [types.EXPAND_MENU] (state, menuItem) {
     if (menuItem.index > -1) {

@@ -37,12 +37,13 @@
       </div>
     </div>
     <div v-else style="height:100%">
-
-      <div :class="{ hidden: !show }" class="container is-fluid is-marginless app-content">
+      <!--
+      <div :class="{ hidden: !show, isblog: inBlog }" class="container is-fluid is-marginless app-content">
       </div>
-
-      <div class="container is-fluid is-marginless app-content">
+      -->
+      <div :class="{ isblog: inBlog }" class="container is-fluid is-marginless app-content">
         <levelbar :show="false"></levelbar>
+        <topbar :show="topbar.show"></topbar>
         <transition
           mode="out-in"
           enter-active-class="fadeIn"
@@ -58,6 +59,7 @@
 
 <script>
 import Levelbar from './Levelbar'
+import Topbar from './Topbar'
 import { mapGetters, mapActions } from 'vuex'
 
 var modalSubmitRegister = 'Register'
@@ -66,8 +68,8 @@ var modalSubmitLogin = 'Login'
 
 export default {
   components: {
-    Levelbar
-
+    Levelbar,
+    Topbar
   },
   data () {
     return {
@@ -83,7 +85,6 @@ export default {
       email: '',
       loginUser: '',
       loginPassword: '',
-
       // Modal error messages
       registerError: '',
       loginError: '',
@@ -92,11 +93,13 @@ export default {
     }
   },
   computed: mapGetters({
-    session: 'session'
+    session: 'session',
+    topbar: 'topbar'
   }),
   props: {
     notLoggedIn: Boolean,
-    hasSidebar: Boolean
+    hasSidebar: Boolean,
+    inBlog: Boolean
   },
   mounted: function () {
     console.log('MOUTNED SESSION')
@@ -512,6 +515,11 @@ export default {
 }
 .user-modal-container input[type="submit"].disabled {
     background-color: #98d6b7;
+}
+
+.isblog {
+  padding:0px;
+  margin:0px;
 }
 
 </style>
