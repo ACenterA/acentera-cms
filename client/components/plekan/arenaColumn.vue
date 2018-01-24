@@ -6,7 +6,7 @@
       <div class="plekan-row-item animated fadeIn transition-component"
            v-for="(r,key) in rows"
            :key="r.index">
-        <div class="plekan-tools">
+        <div class="plekan-tools" style="display:none">
           <span v-if="!isTranslate"
                 class="plekan-move-row">
             <i class="fa fa-hand-grab-o"></i>
@@ -23,15 +23,11 @@
             <i class="fa fa-copy"></i>
           </span>
         </div>
-
-        Will create of {{ r.name }}
-
         <component :is="r.name"
                    :index="key"
                    :store="store"
                    :displayLanguage="language">
         </component>
-
       </div>
     </div>
   </div>

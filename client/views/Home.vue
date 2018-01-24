@@ -1,13 +1,11 @@
 <template>
   <!-- Home -->
   <div class="content has-text-centered">
-
     <div v-if="!isLoaded">
     </div>
 
     <div v-if="isLoaded">
-        <div v-if="isWebsite">
-
+        <div v-if="isWebsite()">
           <!-- For Each Websites -->
           <div v-if="project && project.websites">
 
@@ -61,8 +59,7 @@
               </div>
 
           </div>
-
-
+          
           <!-- No website yet... -->
           <section v-if="! ( project && project.websites )">
             <div class="">
@@ -222,78 +219,7 @@ export default {
     }
   },
   mounted () {
-    console.log('toggle test')
-    /*
-
-    var self = this
-    this.refreshUser({ vue: this,
-      callback: function () {
-        console.error('callll back is called 03')
-        if (self.project && self.project.websites) {
-          // Only if no project is selected..
-          console.error('callll back is called 03 A')
-          // window.vm.$store.state.app.isLoaded
-          if (!self.$store.state.app.isLoaded) {
-            console.error('callll back is called 03 AC')
-            console.error('callll back is called 03 AD')
-            self.$store.state.app.sidebarglobal.opened = true
-            self.$store.state.app.sidebarglobal.hidden = false
-          }
-        } else {
-          // NO PROJECT YET ??
-          console.error('callll back is called 03 B')
-          self.$store.state.app.sidebarglobal.opened = false
-          self.$store.state.app.sidebarglobal.hidden = true
-        }
-      }
-    })
-    */
-
-    /*
-    this.toggleRepoState(1)
-    var self = this
-
-    var $gitobj = this.$github
-    if (this.$store.state.github.logininfo.type === 'BitBucket') {
-      $gitobj = this.$bitbucket
-    }
-
-    this.$httpApi.get(window.apiUrl + '/git?action=config', { withCredentials: true }).then((response) => {
-      this.toggleRepoUrl(response.data.Data)
-      console.log('toggle repo data')
-      if (response !== null && response.data !== null) {
-        this.toggleRepo(response.data)
-      }
-
-      if (self.$store.state.app.inet) {
-        this.$httpApi.get(window.apiUrl + '/git?action=pull', { headers: { 'Authorization': $gitobj.getBasicAuth() } }).then((response) => {
-          console.log('doing pull done')
-          console.log(response.data.Data)
-          self.toggleRepoState(0) // all good
-        })
-        .catch((error) => {
-          console.error(error)
-          console.error('err1')
-          if (error.response.status === 500) {
-            self.toggleRepoState(6) // need to setup SSH Key for the user
-          } else {
-            this.$onError(error)
-          }
-        })
-      }
-    })
-    .catch((error) => {
-      console.error(error)
-      console.error('err2')
-      if (error.response.status === 500) {
-        self.toggleRepoState(5) // State 5 = no .git/config file....
-      } else {
-        this.$onError(error)
-      }
-    })
-    */
   },
-
   methods: {
     ...mapActions([
       'toggleRepoState',

@@ -100,7 +100,7 @@ plekan.install = (Vue, optionsOut) => {
     try {
 
       console.error('CREATE COMPONENT OF...')
-      if (m.hasOwnProperty('newContext')) {
+      if (m.hasOwnProperty('AnewContext')) {
         var tt = {};
         Object.assign(tt,m.context);
         Object.assign(tt,m.newContext);

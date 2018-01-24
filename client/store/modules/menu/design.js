@@ -7,11 +7,13 @@ export default {
     expanded: false
   },
   children: [
+/*
     {
       name: 'Static Html',
       path: '/Pages',
       component: lazyLoading('design/Pages')
     },
+*/
     {
       name: 'Widget',
       path: '/widget',

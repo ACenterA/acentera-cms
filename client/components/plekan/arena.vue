@@ -1,5 +1,5 @@
 <template>
-  <div class="plekan-area" style="position:absolute; top:50px;">
+  <div class="plekan-area">
     <!-- This components for Preview and Translate language change  -->
     <!-- change-language v-if="store.state.languages.length > 1"></change-language -->
     <!-- Arena Container  -->
@@ -33,6 +33,7 @@
 
     <div class="plekan-container">
       <!-- <pre>{{store.state.rows}}</pre> -->
+      <!--
       <div class="plekan-footer">
         <button v-for="b in $plekan_buttons"
                 type="button"
@@ -41,6 +42,7 @@
           {{b.text}}
         </button>
       </div>
+      -->
     </div>
 
   </div>

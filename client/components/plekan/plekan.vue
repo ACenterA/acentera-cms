@@ -3,7 +3,11 @@
     <Editor></Editor>
     <div style="height:100%">
       <Arena></Arena>
-      <List></List>
+      <!--
+        // TODO: This will be used when we do
+        // widgets ?
+        <List></List>
+      -->
     </div>
   </div>
 </template>

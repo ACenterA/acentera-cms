@@ -12,11 +12,17 @@ const state = {
     isMobile: false,
     isTablet: false
   },
+  topbar: {
+    show: false,
+    selectedPost: null
+  },
   repoState: {
     updating: -1,
     updatingCount: 0,
     Master: null,
     Branch: null,
+    Ref: null,
+    Provider: null,
     url: null,
     isLoaded: false
   },
@@ -31,6 +37,9 @@ const state = {
   sidebartwo: {
     opened: false,
     hidden: true,
+    json: []
+  },
+  sidebarblogData: {
     json: []
   },
   effect: {
@@ -61,13 +70,31 @@ const mutations = {
 
   [types.TOGGLE_SIDEBAR_TWO] (state, opened) {
     if (state.sidebartwo.hidden) {
-      if (state.sidebartwo.opened) {
+      if (opened) {
         state.sidebartwo.hidden = false
       }
     }
     state.sidebartwo.opened = opened
+    console.error('sidebartwo... ' + state.sidebartwo.hidden)
+    console.error(state.sidebartwo)
   },
 
+  [types.TOGGLE_SIDEBAR_BLOGDATA]  (state, opened) {
+    if (state.sidebartwo.hidden) {
+      if (opened) {
+        state.sidebartwo.hidden = false
+      }
+    }
+    state.sidebartwo.opened = opened
+    // console.error('sidebartwo... ' + state.sidebartwo.hidden)
+    // console.error(state.sidebartwo)
+  },
+
+  [types.TOGGLE_BLOGDATA] (state, data) {
+    console.error('SET BLOG DATA DDATA')
+    console.error(data)
+    state.sidebarblogData.json = data
+  },
   [types.TOGGLE_SIDEBAR_TWO_DATA] (state, data) {
     console.error('SET SIDEBATWO DDATA')
     console.error(data)
@@ -189,7 +216,14 @@ const mutations = {
     var origState = state.repoState
     origState.Branch = update.Branch
     origState.Master = update.Master
-
+    origState.Ref = update.Ref
+    if (update.Data.indexOf('https://bitbucket.org') >= 0) {
+      origState.Provider = 'BitBucket'
+    } else if (update.Data.indexOf('https://github.com') >= 0) {
+      origState.Provider = 'Github'
+    } else {
+      origState.Provider = 'Unknown'
+    }
     if (!((update.Branch === '' || update.Branch === undefined) || (update.Master === '' || update.Master === undefined))) {
       origState.isLoaded = true
     } else {
@@ -215,6 +249,18 @@ const mutations = {
     // origState.url = tmpUrl
     // state.repoState = origState
     // console.error(window.vm.$store.getters)
+    if (item == null) {
+      // unselecting websites..
+      state.websiteId = null
+      window.localStorage.removeItem('selectedWebsite')
+      window.localStorage.removeItem('selectedProject')
+      state.sidebarglobal.hidden = false
+      state.sidebarglobal.opened = true
+      state.sidebar.hidden = true
+      state.sidebar.opened = false
+      window.vm.$router.push({ 'path': '/' })
+      return
+    }
     console.error('selected website...?')
     console.error(item)
     console.error(state)
@@ -260,6 +306,16 @@ const mutations = {
       })
     })
     */
+  },
+  [types.SELECT_POST] (state, item) {
+    console.error('selected post...?')
+    console.error(item)
+    if (state.topbar.selectedPost) {
+      state.topbar.selectedPost.selected = false
+    }
+    state.topbar.selectedPost = item
+    // TODO: Find a better option to get the rss created properly ?
+    window.frameUrl = item.link.replace('localhost:1313/', 'localhost:8081/')
   }
 }
 

@@ -107,8 +107,12 @@ export const init = (type, data) => {
   this.state[type] = data
 }
 
+export const resetRow = (state, r, i) => {
+  state.rows = []
+}
+
 export const addRow = (state, r, i) => {
-  console.error('addRow')
+  console.error('addRow TEST')
   console.error(r)
   console.error(i)
 
@@ -125,6 +129,7 @@ export const addRow = (state, r, i) => {
 
   console.error('add row here 01111 c')
   console.error('addlkjflsdkjflka lrROW')
+  console.error(state.rows)
   console.error(window.vm)
   window.vm.$plekanEvent.onAdd(tmp)
 }
@@ -141,6 +146,17 @@ export const updateRows = (index, row) => {
 export const deleteRow = (r, i) => {
   const tmp = this.state.rows.splice(i, 1)
   window.vm.$plekanEvent.onDelete(tmp, i)
+}
+
+export const deleteRowTest = (state, r, i) => {
+  console.error('delete row test')
+  console.error('delete row test a')
+  console.error(state)
+  console.error(state.rows)
+  if (state && state.rows) {
+    const tmp = state.rows.shift()
+    window.vm.$plekanEvent.onDelete(tmp, 0)
+  }
 }
 
 export const dublicateRow = (r, i) => {
@@ -213,10 +229,22 @@ export const editorStart = (state) => {
     console.error('remove selection')
   })
 
+  /* eslint-disable */
   bus.$on('selectionEnd', () => {
-    console.error('selectionEND add event.. start')
-    window.editorElementDynamic.classList.add('active')
+    console.error('this is currently disabled....')
+    console.error('this is currently disabled....')
+    console.error('this is currently disabled....')
+    console.error('this is currently disabled....')
+    if (!window.blogeditor) {
+      return
+    }
 
+    // console.error('selectionEND add event.. start')
+    window.editorElementDynamic.classList.add('active')
+    try {
+      document.querySelector('.create-link').classList.remove('active')
+    } catch (e) {
+    }
     // This operation disabled overflow for  out of window
 
     let _left = left + width / 2 - tw / 2
@@ -229,12 +257,31 @@ export const editorStart = (state) => {
 
     _left = _left > possibleLeft ? possibleLeft : _left
 
-    window.editorElementDynamic.style.left = `${_left}px`
+
+    // find the corresponding iframe container
+    /*
+    var iframe = $('.arenatest').filter(function () {
+      var iframe_body = $(this).contents().find('body')
+      return iframe_body.get(0)
+    })
+    var tmpTop = $(iframe).offset().top
+    console.error('OLD TMP TOP')
+    */
+    // console.error(tmpTop)
+    // console.error(window.pageYOffset)
+    // console.error(d.pageYOffset)
+
+    // console.error($(iframe).offset().top)
+    var oldTmpTop = $(d).scrollTop()
+    // window.editorElementDynamic.style.left = `${_left}px` // this is done in the mouseover...
     window.editorElementDynamic.style.top = `${_top}px`
+    window.editorElementDynamic.attributes['top'] = `${_top}`
+    window.editorElementDynamic.attributes['scrolltop'] = `${oldTmpTop}`
 
     setActiveEditorButtons()
     state.sel = window.selo.saveSelection()
   })
+  /* eslint-enable */
 
   bus.$on('removeSelectionEditor', () => {
     window.editorElementDynamic.classList.remove('active')
@@ -242,13 +289,31 @@ export const editorStart = (state) => {
 
   bus.$on('selectionStart', () => {
     console.error('selectionSTart add event.. start')
+
+    // const d = document.getElementsByTagName('iframe')[0].contentWindow.document
+    // gb = d.getBoundingClientRect
     gb = window.selo.getPositionRange().getBoundingClientRect
+    // window.editorElementDynamic.style.left = `${calc.width / 2 + calc.left - editButtonWidth / 2}px`
+    // aaaa
 
     left = gb.left
     top = gb.top
     width = gb.width
 
     if (window.editorElementDynamic.className.indexOf('active') === -1) {
+    /*
+      console.error('ggaa set left to .... ' + left)
+      console.error(d)
+      console.error($('.plekan-outerdiv'))
+      console.error($('.plekan-outerdiv')[0].offsetLeft)
+      */
+      var tmpOffset = $('.plekan-outerdiv')
+      if (tmpOffset && tmpOffset[0]) {
+        left += tmpOffset[0].offsetLeft
+        top += tmpOffset[0].offsetTop
+      }
+
+      // console.error($('.plekan-outerdiv')[0].offsetLeft + " vs " + )
       window.editorElementDynamic.style.left = `${left + width / 2 - tw / 2}px`
       window.editorElementDynamic.style.top = `${top - th}px`
     }

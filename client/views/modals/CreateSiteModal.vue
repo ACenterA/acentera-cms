@@ -225,7 +225,7 @@ export default {
       console.error(self.$store.state.session.token)
       console.log(this.$store.state.github.logininfo)
 
-      $gitobj.setUserPass(this.$store.state.github.logininfo.user, this.$store.state.github.logininfo.pass)
+      $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
 
       console.log(repoReqObj)
       $gitobj.post(userPostPath, repoReqObj, function (response) {
@@ -481,7 +481,7 @@ export default {
         userPostPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + self.repositoryNameValidator()
       }
       console.log(this.$store.state.github.logininfo)
-      $gitobj.setUserPass(this.$store.state.github.logininfo.user, this.$store.state.github.logininfo.pass)
+      $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
 
       $gitobj.delete(userPostPath, function (next) {
         console.log('success fully deleted newly created Repo...')

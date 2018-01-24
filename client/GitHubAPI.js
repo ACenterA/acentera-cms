@@ -245,7 +245,7 @@
        */
       get: function (uri, params, fillIn, errorCb) {
         // verifying what user sends to fill in
-        console.log('received get here')
+        console.error('received get here')
         if (this._verifyFillIn(fillIn) !== true) {
           return
         }

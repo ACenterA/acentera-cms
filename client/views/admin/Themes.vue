@@ -8,8 +8,7 @@
       Current Theme : {{ theme }}
       <div v-for="json in themes">
 
-
-          <div v-if="json.name == theme" class="tile is-parent is-vertical is-3 left">
+          <div v-if="json.Name == theme" class="tile is-parent is-vertical is-3 left">
             <article class="message" v-bind:class="'is-primary'">
               <div class="message-header">
                 <p>{{json.Title}}</p>
@@ -20,7 +19,7 @@
             </article>
           </div>
 
-          <div v-if="json.name != theme" class="tile is-parent is-vertical is-3 left">
+          <div v-if="json.Name != theme" class="tile is-parent is-vertical is-3 left">
             <article class="message" v-bind:class="'not-selected'">
               <div class="message-header">
                 <p>{{json.Title}}</p>
@@ -199,7 +198,7 @@ export default {
       this.$httpApi.post(window.apiUrl + '/settings', this.allSettings, {}).then((response) => {
         console.log('SAVED')
         if (json !== undefined) {
-          self.theme = json.name
+          self.theme = json.Name
         }
       })
       .catch((error) => {
@@ -207,7 +206,7 @@ export default {
       })
     },
     selectTheme (json) {
-      this.allSettings.theme = json.name
+      this.allSettings.theme = json.Name
       this.save(json)
     }
   }

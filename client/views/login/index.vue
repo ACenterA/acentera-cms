@@ -1,7 +1,6 @@
 <template>
     <div class="tile is-ancestor box is-vertical">
       <div class="tile">
-
         <!-- Left side -->
         <div class="column is-6">
           <article v-if="isGitHub()"  class="tile is-parent is-5 is-vertical">
@@ -17,6 +16,25 @@
         <!-- Right column -->
         <div class="column is-6">
 
+          <div v-if="isWebsite">
+
+            <!-- Warnings -->
+            <div v-if="username === null" class="field">
+              <article class="message is-warning">
+                <div class="message-body">
+                  <strong>You must be logged in to edit your website.</strong>
+                </div>
+              </article>
+            </div>
+            <div v-if="username !== null">
+              <article class="message is-success">
+                <div class="message-body">
+                  <strong>You can edit and save your website..</strong>
+                </div>
+              </article>
+            </div>
+          </div>
+          <div v-if="!isWebsite">
             <!-- Warnings -->
             <div v-if="username === null" class="field">
               <article class="message is-warning">
@@ -59,6 +77,7 @@
               </article>
             </div>
 
+          </div>
         </div>
     </div>
   </div>
@@ -100,7 +119,8 @@ export default {
   computed: {
     ...mapGetters({
       session: 'session',
-      repoState: 'repoState'
+      repoState: 'repoState',
+      isWebsite: 'isWebsite'
     }),
     healthKeys: function () {
       return Object.keys(this.healthData)
@@ -226,6 +246,12 @@ export default {
     },
     testFetch: function () {
       var self = this
+
+      if (this.$store.state.app.website) {
+        // No SshKey Remote we use username / password
+        return
+      }
+
       this.$httpApi.get(window.apiUrl + '/sshkeys?action=test').then((response) => {
         // console.log('ssh key test is')
         // console.log(response)
@@ -271,7 +297,7 @@ export default {
         userPostPath = '1.0/users/' + this.$store.state.github.logininfo.username + '/ssh-keys'
       }
       console.log(this.$store.state.github.logininfo)
-      $gitobj.setUserPass(this.logininfo.user, this.logininfo.pass)
+      $gitobj.setUserPass(this.logininfo.username, this.logininfo.pass)
       $gitobj.get(userGetPath, {}, function (next) {
         console.log('success fully got user informations...')
         self.$http.get(window.apiUrl + '/sshkeys?action=create').then((response) => {

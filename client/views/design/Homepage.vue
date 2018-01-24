@@ -11,9 +11,12 @@
     </div>
 
     <div class="fullheight" v-if="!isRepoError()">
-      <div class="tile is-ancestor is-vertical fullheight">
-          <iframe v-if="selectedPage" class="fullheight" :src="selectedPage"></iframe>
+      <plekan></plekan>
+      <!--
+      <div class="plekan-outerdiv tile is-ancestor is-vertical fullheight">
+          <iframe v-if="loaded && selectedPage" class="fullheight" :src="selectedPage"></iframe>
       </div>
+      -->
     </div>
   </div>
 </template>
@@ -22,8 +25,12 @@
 import Tooltip from 'vue-bulma-tooltip'
 import TreeView from 'components/TreeView'
 import { Sidebartwo } from 'components/layout/'
-import { mapGetters } from 'vuex'
 import Modal from './modals/InfoModalWidget'
+import { mapGetters } from 'vuex'
+
+import Vue from 'vue'
+import plekan from 'components/plekan/plekan.vue'
+import dynamicObj from '../../plekan/src/core/modules/dynamic.vue'
 // import Vue from 'vue'
 
 // import Modal from './modals/InfoModal'
@@ -35,7 +42,8 @@ export default {
     Tooltip,
     TreeView,
     Modal,
-    Sidebartwo
+    Sidebartwo,
+    plekan
   },
 
   data () {
@@ -46,7 +54,6 @@ export default {
       testTitle: '',
       selectedObject: null,
       type: 'Static',
-      selectedPage: window.goHostUrl, // window.apiHost,
       cipher: '',
       userTransitKey: '',
       extra: '?editMode=widget&apiPort=8081&jsPort=8091',
@@ -85,18 +92,23 @@ export default {
       github: 'github',
       pkginfo: 'pkg',
       sidebartwo: 'sidebartwo',
-      repoState: 'repoState'
-    })
+      repoState: 'repoState',
+      loaded: 'loaded'
+    }),
+    selectedPage: function () {
+      if (this.$store.state.isLoaded) {
+        return ''
+      }
+      return window.goHostUrl
+    }
   },
-
   events: {
     incrementTotal: function () {
       console.log('total aaa')
     }
   },
-
   methods: {
-    refreshData () {
+    refreshWidgets () {
       console.log('get file listing')
 
       var self = this
@@ -114,6 +126,187 @@ export default {
       })
       .catch((error) => {
         this.$onError(error)
+      })
+    },
+    refreshData () {
+      var self = this
+      if (!this.$store.state.app.isLoaded) {
+        console.error('not loaded')
+        return setTimeout(function () {
+          self.refreshData()
+        }, 1000)
+      }
+      var currentUrl = window.goHostUrl + '/'
+      // if (window.location.href.indexOf('acentera.com') <= -1) {
+      //   currentUrl = 'http://localhost:8081/'
+      // }
+      this.$httpApi.get(currentUrl, { headers: { edit: 1 } }).then((res) => {
+        console.error(window.VueApp.$store.state.moduleList)
+        var Data = res.data.data.Data
+
+        // console.error(window.data.Data);
+        var headStart = Data.indexOf('<head>') + 6
+        if (headStart < 7) {
+          headStart = Data.toLowerCase().indexOf('<head>') + 6
+          if (headStart < 7) {
+            // headStart = window.data.Data.toLowerCase().indexOf("doctype html>");
+            // alert(headStart);
+            // if (headStart <= 10) {
+            headStart = Data.toLowerCase().indexOf('<html>') + 6
+            //
+          }
+        }
+
+        if (headStart < 6) {
+          headStart = 0
+        }
+
+        var headEnd = Data.indexOf('</head>')
+        if (headEnd < 0) {
+          headEnd = Data.toLowerCase().indexOf('</head>') + 7
+        }
+
+        var bodyStartIdx01 = Data.indexOf('<body')
+        var bodyStart = Data.indexOf('<body>') + 6
+        if (bodyStart < 7) {
+          console.error('FOUND BODY START AT A :' + bodyStart)
+          console.error('FOUND BODY START AT A :' + bodyStartIdx01)
+          // console.error(Data)
+          if (bodyStartIdx01 > 6) {
+            bodyStart = bodyStartIdx01
+          } else {
+            bodyStart = Data.toLowerCase().indexOf('<body>') + 6
+            bodyStartIdx01 = Data.toLowerCase().indexOf('<body>') + 1
+          }
+        }
+
+        window.TestData = Data
+        if (bodyStart < 7) {
+          console.error('FOUND BODY START AT :' + bodyStart)
+          bodyStart = 0
+          bodyStartIdx01 = 0
+        }
+
+        if (headEnd < headStart) {
+          headEnd = bodyStart - 6
+        }
+
+        var bodyEnd = Data.lastIndexOf('</body')
+        if (bodyEnd < 0) {
+          bodyEnd = Data.toLowerCase().lastIndexOf('</body')
+        }
+        bodyEnd += 7
+
+        var body = Data.substring(bodyStart, bodyEnd) // .replaceAll(" href=\"#"," data-href=\"#").replaceAll(" href=\"/#"," data-href=\"/#")
+        var head = Data.substring(headStart, headEnd)
+
+        if (currentUrl === '') {
+          console.log('aa')
+        }
+        head = '<base href="' + currentUrl + '">' + head // TODO: Only when in Development / debugging
+
+        var htmlContent = body
+        var headContent = head
+        window.Head = headContent
+        window.Body = htmlContent
+        var theH = document.getElementsByTagName('iframe')[0].contentWindow.document.getElementsByTagName('head')[0]
+        $(theH).append(head)
+
+        var customComponents = [
+          {
+            'name': 'awesomecomponentBody9',
+            'group': 'image',
+            'thumbnail': 'https://vuejs.org/images/logoB.png',
+            context: dynamicObj,
+            newContext: {
+              /*
+                //this not working so we use getData from the methods below ...
+              data () {
+                return {
+                  DEFAULT_CONTENT: htmlContent
+                }
+              },
+              */
+              methods: {
+                isHead: function () {
+                  return false
+                },
+                getData: function () {
+                  return htmlContent
+                },
+                orThisgetData: function () {
+                  return htmlContent
+                }
+              }
+            }
+          }
+        ]
+
+        // console.error(htmlContent)
+
+        /* eslint-disable */
+        const oList = customComponents.map(m => {
+          // Register Component
+          m.contents = m.contents || {}
+
+          this.$store.state.languages.map(l => {
+            m.contents[l] = {}
+            m.contents[l].html = ""
+            m.contents[l].fields = {}
+
+            return true
+          })
+
+          try {
+            if (m.hasOwnProperty('newContext')) {
+              var tt = {}
+
+              Object.assign(tt,m.context);
+
+              if (m.newContext.hasOwnProperty('data')) {
+                tt['data'] = m.newContext['data']
+              }
+
+              if (m.newContext.hasOwnProperty('methods')) {
+                for (var k in m.newContext.methods) {
+                    tt.methods[k] = m.newContext.methods[k]
+                }
+              }
+
+              /*
+              Object.assign(tt.mixins[0],this.$plekan.plekanComponentMixin.methods)
+              Object.assign(tt,plekan.plekanComponentMixin)
+              for (var k in m.newContext) {
+                  console.error('have to process')
+                  console.error(k)
+                  console.error(m.newContext[k])
+              }
+              */
+
+              /*
+              // this fixes the getData() function ??? ....
+              Object.assign(tt.mixins[0],m.newContext);
+              Object.assign(tt,m.newContext);
+              */
+
+              Vue.component(m.name, tt)
+            } else {
+              Vue.component(m.name, Object.assign({}, m.context))
+            }
+          } catch (f) {
+            console.error(f.stack)
+          }
+
+          delete m.context
+          return m
+        })
+
+        oList.forEach((e) => {
+          // this.$store.commit('addModuleList', e) // weird ?
+          // this.store.state.moduleList[0]
+          // const tmprow = this.list[rowindex]
+          this.$store.commit('addRow', e, 0)
+        })
       })
     },
 
@@ -153,7 +346,7 @@ export default {
 
       var self = this
       this.$httpApi.post(window.apiUrl + '/widgetupload', postData, {
-        headers: {'TmpHeader': 'tmp'}
+        // headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {
         console.log('got response')
