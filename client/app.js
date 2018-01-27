@@ -21,18 +21,36 @@ if (!window.console) {
     }
   }
 }
+
+$.fn.outerHTMLEditor = function (doc) {
+  console.error('ignoring of ... and cloning of a')
+  console.error(this)
+  console.error('ignoring of ... and cloning of b')
+  console.error(this.eq(0))
+  console.error('ignoring of ... and cloning of c')
+  console.error(this.eq(0).clone())
+  console.error('ignoring of ... and cloning of d')
+  var tmpDiv = $('<div editor-ignore="true"/>')
+  var html = tmpDiv.append(this.eq(0).clone()).html()
+  tmpDiv.remove()
+  return html
+}
+
 Vue.prototype.$clone = function (object) {
   console.error('recieved clone of')
   console.error(object)
   return cloneDeep(object)
 }
+window.currentParents = null
+import dynamicObj from './plekan/src/core/modules/dynamic.vue'
+window.dynamicObjClone = Vue.prototype.$clone(dynamicObj)
 
 Vue.prototype.$http = axios
 Vue.axios = axios
 Vue.use(NProgress)
 console.error(plekan)
 Vue.use(plekan.plekan, {
-  defaultLanguage: 'tr',
+  defaultLanguage: 'en',
   languages: ['tr', 'en'],
   // customComponents:[newComponent],
   modules: [],
@@ -123,7 +141,6 @@ const bitbucketapi = Vue.prototype.BitBucketAPI
 Vue.prototype.$BitBucket = bitbucketapi
 
 sync(store, router)
-
 const nprogress = new NProgress({ parent: '.nprogress-container' })
 
 const { state } = store
@@ -143,9 +160,9 @@ if (window.location.href.indexOf('acentera.com') !== -1) {
 } else {
   // Enable devtools
   // store.commit('isLoaded', true)
+  window.withCredentials = false // required
   Vue.config.devtools = true
   store.commit('setWebsite', false) // weird ?
-  window.withCredentials = false
 }
 // } // end if (hosted version)
 // store.commit('setProjectSelected', false)
@@ -161,7 +178,7 @@ if (state.app.website) {
     store.commit('setInet', true)
   }
 } else {
-  store.commit('isLoaded', true)
+  // neverdo this : store.commit('isLoaded', true)
   Vue.prototype.$checkInet = function () {
     store.commit('setInet', true)
   }
@@ -209,13 +226,28 @@ if (state.app.website) {
 }
 
 Vue.prototype.$checkInet()
+window.hasProcessed = false
 
 router.beforeEach((route, redirect, next) => {
   $('body').removeClass('overflow-hidden')
-  console.error('befoure route next is')
+  // console.error('befoure route next is')
+  store.commit('deleteAllRows', 0, 1)
+  window.hasProcessed = false
+
+  // SSH Key Top Missing SSH Key error
+  // temporary fixes
+  if (store.state && store.state.app && store.state.app.repoState && store.state.app.repoState.updating >= 6) { // ssh key issue
+    store.commit('REPO_STATE_UPATE', 0) // all good
+  }
+
   console.error(route)
   console.error(this.a)
   window.currVemTest = this
+
+  store.state.app.topbar.show = true
+  store.state.app.topbar.selectedPost = {}
+  store.state.app.topbar.selectedPost.selected = true
+
   if (route.path.indexOf('blogs') >= 0) {
     store.state.app.topbar.show = true
   } else {

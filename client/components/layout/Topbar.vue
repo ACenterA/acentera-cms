@@ -2,9 +2,13 @@
   <nav class="topbar app-topbar" :class="{ hidden: !show }">
     <div class="level-left">
       <div class="level-item">
-        <h3 v-if="selectedPost !== null" class="subtitle is-5">
-          Editing : {{ selectedPost.title }}
-          <!-- {{selectedPost.link}} -->
+        <h3 v-if="selectedPost !== null" class="subtitle is-5">          
+          <span v-if="selectedPost.title">
+            Editing : {{ selectedPost.title }}
+          </span>
+          <span v-else>
+            <br/>
+          </span>
         </h3>
       </div>
       <div class="level-item" v-if="!!codelink">

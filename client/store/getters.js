@@ -49,15 +49,16 @@ const getBasicAuth = state => {
   if (window.vm.$store.state.github === null || window.vm.$store.state.github === undefined) {
     return null
   }
-  if (window.vm.$store.state.github.logininfo.type === 'BitBucket') {
+  if (window.vm.$store.state.github && window.vm.$store.state.github.logininfo && window.vm.$store.state.github.logininfo.type === 'BitBucket') {
     console.error('in GET BASIC AUTH cc')
     gitobj = window.vm.$bitbucket
   }
   console.error('in GET BASIC AUTH cc AAA')
   if (!window.vm.$store.state.github || !window.vm.$store.state.github.logininfo || window.vm.$store.state.github.logininfo.pass === '') {
     console.error('in GET BASIC AUTH cc BBB')
+    console.error('GET OF GITHUB GET 09')
     let raw = window.localStorage.getItem('github')
-    console.error('SET OF PARRALEL DATA TEST OF.... ')
+    console.error('KL SET OF PARRALEL DATA TEST OF.... ')
     console.error(typeof raw)
     console.error('in GET BASIC AUTH cc CCC')
     console.error(raw)

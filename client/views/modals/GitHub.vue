@@ -141,18 +141,6 @@
     },
 
     mounted: function () {
-      /*
-        let raw = window.localStorage.getItem('github')
-        console.log(raw)
-        if (raw !== null) {
-          console.log('arse aa')
-          console.log(raw)
-          this.parallelData = JSON.parse(raw)
-        } else {
-          // this.$github.get('user', {}, [this.parallelData, 'user'], this.gitError) <-- auto set but will not save store?
-          this.$github.get('user', {}, this.updateGituser, this.gitError)
-        }
-      */
       if (this.github() !== undefined) {
         let raw = this.github()
         this.parallelData = raw
@@ -172,22 +160,7 @@
         Vue.set(this.parallelData, 'user', param)
         Vue.set(this.parallelData, 'logininfo', loginfo)
 
-        /*
-        var gitHub = {
-          user: param
-        }
-        */
-        /*
-        // Vue.set(this.$store.getters.github, 'github', gitHub)
-        if (gitHub) {
-          // d
-        }
-        */
-        // Vue.set(this.$github, 'github', gitHub)
-        // = gitHub
-        // store session data in localstorage
-        console.log('window set local storage of')
-        console.log(this.parallelData)
+        console.error('SET GITHUB HERE 00001')
         window.localStorage.setItem('github', JSON.stringify(this.parallelData))
         this.$store.commit('setGit', this.parallelData)
 
@@ -210,22 +183,7 @@
         Vue.set(this.parallelData, 'user', param)
         Vue.set(this.parallelData, 'logininfo', loginfo)
 
-        /*
-        var gitHub = {
-          user: param
-        }
-        */
-        /*
-        // Vue.set(this.$store.getters.github, 'github', gitHub)
-        if (gitHub) {
-          // d
-        }
-        */
-        // Vue.set(this.$github, 'github', gitHub)
-        // = gitHub
-        // store session data in localstorage
-        console.log('bitbucket window set local storage of')
-        console.log(this.parallelData)
+        console.error('SET GITHUB HERE 9999')
         window.localStorage.setItem('github', JSON.stringify(this.parallelData))
         this.$store.commit('setGit', this.parallelData)
 

@@ -22,7 +22,7 @@
                 @click="dublicateRow(r,key)">
             <i class="fa fa-copy"></i>
           </span>
-        </div>
+        </div>        
         <component :is="r.name"
                    :index="key"
                    :store="store"

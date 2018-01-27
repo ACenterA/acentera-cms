@@ -155,20 +155,9 @@
     },
     mounted: function () {
       /*
-        let raw = window.localStorage.getItem('github')
-        console.log(raw)
-        if (raw !== null) {
-          console.log('arse aa')
-          console.log(raw)
-          this.parallelData = JSON.parse(raw)
-        } else {
-          // this.$github.get('user', {}, [this.parallelData, 'user'], this.gitError) <-- auto set but will not save store?
-          this.$github.get('user', {}, this.updateGituser, this.gitError)
-        }
-      */
       if (this.github() !== undefined) {
         let raw = this.github()
-        console.error('SET OF PARRALEL DATA TEST OF.... ')
+        console.error('GG SET OF PARRALEL DATA TEST OF.... ')
         console.error(typeof raw)
         if (typeof raw === 'string') {
           this.parallelData = JSON.parse(raw)
@@ -176,20 +165,20 @@
           this.parallelData = raw
         }
         var $gitobj = this.$github
+        console.error('GEEZ GITHUB TT')
+        console.error(this.parallelData)
         if (this.parallelData.logininfo) {
           if (this.parallelData.logininfo.pass && this.parallelData.logininfo.pass !== '') {
-            if (this.$store.state.github.logininfo.type === 'BitBucket') {
+            if (this.parallelData.logininfo && this.parallelData.logininfo.type === 'BitBucket') {
               console.error('updaitng git bitbucket 01  ')
               $gitobj = this.$bitbucket
-              console.error(this.$store.state.github)
-              console.error('TET USERNAME :' + this.$store.state.github.logininfo.username)
-              console.error('TET PW  :' + this.$store.state.github.logininfo.pass)
-              this.$bitbucket.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
-              this.$bitbucket.get('/2.0/user', {}, this.updateBitbucketuser, this.gitError)
+              // this.$bitbucket.setUserPass(this.parallelData.logininfo.username, .parallelData.logininfo.pass)
+              $gitobj.setUserPass(this.parallelData.logininfo.username || this.parallelData.user.login, this.parallelData.logininfo.pass)
+              $gitobj.get('/2.0/user', {}, this.updateBitbucketuser, this.gitError)
             } else {
               console.error('updaitng git github 01  ')
               $gitobj = this.$github
-              $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+              $gitobj.setUserPass(this.parallelData.logininfo.username || this.parallelData.user.login, this.parallelData.logininfo.pass)
               $gitobj.get('user', {}, this.updateGituser, this.gitError)
             }
           } else {
@@ -197,6 +186,7 @@
           }
         }
       }
+      */
     },
     methods: {
       updateGituser: function (param) {
@@ -213,22 +203,7 @@
         Vue.set(this.parallelData, 'user', param)
         Vue.set(this.parallelData, 'logininfo', loginfo)
 
-        /*
-        var gitHub = {
-          user: param
-        }
-        */
-        /*
-        // Vue.set(this.$store.getters.github, 'github', gitHub)
-        if (gitHub) {
-          // d
-        }
-        */
-        // Vue.set(this.$github, 'github', gitHub)
-        // = gitHub
-        // store session data in localstorage
-        console.log('window set local storage of')
-        console.log(this.parallelData)
+        console.error('SET GITHUB SET HERE')
         window.localStorage.setItem('github', JSON.stringify(this.parallelData))
         this.$store.commit('setGit', this.parallelData)
 
@@ -254,7 +229,7 @@
         Vue.set(this.parallelData, 'user', param)
         Vue.set(this.parallelData, 'logininfo', loginfo)
 
-        console.log('bitbucket window set local storage of')
+        console.log('GITHUB SET bitbucket window set local storage of')
         console.log(this.parallelData)
         window.localStorage.setItem('github', JSON.stringify(this.parallelData))
         this.$store.commit('setGit', this.parallelData)
@@ -281,7 +256,8 @@
       },
       isLogIn: function () {
         console.log('aaa 999a')
-        console.log(this.username)
+        // console.log(this.username)
+        this.parallelData = this.github()
         console.error(this.parallelData)
         if (this.parallelData.logininfo) {
           console.log('aaa 999a f')

@@ -291,7 +291,7 @@ export default {
       var userPostPath = '/user/keys'
       var $gitobj = this.$github
       console.log('type test')
-      if (this.$store.state.github.logininfo.type === 'BitBucket') {
+      if (this.$store.state.github && this.$store.state.github.logininfo && this.$store.state.github.logininfo.type === 'BitBucket') {
         $gitobj = this.$bitbucket
         userGetPath = '1.0/users/' + this.$store.state.github.logininfo.username
         userPostPath = '1.0/users/' + this.$store.state.github.logininfo.username + '/ssh-keys'

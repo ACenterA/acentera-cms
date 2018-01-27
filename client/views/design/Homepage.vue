@@ -10,13 +10,8 @@
       </div>
     </div>
 
-    <div class="fullheight" v-if="!isRepoError()">
+    <div v-if="!isRepoError() && loaded" class="fullheight">
       <plekan></plekan>
-      <!--
-      <div class="plekan-outerdiv tile is-ancestor is-vertical fullheight">
-          <iframe v-if="loaded && selectedPage" class="fullheight" :src="selectedPage"></iframe>
-      </div>
-      -->
     </div>
   </div>
 </template>
@@ -28,9 +23,9 @@ import { Sidebartwo } from 'components/layout/'
 import Modal from './modals/InfoModalWidget'
 import { mapGetters } from 'vuex'
 
-import Vue from 'vue'
+// import Vue from 'vue'
 import plekan from 'components/plekan/plekan.vue'
-import dynamicObj from '../../plekan/src/core/modules/dynamic.vue'
+// import dynamicObj from '../../plekan/src/core/modules/dynamic.vue'
 // import Vue from 'vue'
 
 // import Modal from './modals/InfoModal'
@@ -65,6 +60,8 @@ export default {
 
   mounted: function () {
     var self = this
+    this.$store.state.app.topbar.show = true
+    // this.$store.state.topbar.selectedPost = false
     console.log('is github')
     console.log(this)
     console.log(this.github)
@@ -136,178 +133,10 @@ export default {
           self.refreshData()
         }, 1000)
       }
+
       var currentUrl = window.goHostUrl + '/'
-      // if (window.location.href.indexOf('acentera.com') <= -1) {
-      //   currentUrl = 'http://localhost:8081/'
-      // }
-      this.$httpApi.get(currentUrl, { headers: { edit: 1 } }).then((res) => {
-        console.error(window.VueApp.$store.state.moduleList)
-        var Data = res.data.data.Data
 
-        // console.error(window.data.Data);
-        var headStart = Data.indexOf('<head>') + 6
-        if (headStart < 7) {
-          headStart = Data.toLowerCase().indexOf('<head>') + 6
-          if (headStart < 7) {
-            // headStart = window.data.Data.toLowerCase().indexOf("doctype html>");
-            // alert(headStart);
-            // if (headStart <= 10) {
-            headStart = Data.toLowerCase().indexOf('<html>') + 6
-            //
-          }
-        }
-
-        if (headStart < 6) {
-          headStart = 0
-        }
-
-        var headEnd = Data.indexOf('</head>')
-        if (headEnd < 0) {
-          headEnd = Data.toLowerCase().indexOf('</head>') + 7
-        }
-
-        var bodyStartIdx01 = Data.indexOf('<body')
-        var bodyStart = Data.indexOf('<body>') + 6
-        if (bodyStart < 7) {
-          console.error('FOUND BODY START AT A :' + bodyStart)
-          console.error('FOUND BODY START AT A :' + bodyStartIdx01)
-          // console.error(Data)
-          if (bodyStartIdx01 > 6) {
-            bodyStart = bodyStartIdx01
-          } else {
-            bodyStart = Data.toLowerCase().indexOf('<body>') + 6
-            bodyStartIdx01 = Data.toLowerCase().indexOf('<body>') + 1
-          }
-        }
-
-        window.TestData = Data
-        if (bodyStart < 7) {
-          console.error('FOUND BODY START AT :' + bodyStart)
-          bodyStart = 0
-          bodyStartIdx01 = 0
-        }
-
-        if (headEnd < headStart) {
-          headEnd = bodyStart - 6
-        }
-
-        var bodyEnd = Data.lastIndexOf('</body')
-        if (bodyEnd < 0) {
-          bodyEnd = Data.toLowerCase().lastIndexOf('</body')
-        }
-        bodyEnd += 7
-
-        var body = Data.substring(bodyStart, bodyEnd) // .replaceAll(" href=\"#"," data-href=\"#").replaceAll(" href=\"/#"," data-href=\"/#")
-        var head = Data.substring(headStart, headEnd)
-
-        if (currentUrl === '') {
-          console.log('aa')
-        }
-        head = '<base href="' + currentUrl + '">' + head // TODO: Only when in Development / debugging
-
-        var htmlContent = body
-        var headContent = head
-        window.Head = headContent
-        window.Body = htmlContent
-        var theH = document.getElementsByTagName('iframe')[0].contentWindow.document.getElementsByTagName('head')[0]
-        $(theH).append(head)
-
-        var customComponents = [
-          {
-            'name': 'awesomecomponentBody9',
-            'group': 'image',
-            'thumbnail': 'https://vuejs.org/images/logoB.png',
-            context: dynamicObj,
-            newContext: {
-              /*
-                //this not working so we use getData from the methods below ...
-              data () {
-                return {
-                  DEFAULT_CONTENT: htmlContent
-                }
-              },
-              */
-              methods: {
-                isHead: function () {
-                  return false
-                },
-                getData: function () {
-                  return htmlContent
-                },
-                orThisgetData: function () {
-                  return htmlContent
-                }
-              }
-            }
-          }
-        ]
-
-        // console.error(htmlContent)
-
-        /* eslint-disable */
-        const oList = customComponents.map(m => {
-          // Register Component
-          m.contents = m.contents || {}
-
-          this.$store.state.languages.map(l => {
-            m.contents[l] = {}
-            m.contents[l].html = ""
-            m.contents[l].fields = {}
-
-            return true
-          })
-
-          try {
-            if (m.hasOwnProperty('newContext')) {
-              var tt = {}
-
-              Object.assign(tt,m.context);
-
-              if (m.newContext.hasOwnProperty('data')) {
-                tt['data'] = m.newContext['data']
-              }
-
-              if (m.newContext.hasOwnProperty('methods')) {
-                for (var k in m.newContext.methods) {
-                    tt.methods[k] = m.newContext.methods[k]
-                }
-              }
-
-              /*
-              Object.assign(tt.mixins[0],this.$plekan.plekanComponentMixin.methods)
-              Object.assign(tt,plekan.plekanComponentMixin)
-              for (var k in m.newContext) {
-                  console.error('have to process')
-                  console.error(k)
-                  console.error(m.newContext[k])
-              }
-              */
-
-              /*
-              // this fixes the getData() function ??? ....
-              Object.assign(tt.mixins[0],m.newContext);
-              Object.assign(tt,m.newContext);
-              */
-
-              Vue.component(m.name, tt)
-            } else {
-              Vue.component(m.name, Object.assign({}, m.context))
-            }
-          } catch (f) {
-            console.error(f.stack)
-          }
-
-          delete m.context
-          return m
-        })
-
-        oList.forEach((e) => {
-          // this.$store.commit('addModuleList', e) // weird ?
-          // this.store.state.moduleList[0]
-          // const tmprow = this.list[rowindex]
-          this.$store.commit('addRow', e, 0)
-        })
-      })
+      this.$bus.$emit('updateEditFrame', currentUrl.replace('localhost:1313/', 'localhost:8081/'))
     },
 
     close () {
@@ -466,37 +295,62 @@ export default {
 </script>
 
 <style scoped>
-  .padleft {
-    position: relative;
-    left:30px;
-    top:30px;
-    height:300px;
-    flex-grow: 0;
-    min-height:300px;
-    width:90%;
-  }
+.padleft {
+  // position: relative;
+  left:0px;
+  top:0px;
+  height:300px;
+  flex-grow: 0;
+  min-height:300px;
+  width:90%;
+}
 
-  .app-inner-content {
-      height: 100%;
-  }
-  .button {
-    margin: 5px 0 0;
-  }
-
-  .fullheight {
+.app-inner-content {
     height: 100%;
-    min-height:100%;
-  }
+    margin-top: 0px;
+}
+.button {
+  margin: 5px 0 0;
+}
 
-  .control .button {
-    margin: inherit;
-  }
+.fullheight {
+  height: 100%;
+  min-height:100%;
+}
 
-  .fa-trash-o {
-    color: red;
-  }
+.control .button {
+  margin: inherit;
+}
 
-  .fa-info {
-    color: lightskyblue;
-  }
+.fa-trash-o {
+  color: red;
+}
+
+.fa-info {
+  color: lightskyblue;
+}
+
+
+.rightSide.active {
+  right: 0px;
+}
+
+.rightSide {
+    position: fixed;
+    width: 200px;
+    height: 100%;
+    background-color: #f2f2f2;
+    right: -300px;
+    padding: 10px;
+    top: 105px;
+    border-left: 1px solid #ddd;
+    transition: all .3s;
+    z-index: 12;
+    box-shadow: 0px 3px 78px 0px rgba(0, 0, 0, 0.1);
+}
+
+.animated {
+    animation-duration: .377s;
+}
+
 </style>

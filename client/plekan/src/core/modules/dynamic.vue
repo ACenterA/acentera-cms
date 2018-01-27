@@ -1,7 +1,6 @@
 <template>
-    <div class="plekan-template" v-html="_content" :contenteditable="false"></div>
+    <div :editor-name="nm()" ff="aa" class="plekan-template" v-html="_content"></div>
 </template>
-// <div class="plekan-template" v-html="_content" :contenteditable="isEditable"></div>
 
 <script>
   import mixinComponent from '../../core/mixin'
@@ -12,6 +11,13 @@
     data () {
       var self = this
       return {
+        nm: function () {
+          return this.me.name
+        },
+        IS_EDITABLE: function () {
+          console.error('IS EDITABLE TEST')
+          return self.editable() // false
+        },
         DEFAULT_CONTENT: function () {
           console.error(self)
           console.error('GEEZZ3')
@@ -22,6 +28,7 @@
     mounted () {
       console.error('mountedComponent')
       var self = this
+      this.updateElementToEditable(this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome') + 1))
       this.$bus.$on('destroyDynamicComponent', (data) => {
         console.error('recieved destroy...')
         console.error(self)
@@ -48,9 +55,10 @@
         return false
       },
       isEditable () {
-        console.error('is editable testaaaa')
+        console.error('isEditable: false')
         console.error(this)
-        return true
+        // return false
+        return this.IS_EDITABLE() // DEFAULT_CONTENT()
       }
     },
     postInserts () {

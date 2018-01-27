@@ -174,6 +174,7 @@ export default {
       }
     },
     closeAndLogout () {
+      console.error('SET GITHUB HERE LOGOUT CLEAR')
       window.localStorage.setItem('github', JSON.stringify({}))
       this.$store.commit('setGit', {})
       this.$emit('close')

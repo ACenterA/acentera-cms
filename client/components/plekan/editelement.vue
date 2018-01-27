@@ -124,9 +124,12 @@ export default {
   },
   methods: {
     isParamEditable () {
+      console.error('test this element..')
       if (!this.element) {
         return false
       }
+      console.error('test this element..A')
+      console.error(this.element)
       return (this.element.attributes.hasOwnProperty('parameditable'))
     },
     /**

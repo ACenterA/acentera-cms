@@ -208,7 +208,7 @@ selectionPolify.start();
       var oRect = oRange.getBoundingClientRect();
 
       var bound = {};
-
+      
       bound["left"] =  oRect.left
       bound["top"] =  oRect.top
       bound["getBoundingClientRect"] = oRect;
