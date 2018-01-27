@@ -44,6 +44,7 @@ export const setInet = (state, val) => {
 }
 
 export const isLoaded = (state, val) => {
+  console.error('SET IS LOADED 1')
   state.app.isLoaded = val
 }
 
@@ -148,14 +149,20 @@ export const deleteRow = (r, i) => {
   window.vm.$plekanEvent.onDelete(tmp, i)
 }
 
-export const deleteRowTest = (state, r, i) => {
+export const deleteAllRows = (state, r, i) => {
   console.error('delete row test')
   console.error('delete row test a')
   console.error(state)
   console.error(state.rows)
   if (state && state.rows) {
-    const tmp = state.rows.shift()
-    window.vm.$plekanEvent.onDelete(tmp, 0)
+    var tmp = state.rows.shift()
+    while (!(tmp === null || tmp === undefined)) {
+      console.error('deleteing of tmp')
+      console.error(tmp)
+      window.vm.$plekanEvent.onDelete(tmp, 0)
+      tmp = state.rows.shift()
+    }
+    window.hasProcessed = false
   }
 }
 
@@ -231,11 +238,11 @@ export const editorStart = (state) => {
 
   /* eslint-disable */
   bus.$on('selectionEnd', () => {
-    console.error('this is currently disabled....')
-    console.error('this is currently disabled....')
-    console.error('this is currently disabled....')
-    console.error('this is currently disabled....')
     if (!window.blogeditor) {
+      console.error('this is currently disabled....')
+      console.error('this is currently disabled....')
+      console.error('this is currently disabled....')
+      console.error('this is currently disabled....')
       return
     }
 

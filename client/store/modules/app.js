@@ -214,6 +214,11 @@ const mutations = {
   },
   [types.REPO_UPATE] (state, update) {
     var origState = state.repoState
+    if (!(update && update.Data)) {
+      console.error('IGNORING REPO UPDATE HERE')
+      console.error(update)
+      return
+    }
     origState.Branch = update.Branch
     origState.Master = update.Master
     origState.Ref = update.Ref
@@ -314,8 +319,6 @@ const mutations = {
       state.topbar.selectedPost.selected = false
     }
     state.topbar.selectedPost = item
-    // TODO: Find a better option to get the rss created properly ?
-    window.frameUrl = item.link.replace('localhost:1313/', 'localhost:8081/')
   }
 }
 

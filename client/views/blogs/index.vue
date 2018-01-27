@@ -19,7 +19,7 @@
               <label class="label">Select a post post from the left menu, or click on Create new post.</label>
           </article>
 
-          <plekan></plekan>
+          <plekan :class="{ hidden: !selectedPost }"></plekan>
 
           <div v-if="selectedPost !== null" class="rightSide">
 
@@ -42,7 +42,7 @@ import plekan from 'components/plekan/plekan.vue'
 
 // import Modal from './modals/InfoModal'
 
-const querystring = require('querystring')
+// const querystring = require('querystring')
 
 export default {
   components: {
@@ -78,6 +78,7 @@ export default {
     console.log(this)
     console.log(this.github)
     this.$store.state.app.topbar.show = true
+    this.$store.commit('deleteAllRows', 0, 1)
     this.$bus.$on('staticHtmlSelected', function (data) {
       console.log('reciev inc dotal modal')
       console.log(this)
@@ -142,6 +143,7 @@ export default {
         this.$onError(error)
       })
     },
+
     updateEditFrame () {
     },
 
@@ -149,11 +151,7 @@ export default {
       console.log('close here a')
       this.showModal = false
     },
-    /*
-    editObj () {
-      console.log('edit obj of a')
-    },
-    */
+
     createWidget (obj) {
       console.log('creating widget using')
       console.log(obj)
@@ -205,84 +203,12 @@ export default {
 
     editObj (obj) {
       console.log('edit obj of')
-      console.log(obj)
-      console.log(obj.original.Path)
-      this.selectedPage = window.goHostUrl + '/widgetedit/' + obj.original.Path + this.extra
-      this.showModal = false
     },
 
     closeModalBasic () {
-      console.log('close modal basic here')
       this.selectedIndex = -1
       this.showModal = false
     },
-
-    AtoggleSidebar: function (f) {
-      this.$store.commit('TOGGLE_SIDEBAR_TWO', true)
-      this.$store.commit('TOGGLE_SIDEBAR_TWO_DATA', this.$data.chart)
-    },
-
-    incrementTotal: function () {
-      console.log('total aaa')
-    },
-
-    openWrench: function () {
-      console.log('azz')
-    },
-
-    encryptText: function () {
-      if (this.editing) {
-        return
-      }
-
-      this.$http.post('/api/transit/encrypt', querystring.stringify({
-        plaintext: this.plaintext,
-        key: this.userTransitKey
-      }), {
-        headers: {'X-CSRF-Token': this.csrf}
-      })
-
-      .then((response) => {
-        this.cipher = response.data.result
-        this.plaintext = ''
-        this.$notify({
-          title: 'Success',
-          message: 'Encryption successful',
-          type: 'success'
-        })
-      })
-
-      .catch((error) => {
-        this.$onError(error)
-      })
-    },
-    decryptText: function () {
-      if (this.editing) {
-        return
-      }
-
-      this.$http.post('/api/transit/decrypt', querystring.stringify({
-        cipher: this.cipher,
-        key: this.userTransitKey
-      }), {
-        headers: {'X-CSRF-Token': this.csrf}
-      })
-
-      .then((response) => {
-        this.plaintext = response.data.result
-        this.cipher = ''
-        this.$notify({
-          title: 'Success',
-          message: 'Decryption successful',
-          type: 'success'
-        })
-      })
-
-      .catch((error) => {
-        this.$onError(error)
-      })
-    },
-
     clearPlaintext: function () {
       this.plaintext = ''
     },

@@ -394,6 +394,7 @@
       },
 
       getBasicAuth: function () {
+        console.error('GITHUB geBasicAuth')
         if (isToken) {
           /*
           var h = {

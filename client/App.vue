@@ -33,15 +33,19 @@ export default {
     console.error('a')
     this.$bus.$on('updateEditFrame', function (data) {
       var self = window.vm
-      console.error('UPDATE ... updateEditFrame ')
+
       // self.$store.commit('resetRows')
-      self.$store.commit('deleteRowTest', 0, 1)
+
+      console.error('TEST DELETE ROWS UPDATE ... updateEditFrame using ' + data)
+      self.$store.commit('deleteAllRows', 0, 1)
+      console.error('TEST DELETE ROWS DONE')
 
       // TODO: Find something else better than this...
       self.$bus.$emit('destroyDynamicComponent')
 
-      var currentUrl = window.frameUrl || window.goHostUrl + '/'
-      console.error('UPDATE ... updateEditFrame ' + window.frameUrl)
+      console.error('UPDATE ... updateEditFrame ' + data)
+      var currentUrl = data || window.goHostUrl + '/'
+      console.error('UPDATE ... updateEditFrame final url ' + currentUrl)
       // if (window.location.href.indexOf('acentera.com') <= -1) {
       //   currentUrl = 'http://localhost:8081/'
       // }
@@ -115,6 +119,9 @@ export default {
         var headContent = head
         window.Head = headContent
         window.Body = htmlContent
+        if (!((document.getElementsByTagName('iframe') && document.getElementsByTagName('iframe')[0]))) {
+          return
+        }
         var theH = document.getElementsByTagName('iframe')[0].contentWindow.document.getElementsByTagName('head')[0]
         $(theH).append(head)
 
@@ -147,45 +154,57 @@ export default {
         // return { DEFAULT_CONTENT: htmlContent }
         // }
         // console.error(dynamicObjClone.mixins[0].data())
-        window.ctr++
+        // window.ctr++
         console.error('GOT WINDOW CTR' + window.ctr)
 
+        var compName = 'awesomecomponentBody' + window.ctr++
         window.componentObj = window.componentObj || {}
 
+        // console.error('TEST EDITORELEM')
+        // var EDITORELEM = $(htmlContent).find('[editor=true]')
+        // console.error(EDITORELEM)
+        // $(se.$el).find('[editor=true]')
+
         var kkA = {
-          data: function () {
-            return htmlContent
-          }
+            tmpData: htmlContent,
+            data: function () {
+              return this.tmpData
+            },
+            editable: function () {
+              return false
+            }
         }
-        window.componentObj['awesomecomponentBody' + window.ctr] = kkA
+        window.componentObj[compName] = kkA
         var customComponents = [
           {
-            'name': 'awesomecomponentBody' + window.ctr,
+            'name': compName,
             'group': 'image',
             'thumbnail': 'https://vuejs.org/images/logo1a.png',
             context: dynamicObj,
             newContext: {
-                //this not working so we use getData from the methods below ...
+              /*
+              //this not working so we use getData from the methods below ...
               data () {
                 return {
-                  DEFAULT_CONTENT: window.ctr++ // htmlContent
+                  DEFAULT_CONTENT: htmlContent // this is always same object
                 }
               },
+              */
               methods: {
                 isHead: function () {
                   return false
                 },
+                editable: function () {
+                  return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].editable()
+                },
                 getData: function () {
-                  console.error('received get data test here A')
-                  console.error('RETURNING OF')
-                  // console.error(htmlContent)
-                  // console.error(this.DEFAULT_CONTENT)
-                  console.error(this)
-                  console.error(kkA)
-                  console.error(this.$vnode.tag.indexOf('-awesome'))
                   console.error('GOT COMP ' + this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1))
                   return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].data()
-                  // return kkA.data() // window.Body; //htmlContent
+                  // return kkA.data() // window.Body; //htmlContent  <-- // this is always same object
+                },
+                isEditable: function () {
+                  console.error('isEditable..test')
+                  return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].editable()
                 },
                 orThisgetData: function () {
                   return htmlContent
@@ -194,7 +213,7 @@ export default {
             }
           }
         ]
-
+        window.ctr++
         // console.error(htmlContent)
 
         /* eslint-disable */
@@ -252,6 +271,340 @@ export default {
           // }
         })
       });
+    })
+
+
+    function removeParents(e, root) {
+        root = root ? root : document.body;
+        var p = e.parentNode;
+        while(root != p){
+            e = p;
+            p = e.parentNode;
+        }
+        root.removeChild(e);
+    }
+
+    this.$bus.$on('updateElementToEditable', function (busData) {
+
+      var data = busData.data
+      var mainComponentName = busData.component
+      var $elObj = busData.obj
+
+      var self = window.vm
+      /*
+      if (data === undefined || data === null) {
+        console.error('received updateElemet of data - failsafe empty')
+      }
+      if (data.length === 0) {
+        console.error('received updateElemet of data - failsafe no data')
+      }
+      */
+      // if (window.hasProcessed) {
+      //  console.error('received updateElemet of data - failsafe')
+      //  return
+      // }
+      // window.hasProcessed = true // untill next delete..
+
+      console.error('received updateElemet of data')
+      console.error(data)
+      var mainComponentObj = $(window.componentObj[mainComponentName].data())
+      var FindElems = mainComponentObj.find('[editor=true]')
+      if (FindElems.length <= 0) {
+        console.error('NO MORE ELEMENTS')
+        window.hasProcessed = true
+      }
+      if (FindElems.length > 0) {
+        var item = FindElems[0]
+        console.error('replacing of ')
+        console.error(item)
+
+        var parent = $(item).parent()
+        var itm = $(item)
+        itm.removeAttr('editor')
+        itm.attr('contenteditable', 'true')
+        console.error('parent test')
+        console.error(parent)
+
+        var htmlContent = itm.outerHTMLEditor()
+        var componentName = 'awesomecomponentBody' +  window.ctr++
+        console.error('adding component of ' + componentName)
+        itm.attr('tmpName', componentName)
+        console.error('aa replacing of ')
+        console.error(item)
+        var ka = $('<div id="placeholder-' + componentName +'"></div>' )
+        ka.insertBefore(itm)
+        // itm.replaceWith('<div id="placeholder-' + componentName +'"></div>' );
+        // remove item
+        item.remove()
+
+        var mainContentHtml = mainComponentObj.outerHTMLEditor()
+
+        console.error('replacing main component..')
+        var mainHtmlObj = $('<div>').append(mainComponentObj.clone()).html()
+        console.error(mainHtmlObj)
+        window.componentObj[mainComponentName].tmpData = mainHtmlObj || mainContentHtml
+        console.error(mainContentHtml)
+        console.error('a finding of.. ' + componentName)
+        console.error(parent.find('#placeholder-' + componentName))
+        window.componentObj = window.componentObj || {}
+
+        var kkA = {
+            tmpData: htmlContent,
+            data: function () {
+              return this.tmpData
+            },
+            editable: function () {
+              return true
+            }
+        }
+        window.blogeditor = true
+
+        window.componentObj[componentName] = kkA
+        window.ctr++
+        var customComponents = [
+            {
+              'name': componentName,
+              'group': 'image',
+              'thumbnail': 'https://vuejs.org/images/logo1a.png',
+              context: dynamicObj,
+              newContext: {
+
+                methods: {
+                  isHead: function () {
+                    return false
+                  },
+                  getData: function () {
+                    return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].data()
+                  },
+                  editable: function () {
+                    return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].editable()
+                  },
+                  isEditable: function () {
+                    console.error('isEditable..test')
+                    return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].editable()
+                  },
+                  orThisgetData: function () {
+                    return htmlContent
+                  }
+                }
+              }
+            }
+          ]
+          window.ctr++
+          // console.error(htmlContent)
+
+          const oList = customComponents.map(m => {
+            // Register Component
+            m.contents = m.contents || {}
+
+            self.$store.state.languages.map(l => {
+              m.contents[l] = {}
+              m.contents[l].html = ""
+              m.contents[l].fields = {}
+
+              return true
+            })
+
+            try {
+
+              if (m.hasOwnProperty('newContext')) {
+                var tt = {}
+
+                Object.assign(tt,m.context);
+
+                if (m.newContext.hasOwnProperty('data')) {
+                  tt['data'] = m.newContext['data']
+                }
+
+                if (m.newContext.hasOwnProperty('methods')) {
+                  for (var k in m.newContext.methods) {
+                      tt.methods[k] = m.newContext.methods[k]
+                      tt[k] = m.newContext.methods[k]
+                  }
+                }
+
+                Vue.component(m.name, tt)
+              } else {
+                console.error('A2 - REGISTER NAME A OF ' + m.name)
+                Vue.component(m.name, Object.assign({}, m.context))
+              }
+            } catch (f) {
+              console.error(f.stack)
+            }
+
+            delete m.context
+            return m
+          })
+
+          console.error('olist is')
+          console.error(oList)
+          oList.forEach((e) => {
+            // this.$store.commit('addModuleList', e) // weird ?
+            // this.store.state.moduleList[0]
+            // const tmprow = this.list[rowindex]
+            // if (window.ctr <= 2) {
+              self.$store.commit('addRow', e, 0)
+            // }
+          })
+
+      }
+
+/*
+
+      //TODO: What if the item has anoter editor=true in it ? attributes?
+      $.each(data, function(idx, item) {
+        console.error('will remove of ... idex: ' + idx)
+        console.error(item)
+        // console.error(window.vm.$store.state.rows)
+        if (window.vm.$store.state.rows.length >= 6) {
+          console.error('will remove of failsafe..')
+          return
+        }
+        if ($(item).attr('contenteditable')) {
+          return // ignore it failsafe something loops..
+        }
+
+        // console.error( $(item) )
+        // console.error( $(item).parent() )
+        // removeParents(item, $(item).parent()[0])
+
+        // item.
+        var parent = $(item).parent()
+        var itm = $(item)
+        itm.removeAttr('editor')
+        itm.attr('contenteditable', 'true')
+
+        var htmlContent = itm.outerHTMLEditor(itm[0].ownerDocument) // $iframe)
+
+
+        var componentName = 'awesomecomponentBody' +  window.ctr++
+        console.error('adding component of ' + componentName)
+        itm.attr('tmpName', componentName)
+        console.error('aa replacing of ')
+        console.error(item)
+        var ka = $('<div id="placeholder-' + componentName +'"></div>' )
+        ka.insertBefore(itm)
+        // itm.replaceWith('<div id="placeholder-' + componentName +'"></div>' );
+        // remove item
+        item.remove()
+
+        console.error('Z RECEIVED ELOBJ OF')
+        console.error($(window.componentObj[mainComponentName].data()))
+        console.error('FINDING ITEM')
+        console.error($(window.componentObj[mainComponentName].data()).find('[editor=true]')[0])
+        // console.error($elObj)
+        // var origHTML = $elObj.outerHTMLEditor()
+        // console.error('GOT ORIG HTML OF ' + origHTML)
+
+        console.error('with ')
+        console.error(ka)
+
+        console.error('b finding of.. ' + componentName)
+        console.error(parent.find('#placeholder-' + componentName))
+        window.componentObj = window.componentObj || {}
+
+        var kkA = {
+            tmpData: htmlContent,
+            data: function () {
+              return this.tmpData
+            },
+            editable: function () {
+              return true
+            }
+        }
+        window.blogeditor = true
+
+        window.componentObj[componentName] = kkA
+        window.ctr++
+        var customComponents = [
+            {
+              'name': componentName,
+              'group': 'image',
+              'thumbnail': 'https://vuejs.org/images/logo1a.png',
+              context: dynamicObj,
+              newContext: {
+
+                methods: {
+                  isHead: function () {
+                    return false
+                  },
+                  getData: function () {
+                    return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].data()
+                  },
+                  editable: function () {
+                    return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].editable()
+                  },
+                  isEditable: function () {
+                    console.error('isEditable..test')
+                    return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].editable()
+                  },
+                  orThisgetData: function () {
+                    return htmlContent
+                  }
+                }
+              }
+            }
+          ]
+          window.ctr++
+          // console.error(htmlContent)
+
+          const oList = customComponents.map(m => {
+            // Register Component
+            m.contents = m.contents || {}
+
+            self.$store.state.languages.map(l => {
+              m.contents[l] = {}
+              m.contents[l].html = ""
+              m.contents[l].fields = {}
+
+              return true
+            })
+
+            try {
+
+              if (m.hasOwnProperty('newContext')) {
+                var tt = {}
+
+                Object.assign(tt,m.context);
+
+                if (m.newContext.hasOwnProperty('data')) {
+                  tt['data'] = m.newContext['data']
+                }
+
+                if (m.newContext.hasOwnProperty('methods')) {
+                  for (var k in m.newContext.methods) {
+                      tt.methods[k] = m.newContext.methods[k]
+                      tt[k] = m.newContext.methods[k]
+                  }
+                }
+
+                Vue.component(m.name, tt)
+              } else {
+                console.error('A2 - REGISTER NAME A OF ' + m.name)
+                Vue.component(m.name, Object.assign({}, m.context))
+              }
+            } catch (f) {
+              console.error(f.stack)
+            }
+
+            delete m.context
+            return m
+          })
+
+          console.error('olist is')
+          console.error(oList)
+          oList.forEach((e) => {
+            // this.$store.commit('addModuleList', e) // weird ?
+            // this.store.state.moduleList[0]
+            // const tmprow = this.list[rowindex]
+            // if (window.ctr <= 2) {
+              self.$store.commit('addRow', e, 0)
+            // }
+          })
+      })
+*/
+
+
     })
     /* eslint-enable */
   },

@@ -32,19 +32,27 @@
           <div v-else>
             <div v-if="isWebsiteSelected()">
               <!-- TODO:                      -->
-
               <div v-if="getSelectedWebsite">
                 <div v-if="hasSession() && isRepoInError()">
                   <p class="red">Error with repo...</p>
                 </div>
+
                 <div v-if="hasSession() && isRepoUpdating()">
                   <p class="blue">Updating...</p>
                 </div>
-                <div v-if="!isWebsiteSelected()">
+
+                <div v-if="isWebsite && !isWebsiteSelected()">
                   <div v-if="hasSession() && isKeyMissing()">
-                    <p class="blue">Missng SSH Key.<router-link to="/login" :exact="true"><b>Click here.</b></router-link></p>
+                    <p class="blue">Missing GIT Login.<router-link to="/login" :exact="true"><b>Click here.</b></router-link></p>
                   </div>
                 </div>
+
+                <div v-if="!isWebsite">
+                  <div v-if="hasSession() && isKeyMissing()">
+                    <p class="blue">Missing SSH Key.<router-link to="/login" :exact="true"><b>Click here.</b></router-link></p>
+                  </div>
+                </div>
+
                 <div v-if="isRepoMissing()">
                   <p class="blue">Could not validate Git conenction.</p>
                 </div>
@@ -68,7 +76,7 @@
             Logged in as: {{session.display_name}}
           </a>
 
-          <div v-if="hasSession() && isWebsiteSelected()">
+          <div v-if="hasSession() && !isWebsite || (hasSession() && isWebsite && isWebsiteSelected())">
             <!--
             <a v-if="hasSession() && isTestMissing()" @click="createPreviewSite()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 Create Preview Site
@@ -85,7 +93,7 @@
             </a>
           </div>
 
-          <div v-if="isWebsiteSelected()">
+          <div v-if="isWebsite && isWebsiteSelected()">
             <a v-if="hasSession()" @click="selectWebsite()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 change site
             </a>
@@ -192,20 +200,9 @@ export default {
       // already cleared this.$store.commit('clearSession')
     }
 
-    let gitraw = window.localStorage.getItem('github')
-    if (gitraw) {
-      var github = JSON.parse(gitraw)
-      console.log('set of github')
-      console.log(github)
-      this.$store.commit('setGit', github)
-    } else {
-      this.$store.commit('clearGit')
-    }
-
     // uncomment this to see the details of the session everytime you refresh the page
     // console.log(JSON.stringify(this.session))
   },
-
   computed: {
     ...mapGetters({
       session: 'session',
@@ -214,77 +211,29 @@ export default {
       app: 'app',
       repoState: 'repoState',
       isLoggedIn: 'isLoggedIn',
-      getBasicAuth: 'getBasicAuth'
+      getBasicAuth: 'getBasicAuth',
+      isWebsite: 'isWebsite'
     }),
     getSelectedWebsiteName: function () {
       return this.selectedWebsite
     },
     getSelectedWebsite: function () {
-      var self = this
-      console.error('TEST LOADED AA')
+      // var self = this
+      console.error('TEST LOADED AA GGE')
       console.error(this.$store.state.app.isLoaded)
       if (!this.$store.state.app.isLoaded) {
         console.error('not loaded')
-        /*
-        return setTimeout(function () {
-          self.getSelectedWebsite()
-        }, 1000)
-        */
         return
       }
-      console.error('taaa')
-      if (this.selectedWebsite !== null) {
-        this.$httpApi.get(window.apiUrl + '/git?action=config&loc=nav').then((response) => {
-          this.toggleRepoUrl(response.data.Data)
-          if (response !== null && response.data !== null) {
-            this.toggleRepo(response.data)
-          }
-
-          if (self.$store.state.app.inet) {
-            console.error('pull here 01')
-
-            var basicAuth = self.getBasicAuth
-            console.error('taa 3a ')
-            console.error(self.$store.state.github)
-            if (this.$store.state.github === null || this.$store.state.github.logininfo === null) {
-              return
-            }
-            self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', { headers: { 'Authorization': basicAuth } }).then((response) => {
-              self.toggleRepoState(0) // all good
-            })
-            .catch((error) => {
-              if (error.response.status === 500) {
-                if (error.response.data.Data === 'reference not found') {
-                  self.$notify({
-                    title: 'Website Version',
-                    message: 'This website version does not exists anymore... Please select a new version.',
-                    type: 'warning'
-                  })
-                }
-                self.toggleRepoState(6) // need to setup SSH Key for the user
-              } else {
-                this.$onError(error)
-              }
-            })
-          }
-        })
-        .catch((error) => {
-          console.error(error)
-          console.error('err2a')
-          console.error(error)
-          try {
-            if (error.response.status === 500) {
-              self.toggleRepoState(5) // State 5 = no .git/config file....
-            } else {
-              this.$onError(error)
-            }
-          } catch (ee) {
-            self.toggleRepoState(5) // State 5 = no .git/config file....
-          }
-        })
-      }
+      // if (this.selectedWebsite !== null) {
+      //
+      // }
       console.error('taa 3')
-      return this.selectedWebsite
+      if (this.$store.state.app.website) {
+        return this.selectedWebsite
+      } else {
+        return true
+      }
     }
   },
 
@@ -314,11 +263,16 @@ export default {
     },
     hasSession () {
       if (this.$store.state.app.website) {
+        console.error('its a website session?')
         if (this.session && this.session.display_name) {
           return true
         }
       } else {
+        console.error('its a website not session?')
         if (this.$store.state && this.$store.state.github) {
+          console.error('GIT TEST?')
+          console.error(this.$store.state.github.logininfo)
+          console.error(this.$store.state.app)
           return (this.$store.state.github.logininfo)
         }
       }
@@ -331,10 +285,9 @@ export default {
       return (this.repoState.updating === 5)
     },
     isWebsiteSelected () {
-      // Is hosted Version
       if (!this.$store.state.app.website) {
-        // Hosted version.
-        return false
+        // Self - Hosted version ( dev )
+        return true
       }
 
       // Is local Version
@@ -456,7 +409,7 @@ export default {
           'head': this.$store.state.app.repoState.Branch,
           'base': this.$store.state.app.repoState.Master
         }
-        if (this.$store.state.github.logininfo.type === 'BitBucket') {
+        if (this.$store.state.github && this.$store.state.github.logininfo && this.$store.state.github.logininfo.type === 'BitBucket') {
           $gitobj = this.$bitbucket
           userGetPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/pullrequests'
           userPostPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/pullrequests'
