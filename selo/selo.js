@@ -61,6 +61,7 @@ selectionPolify.start();
   Selo.prototype.attachEvent = function () {
        console.error('attachEvent...');
        var selectionEndTimeout = null,
+          contextMenuEvent    = new CustomEvent('contextMenuEvent'),
           endEvent            = new CustomEvent('selectionEnd'),
           startEvent          = new CustomEvent('selectionStart',{detail:this.selection}),
           clearEvent          = new CustomEvent('removeSelectionEditor'),
@@ -82,15 +83,35 @@ selectionPolify.start();
         "mouseup",
         "selectionchange",
         "keyup",
+        "contextmenu",
         "keydown"
       ].map(function(e) {
-        console.error('addEventListener........');
+        console.error('fff addEventListener........ for');
         console.error(this);
         console.error(this._document);
         this._document.addEventListener(e.toString(), function(evt/*event*/) {
           console.error(evt);
+          console.error('RECEIVED evt.type of ' + evt.type)
           if (evt.type != "selectionchange" && evt.type != "mouseup") {
-            if (evt.type == "click") {
+            if (evt.type === "contextmenu") {
+              console.error('contextmenu ON ITEM 01 A dispatch');
+
+              // contextMenuEvent.target = evt.target
+              console.error('TARGET IS')
+              console.error(evt.target)
+              console.error(evt)
+              var tmpcontextMenuEvent = new CustomEvent('contextMenuEvent', { detail: evt  })
+              // {detail:this.selection}),
+              // TODO: Should we check the target is editable ??
+              if (this._bus !== undefined) {
+                   console.error('AZTEST emit of ' + tmpcontextMenuEvent.type + ' ==> event vs ' + tmpcontextMenuEvent.type);
+                   console.error(tmpcontextMenuEvent)
+                   this._bus.$emit(contextMenuEvent.type, tmpcontextMenuEvent);
+              } else {
+                   this._document.dispatchEvent(tmpcontextMenuEvent);
+              }
+              return
+            } else if (evt.type == "click") {
           		console.error('CLICK ON ITEM 01 A dispatch');
           		console.error(evt);
           		// evt.preventDefault();
@@ -107,7 +128,7 @@ selectionPolify.start();
               if (map[65] && map[91] ) {
                 if (this.hasText()) {
               		  if (this._bus !== undefined) {
-              			     console.error('emit end event 03');
+              			     console.error('emit end event 03 testa');
               		       this._bus.$emit(endEvent.type, endEvent);
               		  } else {
                     	   this._document.dispatchEvent(endEvent);
@@ -117,7 +138,7 @@ selectionPolify.start();
               else if ((map[16] && map[37]) || (map[16] && map[38]) || (map[16] && map[39]) || (map[16] && map[40]) ) {
                 if (this.hasText()) {
               		  if (this._bus !== undefined) {
-              			   console.error('emit end event 01?');
+              			   console.error('emit end event 01 test a?');
               		   	 this._bus.$emit(endEvent.type, endEvent);
               		  } else {
                        this._document.dispatchEvent(endEvent);
@@ -149,7 +170,7 @@ selectionPolify.start();
               } else {
                 console.error('has tetxt aaa');
                 if (this._bus !== undefined) {
-                     console.error('emit end event 02');
+                     console.error('emit end event 02 testa');
                      this._bus.$emit(clearEvent.type, clearEvent); //only clearEventType is usefull
                 } else {
                      this._document.dispatchEvent(clearEvent);
@@ -208,7 +229,7 @@ selectionPolify.start();
       var oRect = oRange.getBoundingClientRect();
 
       var bound = {};
-      
+
       bound["left"] =  oRect.left
       bound["top"] =  oRect.top
       bound["getBoundingClientRect"] = oRect;

@@ -244,6 +244,7 @@ router.beforeEach((route, redirect, next) => {
   console.error(this.a)
   window.currVemTest = this
 
+  store.state.app.viewMenu = false // reset menu right click
   store.state.app.topbar.show = true
   store.state.app.topbar.selectedPost = {}
   store.state.app.topbar.selectedPost.selected = true

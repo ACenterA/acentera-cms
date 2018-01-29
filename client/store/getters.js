@@ -5,7 +5,13 @@ const sidebar = state => state.app.sidebar
 const sidebarglobal = state => state.app.sidebarglobal
 const sidebartwo = state => state.app.sidebartwo
 const sidebarblogData = state => state.app.sidebarblogData
-const inBlog = state => state.app.topbar.show === true
+const inBlog = state => {
+  if (state.app.repoState && state.app.repoState.updating >= 3) {
+    return false
+  }
+  return state.app.topbar.show === true
+}
+
 const effect = state => state.app.effect
 const menuitems = state => state.menu.items
 const menuglobalitems = state => state.menuglobal.items
@@ -68,14 +74,14 @@ const getBasicAuth = state => {
       window.vm.$store.state.github = raw
     }
   }
-  console.error(window.vm.$store.state.github.logininfo)
-  // if (window.vm.$store.state.github && window.vm.$store.state.github.logininfo window.vm.$store.state.github.logininfo.user === null)
-  console.error('a set of ' + window.vm.$store.state.github.logininfo.username)
-  console.error('b set of ' + window.vm.$store.state.github.logininfo.pass)
-  gitobj.setUserPass(window.vm.$store.state.github.logininfo.username, window.vm.$store.state.github.logininfo.pass)
+  if (window.vm.$store.state.github && window.vm.$store.state.github.logininfo) {
+    gitobj.setUserPass(window.vm.$store.state.github.logininfo.username, window.vm.$store.state.github.logininfo.pass)
 
-  console.error('RETURN OF :' + gitobj.getBasicAuth())
-  return gitobj.getBasicAuth()
+    console.error('RETURN OF :' + gitobj.getBasicAuth())
+    return gitobj.getBasicAuth()
+  } else {
+    return null
+  }
 }
 
 const isLoggedIn = state => {

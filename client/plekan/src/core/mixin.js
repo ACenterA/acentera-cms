@@ -367,7 +367,11 @@ export default {
         var parent = $(item).parent()
         var itm = $(item)
         itm.removeAttr('editor')
-        itm.attr('contenteditable', 'true')
+        if (itm.attr('parameditable')) {
+          itm.attr('contenteditable', 'false')
+        } else {
+          itm.attr('contenteditable', 'true')
+        }
         console.error('parent test')
         console.error(parent)
 

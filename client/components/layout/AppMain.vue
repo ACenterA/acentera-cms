@@ -43,7 +43,7 @@
       -->
       <div :class="{ isblog: inBlog }" class="container is-fluid is-marginless app-content">
         <levelbar :show="false"></levelbar>
-        <topbar :show="topbar.show"></topbar>
+        <topbar :show="inBlog && topbar.show"></topbar>
         <transition
           mode="out-in"
           enter-active-class="fadeIn"

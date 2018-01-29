@@ -89,7 +89,7 @@ export default {
     }
 */
     /** @type {Array} Düzenlenebilir DOM elementleri */
-    const editableTag = ['DIV', 'IFRAME', 'IMG', 'A', 'SCRIPT']
+    const editableTag = ['NAV', 'HEADER', 'SECTION', 'DIV', 'IFRAME', 'IMG', 'A', 'SCRIPT', 'UL', 'LI', 'SPAN']
     const d = document.getElementsByTagName('iframe')[0].contentWindow.document
 
     const editButton = document.querySelector('.plekan-editable-elements-button')
@@ -127,11 +127,13 @@ export default {
       calc = target.getBoundingClientRect()
 
 
-
-      if (editableTag.indexOf(tagname) !== -1) {
+      console.error('TEST EDITABLE TAG')
+      console.error(tagname)
+      if (true || editableTag.indexOf(tagname) !== -1) {
         parents = hasParent(e.target, 'plekan-row-item')
-
+        console.error('TEST EDITABLE TAG A')
         if (parents) {
+          console.error('TEST EDITABLE TAG B')
           console.error(self)
           console.error(d)
           console.error(e.target)
@@ -141,9 +143,11 @@ export default {
           console.error(target)
           // console.error(target.attributes.hasOwnProperty('parameditable'))
           if (! target.attributes.hasOwnProperty('parameditable')) {
+            editButton.style.display = 'none'
+            editButton.classList.remove('is-visible')
+            editButton.classList.remove('active')
             return
           }
-
           self.editableModalElement = target
           editButton.style.display = 'block'
           editButton.classList.add('is-visible')
@@ -175,13 +179,14 @@ export default {
           console.error('calc is ...')
           console.error(calc)
 
-          console.error('let window editor?')          
+          console.error('let window editor?')
           editButton.style.left = `${calc.width / 2 + calc.left - editButtonWidth / 2}px`
         }
       } else if (target.parentNode !== editButton && target !== editButton) {
         editButton.style.display = 'none'
         editButton.classList.remove('is-visible')
       }
+
     })
 
 

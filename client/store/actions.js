@@ -41,11 +41,9 @@ const refreshConfig = (state) => {
       console.error(self.$store.state.app.inet)
       if (self.$store.state.app.inet) {
         console.error('pull here 01 9a')
+        self.$store.commit(types.REPO_STATE_UPATE, 0) // first set valid
         console.error(self.$store.getters.getBasicAuth)
         var basicAuth = self.$store.getters.getBasicAuth
-        console.error('pull here 01 9b')
-        console.error('taa 3a ')
-        console.error(self.$store.state.github)
         /*
         if (self.$store.state.github === null || self.$store.state.github.logininfo === null) {
           return
@@ -53,23 +51,25 @@ const refreshConfig = (state) => {
         */
         console.error('DOING PULL AUTH IS')
         console.error(basicAuth)
-        self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', { headers: { 'Authorization': basicAuth } }).then((response) => {
-          self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
-        })
-        .catch((error) => {
-          if (error.response.status === 500) {
-            if (error.response.data.Data === 'reference not found') {
-              self.$notify({
-                title: 'Website Version',
-                message: 'This website version does not exists anymore... Please select a new version.',
-                type: 'warning'
-              })
+        if (basicAuth !== null) { // TODO: If in Dev
+          self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', { headers: { 'Authorization': basicAuth } }).then((response) => {
+            self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
+          })
+          .catch((error) => {
+            if (error.response.status === 500) {
+              if (error.response.data.Data === 'reference not found') {
+                self.$notify({
+                  title: 'Website Version',
+                  message: 'This website version does not exists anymore... Please select a new version.',
+                  type: 'warning'
+                })
+              }
+              self.$store.commit(types.REPO_STATE_UPATE, 6) // need to setup SSH Key for the user
+            } else {
+              self.$onError(error)
             }
-            self.$store.commit(types.REPO_STATE_UPATE, 6) // need to setup SSH Key for the user
-          } else {
-            self.$onError(error)
-          }
-        })
+          })
+        }
       }
     })
     .catch((error) => {
