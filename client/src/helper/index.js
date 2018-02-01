@@ -69,10 +69,6 @@ export const hasParent = (el, parentClassName) => {
 };
 
 export const setActiveEditorButtons = () => {
-  console.error('will set SELO FOCUS ActiveEditor Buttons??')
-  console.error(store.state);
-  console.error(window.selo);
-  console.error(window.selo.selection);
   const el = window.selo.selection.focusNode.parentNode;
   const parents = getParents(el);
 
@@ -106,11 +102,7 @@ export const setActiveEditorButtons = () => {
  * https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand
  */
 export const exec = (cmd, val = null) => {
-  console.error('calling restore selectin........');
   window.selo.restoreSelection(store.state.sel);
-
-  console.error('calling execCommand.. in selection........');
-  // document.execCommand(cmd, false, val);
   window.selo._document.execCommand(cmd, false, val);
   setActiveEditorButtons();
 };

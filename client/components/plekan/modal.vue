@@ -41,11 +41,8 @@ export default {
   },
   mounted () {
     this.event = new CustomEvent('requestHiddenModal') // eslint-disable-line
-
-    console.error('mounted a')
     document.onkeydown = (e) => {
       if (e.key === 'Escape') {
-        console.error('make broadcast')
         this.makeBroadcast()
       }
     }
@@ -58,12 +55,8 @@ export default {
   },
   methods: {
     makeBroadcast () {
-      console.error(this)
-      // console.error(window.parent.document.dispatchEvent(this.event));
-      console.error('EMIT OF')
       this.$bus.$emit(this.event.type, this.event)
       // 'staticHtmlSelected', d)
-      console.error(this.event)
       document.dispatchEvent(this.event)
     },
     setShownVariable () {

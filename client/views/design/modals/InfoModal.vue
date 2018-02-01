@@ -157,18 +157,9 @@ export default {
       }
     },
     validateFilename () {
-      console.log('validaing title' + this.filename)
       return false
     },
     validateTitle () {
-      console.log('validaing title' + this.pageTitle)
-      /*
-      // do nothing if there is no input token string
-      if (this.pageTitle === '') {
-        return
-      }
-      this.$http.post('/api/wrapping/unwrap', querystring.stringify({
-      */
       return true
     },
     checkAction (obj, val) {
@@ -196,8 +187,6 @@ export default {
       this.$emit('close')
     },
     edit (obj) {
-      console.log('emiting editObj')
-      console.log(obj)
       this.$emit('editObj', obj)
     },
     addPage () {

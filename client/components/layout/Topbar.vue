@@ -2,7 +2,7 @@
   <nav class="topbar app-topbar" :class="{ hidden: !show }">
     <div class="level-left">
       <div class="level-item">
-        <h3 v-if="selectedPost !== null" class="subtitle is-5">          
+        <h3 v-if="selectedPost !== null" class="subtitle is-5">
           <span v-if="selectedPost.title">
             Editing : {{ selectedPost.title }}
           </span>
@@ -77,9 +77,6 @@ export default {
 
   methods: {
     topbarClick () {
-      console.error('aa')
-      console.error($('.rightSide'))
-      console.error($('.rightSide').hasClass('active'))
       if ($('.rightSide').hasClass('active')) {
         $('.rightSide').removeClass('active')
       } else {
@@ -87,8 +84,6 @@ export default {
       }
     },
     getList () {
-      console.log('route is')
-      console.log(this.$route)
       if ((('' + this.$route.path)).indexOf('/Pages') >= 0) {
         this.$data.show = false
       } else if ((('' + this.$route.path)).indexOf('/items') >= 0) {

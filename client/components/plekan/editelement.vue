@@ -6,7 +6,24 @@
     <div slot="body">
 
       <div v-if="isParamEditable()">
+        <div v-for="e in getElements" class="plekan-editable-element-fields-container">
+
+          <span v-if="e.type !== 'Image'">
+          <div class="plekan-editable-element-fields">
+             <!-- e.type -->
+             <span>{{e.label}}</span>
+             <input type="text"
+                 v-model="e.value" v-if="e.type !== 'Image'">
+
+              <file-upload :clean="shown"
+                        types="png|jpg|jpeg|gif"
+                        :fileChange="fileChange"
+                        v-if="e.type === 'Image'"></file-upload>
+           </div>
+         </span>
+        </div>
       </div>
+
       <div v-if="!isParamEditable()">
         <div v-for="e in getElementPropertyArray"
              class="plekan-editable-element-fields-container">
@@ -28,7 +45,7 @@
             class="plekan-clearfix">
       <button @click.prevent="save()"
               type="button"
-              class="plekan-footer-button">Save</button>
+              class="plekan-footer-button">Update</button>
       <button @click.prevent="onFileUpload"
               v-show="elementIsImage"
               :disabled="!file"
@@ -82,8 +99,6 @@ export default {
     // document.body.style.overflow = "hidden"
   },
   updated () {
-    console.error('updated shown here')
-    // console.error(document)
     document.body.style.overflow = this.shown ? 'hidden' : ''
   },
   watch: {
@@ -92,22 +107,14 @@ export default {
      * @return {void}
      */
     shown () {
-      console.error('SHOWN SELECTED')
       this.event = new CustomEvent('domupdated') // eslint-disable-line
-
-      console.error('SHOWN SELECTED ELEMENT IS')
-      console.error(this)
-      console.error(this.element)
       if (!this.element) return
 
       const el = this.element
       const tmp = {}
 
-      console.error(el)
       this.elementIsImage = el.tagName === 'IMG'
-      // console.error(this.elementIsImage)
       this.getElementPropertyArray.map((p) => {
-        console.error(p.prop)
         if (el[p.prop] !== undefined) {
           tmp[p.prop] = el[p.prop]
 
@@ -120,6 +127,41 @@ export default {
       })
 
       this.elementEditableProperties = tmp
+    }
+  },
+  computed: {
+    getElements: function () {
+      if ($(this.element).attr('editor-data-param') === undefined) {
+        return []
+      }
+      var editorParamDatas = $(this.element).attr('editor-data-param').split(',')
+      var mapArrObj = []
+      var self = this
+      $.each(editorParamDatas, function (idx, item) {
+        console.error('processingi of ' + item)
+        var itemArr = item.split(':')
+        var itemInfo = {
+          parameter: itemArr[0]
+        }
+        if (itemArr.length >= 1) {
+          itemInfo['type'] = itemArr[1]
+        }
+        if (itemArr.length >= 2) {
+          itemInfo['label'] = itemArr[2]
+        }
+        itemInfo['$el'] = $(self.element)
+        console.error('parameter is : ' + itemArr[0])
+        console.error(self.$store.state.app.settings.params)
+        console.error(window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params))
+        itemInfo['value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
+        itemInfo['orig_value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
+        mapArrObj.push(itemInfo)
+      })
+      console.error('seff a')
+      // console.error(self.$store.state.app.settings.params)
+      // console.error(editorParamDatas)
+      console.error(mapArrObj)
+      return mapArrObj
     }
   },
   methods: {
@@ -167,12 +209,29 @@ export default {
      * @return {void}
      */
     save () {
-      Object.keys(this.elementEditableProperties).map((e) => {
-        console.error('save here 01')
-        console.error(e)
-        this.element[e] = this.elementEditableProperties[e]
-        return true
-      })
+      if (this.isParamEditable()) {
+        console.error('save parameters.... here 01')
+        var self = this
+        $.each(this.getElements, function (idx, item) {
+          console.error('Will update if changed?')
+          console.error(item) // itemInfo['$el']
+          if (item.value !== item.orig_value) {
+            console.error('ITS DIRTY FOR ')
+
+            window.updateEditorProperty(item.parameter, self.$store.state.app.settings.params, item.value)
+            // TODO: Set settings dirty
+
+            item['$el'].html(item.value)
+            console.error(item.value)
+          }
+          // console.error(item['$el'])
+        })
+      } else {
+        Object.keys(this.elementEditableProperties).map((e) => {
+          this.element[e] = this.elementEditableProperties[e]
+          return true
+        })
+      }
       console.error('save object here')
       this.makeABroadcast()
     },

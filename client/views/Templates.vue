@@ -13,6 +13,7 @@
               <div>
                   <div class="center-text">
                       <h4 class="site-title">Choosea template for your website</h4>
+                      (i know its duplicated .. lack of theme right now)
                   </div>
               </div>
             </div>
@@ -33,7 +34,12 @@
               <div class=""
                     style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
 
+                    <div v-if="item.Screenshot">
+                      <img  :src="item.Screenshot" class="mw-100">
+                    </div>
+                    <div v-else>
                       <img v-if="item.Repository" :src="item.Repository + 'raw/master/images/screenshot.png'" class="mw-100">
+                    </div>
               </div>
               <div class="width-full">
                 <div class="float-left width-50">
@@ -171,7 +177,6 @@ export default {
     createSiteModal
   },
   data () {
-    console.log(this.$store.state)
     return {
       themes: [],
       pkg: this.$store.state.pkg,
@@ -187,22 +192,17 @@ export default {
       if (this.$store.state.github == null) {
         return false
       }
-      console.log('is loggedi n test 1 ')
       if (this.$store.state.github.logininfo == null) {
         return false
       }
-      console.log('is loggedi n test 2 ')
       if (this.$store.state.github.logininfo.username == null) {
         return false
       }
-
-      console.log('is loggedi n test3')
       if (!(this.$store.session === null || this.$store.session === undefined)) {
         if (!(this.$store.session.display_name === null || this.$store.session.display_name === undefined)) {
           return false
         }
       }
-      console.log('is loggedi n test4')
       return true
     },
     repoState: function () {
@@ -223,9 +223,9 @@ export default {
     // better not to set UX is nicer
     // self.$store.state.app.sidebarglobal.hidden = true
 
+    // TODO: Test github themes, then local file as fallback ?
     this.$http.get('/assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
-      console.log('got monuted raw json')
       self.themes = response.data
       this.switchTab(0)
     }).catch((error) => {
@@ -238,7 +238,8 @@ export default {
       'toggleRepoState',
       'toggleRepo',
       'toggleRepoUrl',
-      'isWebsite'
+      'isWebsite',
+      'refreshUser'
     ]),
     loginGitBit: function (item) {
       this.showLoginModal = true
@@ -267,8 +268,6 @@ export default {
       return (this.repoState.updating === 6)
     },
     nextStep (nextStepData) {
-      console.error('RECEIVED NEXT STEP OF')
-      console.error(nextStepData)
       // Theme => nextStepData.Name
       // next route => '/templates/' + nextStepData.Name + '/edit'
       this.selectedIndex = -1
@@ -278,8 +277,6 @@ export default {
     },
     changePage (nextStepData) {
       var self = this
-      console.error('GREAT THE SITE GOT CREATED.. AND WE HAVE AN WEBSITE ID')
-      console.error(nextStepData)
       // Theme => nextStepData.Name
       // next route => '/templates/' + nextStepData.Name + '/edit'
       this.showCreateModal = false
@@ -304,12 +301,7 @@ export default {
 
       var ready = function () {
         var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/' + initSite.projectId + '/' + initSite.websiteId + '/state/ready'
-        console.error('posting to ' + initSiteRepoCall)
         var h = { 'authorization': 'Bearer ' + self.$store.state.session.token }
-        // console.error(' TEST AUTHORIZATION ')
-        // console.error(h)
-
-        console.error('SENDINT POST A 01')
         self.$http.post(initSiteRepoCall, initSite, {
           headers: h
         }).then((response) => {
@@ -318,9 +310,16 @@ export default {
             message: 'Your website has been created.',
             type: 'success'
           })
+
+          window.vm.$store.commit('SELECT_INITIAL_WEBSITE', nextStepData)
+          try {
+            self.refreshUser()
+          } catch (f) {
+          }
+          window.vm.$store.commit('SELECT_WEBSITE', initSite)
           setTimeout(function () {
             self.$router.push({ 'path': '/sites/' + websiteId + '/edit' })
-          }, 300)
+          }, 1000)
         }, function (errr) {
           self.$notify({
             title: 'Website ready.',
@@ -330,7 +329,6 @@ export default {
         })
       }
       var fctCheckNewSite = function (itr) {
-        console.log('http://' + websiteId + '.web.acentera.com/?' + new Date())
         $.ajax({
           url: 'http://' + websiteId + '.web.acentera.com/?' + new Date(),
           type: 'GET',
@@ -347,12 +345,10 @@ export default {
                 ready()
                 return
               }
-              console.error(e)
               if (e.response === undefined) {
                 e.response = e
               }
               if (e.response.status === 404) {
-                console.error('404?')
                 if (itr <= 30) {
                   setTimeout(function () {
                     fctCheckNewSite(++itr)
@@ -369,7 +365,6 @@ export default {
                   }, 5000)
                 }
               } else {
-                console.error('404?')
               }
             } catch (ff) {
               if (itr <= 30) {

@@ -39,23 +39,7 @@ export default {
     /*
     * Sortable options init
     */
-    const el = document.getElementById('plekan-module-sortable-list')
-    if (el === undefined || el === null) {
-      console.error('EL IS UNDEF')
-    }
-    /*
-    console.error('EL 0111111')
-    Sortable.create(el, {
-      ...listSortableOptions,
-      onRemove: (e) => {
-        const index = e.clone.dataset.index;
-        this.addRow(index, e.newIndex);
-        this.attachEvent();
-      },
-    });
-    */
-
-    // this.attachEvent();
+    // const el = document.getElementById('plekan-module-sortable-list')
   },
   methods: {
     openModuleList () {
@@ -63,7 +47,6 @@ export default {
       document.querySelector('._plekan_list').classList.toggle('deactive')
     },
     attachEvent () {
-      console.error('attach events test')
       const els = this.$el.querySelectorAll('.plekan-list-item')
       Object.keys(els).map((i) => {
         els[i].onclick = (evt) => {
@@ -76,8 +59,6 @@ export default {
     addRowT (t, sortindex) {
       // this.$store.addRow(tmprow, sortindex)
       const tmprow = t // this.list[rowindex]
-      // console.error(tmprow)
-      // console.error(this.store)
       // this.store.addRow(tmprow, sortindex)
       this.store.commit('addRow', tmprow, sortindex)
     },

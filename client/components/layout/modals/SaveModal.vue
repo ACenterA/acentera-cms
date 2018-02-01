@@ -70,45 +70,11 @@ export default {
 
     create () {
       this.$emit('close', { title: this.pullTitle })
-      /*
-      if (!(this.filename.endsWith('.html'))) {
-        this.errorMsg = 'Filename must ends with .html'
-      } else {
-        this.errorMsg = null
-
-        var folderPath = this.object.original.Path + this.object.original.Name + '/'
-
-        if (this.object.original.Root) {
-          // its the root folder, do not create the folder....
-          folderPath = ''
-        }
-
-        var resp = {
-          folder: folderPath,
-          filename: this.filename,
-          headers: {
-            title: this.pageTitle
-          }
-        }
-        this.pageTitle = ''
-        this.filename = ''
-        this.$emit('createPage', resp)
-      }
-      */
     },
     validateFilename () {
-      console.log('validaing title' + this.filename)
       return false
     },
     validateTitle () {
-      console.log('validaing title' + this.pageTitle)
-      /*
-      // do nothing if there is no input token string
-      if (this.pageTitle === '') {
-        return
-      }
-      this.$http.post('/api/wrapping/unwrap', querystring.stringify({
-      */
       return true
     },
     checkAction (obj, val) {
@@ -136,8 +102,6 @@ export default {
       this.$emit('close')
     },
     edit (obj) {
-      console.log('emiting editObj')
-      console.log(obj)
       this.$emit('editObj', obj)
     },
     addPage () {

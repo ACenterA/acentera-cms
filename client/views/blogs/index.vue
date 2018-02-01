@@ -72,25 +72,15 @@ export default {
   },
 
   mounted: function () {
-    // $('.rightSide')[0].style.top = $('.app-sidebarblog').getBoundingClientRect().top
     var self = this
-    console.log('is github')
-    console.log(this)
-    console.log(this.github)
     this.$store.state.app.topbar.show = true
     this.$store.commit('deleteAllRows', 0, 1)
     this.$bus.$on('staticHtmlSelected', function (data) {
-      console.log('reciev inc dotal modal')
-      console.log(this)
       self.selectedObject = data
       self.showModal = true
     })
 
     this.$bus.$on('staticHtmlEdit', function (data) {
-      console.log('reciev edidt of ...data')
-      console.log(data)
-      // self.selectedObject = data
-      // self.showModal = true
       self.selectedPage = window.apiHost + '/widgetedit/' + data.original.Path + self.extra + '&widget=' + data.original.Path
     })
 
@@ -111,7 +101,6 @@ export default {
 
   events: {
     incrementTotal: function () {
-      console.log('total aaa')
     }
   },
 
@@ -119,27 +108,19 @@ export default {
     refreshData () {
       var self = this
       if (!this.$store.state.app.isLoaded) {
-        console.error('not loaded')
         return setTimeout(function () {
           self.refreshData()
         }, 1000)
       }
 
-      this.$httpApi.get(window.goHostUrl + '/blog/index.xml', {
+      this.$httpApi.get(window.goHostUrl + '/blogs/index.xml', {
         responseType: 'document'
       }).then((response) => {
-        console.error(response.data.childNodes[0].children[0])
         var jsObj = JSON.parse(JSON.parse(JSON.stringify(window.xml2json(response.data.childNodes[0].children[0])).replace('undefined', '')))
-        console.error(jsObj.channel.item)
-        // self.$store.state.app.topbar.json = jsObj.channel.item
-
-        // this.$data.chart = response.data
-        // this.$store.commit('TOGGLE_SIDEBAR', false)
         this.$store.commit('TOGGLE_SIDEBAR_BLOGDATA', true)
         this.$store.commit('TOGGLE_BLOGDATA', jsObj.channel.item)
       })
       .catch((error) => {
-        console.error(error.stack)
         this.$onError(error)
       })
     },
@@ -148,14 +129,10 @@ export default {
     },
 
     close () {
-      console.log('close here a')
       this.showModal = false
     },
 
     createWidget (obj) {
-      console.log('creating widget using')
-      console.log(obj)
-
       var filetmp = obj.folder
       var filepath = filetmp
       var ctr = 0
@@ -182,8 +159,6 @@ export default {
         // headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {
-        console.log('got response')
-        console.log(response)
         self.refreshData()
         self.close()
         self.$notify({
@@ -194,15 +169,12 @@ export default {
         this.selectedPage = window.goHostUrl + '/' + postData.path + '/' + postData.filename + self.extra
       })
       .catch((error) => {
-        console.log('got error eee')
-        console.log(error)
         self.close()
         self.$onError(error)
       })
     },
 
     editObj (obj) {
-      console.log('edit obj of')
     },
 
     closeModalBasic () {

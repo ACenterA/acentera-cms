@@ -62,8 +62,8 @@ export default {
 
   methods: {
     getList () {
-      console.log('route is')
-      console.log(this.$route)
+      // This is bad..
+      // Show base on route ???
       if ((('' + this.$route.path)).indexOf('/Pages') >= 0) {
         this.$data.show = false
       } else if ((('' + this.$route.path)).indexOf('/items') >= 0) {

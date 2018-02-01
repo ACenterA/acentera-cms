@@ -5,30 +5,19 @@ export const setSession = (state, session) => {
 }
 
 export const clearSession = (state, origState) => {
-  console.error('clear session here')
-  console.error(state)
   state.projectSelected = null
   state.session = null
-  console.error('SET PROJECT ID TO null')
   state.app.project = null
   state.app.projectId = null
   state.app.websiteId = null
   this.clearGit(state)
   window.localStorage.removeItem('session')
-//  window.localStorage.removeItem('selectedWebsite')
-//  window.localStorage.removeItem('selectedProject')
   var newState = JSON.parse(JSON.stringify(origState))
-  console.error('revert to')
-  console.error(newState)
 
   for (var key in newState) {
-    console.error('will set ' + key + ' to ' + newState[key])
     state.app[key] = newState[key]
   }
 
-  // state.app.isLoaded = false
-  // state.app.isLoaded = false
-  console.error('HIDE SIDEBAR')
   state.app.sidebar.hidden = true
   state.app.sidebar.opened = false
   state.app.sidebartwo.hidden = true
@@ -44,7 +33,6 @@ export const setInet = (state, val) => {
 }
 
 export const isLoaded = (state, val) => {
-  console.error('SET IS LOADED 1')
   state.app.isLoaded = val
 }
 
@@ -57,13 +45,9 @@ export const setProjectSelected = (state, val) => {
 }
 
 export const setProjectIdForCreation = (state, val) => {
-  console.error(state)
-  console.error('SET PROJECT ID TO ' + val)
   state.app.projectId = val
 }
 export const setWebsiteIdForCreation = (state, val) => {
-  console.error('SET WEBSITE ID TO ' + val)
-  console.error(state)
   state.app.websiteId = val
 }
 
@@ -85,10 +69,6 @@ export const setLanguage = (state, val) => {
 }
 
 export const toggleViewMenu = (state, val) => {
-  console.error('state togglle here')
-  console.error(state)
-  console.error('VAL IS:')
-  console.error(val)
   if (state.app) {
     state.app.viewMenu = val
   } else {
@@ -96,12 +76,9 @@ export const toggleViewMenu = (state, val) => {
   }
   if ($('.right-click-menu').length > 0) {
     if (val) {
-      console.error('set VISIBLE')
-      // $('.right-click-menu')[0].style.display = 'block'
       $('.right-click-menu').show()
       $('.right-click-menu').focus()
     } else {
-      console.error('set HIDDEN')
       $('.right-click-menu').hide()
       // $('.right-click-menu')[0].style.display = 'hidden'
     }
@@ -109,12 +86,18 @@ export const toggleViewMenu = (state, val) => {
 }
 
 export const toggleViewPos = (state, val) => {
-  console.error('state togglle here')
-  console.error(state)
   if (state.app) {
     state.app.viewMenuPos = val
   } else {
     state.viewMenuPos = val
+  }
+}
+
+export const toggleViewMenuType = (state, val) => {
+  if (state.app) {
+    state.app.viewMenuType = val
+  } else {
+    state.viewMenuType = val
   }
 }
 
@@ -147,34 +130,20 @@ export const resetRow = (state, r, i) => {
 }
 
 export const addRow = (state, r, i) => {
-  console.error('addRow TEST')
-  console.error(r)
-  console.error(i)
-
   const tmp = JSON.parse(JSON.stringify(r))
   tmp.index = uuid.v1()
-  console.error('add row here 01111')
   if (isNaN(i)) {
-    console.error('add row here 01111 a')
     state.rows.push(tmp)
-    console.error('add row here 01111 b')
   } else {
     state.rows.splice(i, 0, tmp)
   }
-
-  console.error('add row here 01111 c')
-  console.error('addlkjflsdkjflka lrROW')
-  console.error(state.rows)
-  console.error(window.vm)
   window.vm.$plekanEvent.onAdd(tmp)
 }
 
 export const updateRows = (index, row) => {
-  console.error('add row here 01111 GG')
   const tmp = JSON.parse(JSON.stringify(this.state.rows))
   tmp[index] = row
   this.state.rows = tmp
-  console.error(window.vm)
   window.vm.$plekanEvent.onUpdate(tmp, index)
 }
 
@@ -184,15 +153,9 @@ export const deleteRow = (r, i) => {
 }
 
 export const deleteAllRows = (state, r, i) => {
-  console.error('delete row test')
-  console.error('delete row test a')
-  console.error(state)
-  console.error(state.rows)
   if (state && state.rows) {
     var tmp = state.rows.shift()
     while (!(tmp === null || tmp === undefined)) {
-      console.error('deleteing of tmp')
-      console.error(tmp)
       window.vm.$plekanEvent.onDelete(tmp, 0)
       tmp = state.rows.shift()
     }
@@ -220,12 +183,6 @@ import { setActiveEditorButtons } from '../plekan/src/helper'
 import store from '../store'
 
 export const editorStart = (state) => {
-  console.error('editor Start ....... ')
-  console.error(document.getElementsByTagName('iframe')[0].contentWindow)
-  console.error('bus is')
-  console.error(window.$bus)
-
-  console.error(window.VueApp.$store)
   window.selo = new Selo({
     els: '[contenteditable]', // if you don't set el property, this property set as body by Selo
     iframe: document.getElementsByTagName('iframe')[0].contentDocument,
@@ -239,7 +196,6 @@ export const editorStart = (state) => {
     }
   }
 
-  console.error('editor Start A....... ')
   let left
   let top
   let width
@@ -248,9 +204,6 @@ export const editorStart = (state) => {
   let th
 
   const d = document.getElementsByTagName('iframe')[0].contentWindow.document
-  console.error('aazz3 ')
-  console.error(d)
-  console.error('editor Start B ....... ')
   window.editorElement = document.querySelector('.plekan-editor')
   window.editorElementDynamic = document.querySelector('.dynamic-editor')
   window.editorElementStable = document.querySelector('.stable-editor')
@@ -261,102 +214,97 @@ export const editorStart = (state) => {
   }
 
   state.sel = null
-  console.error('document is.... test')
-  console.error(document)
-  console.error(d)
   const bus = this.$bus || window.$bus
 
   bus.$on('removeSelectionEditor', () => {
-    console.error('remove selection')
+    // //console.error('remove selection')
   })
 
   /* eslint-disable */
   bus.$on('contextMenuEvent', (evtInfo) => {
     evtInfo.detail.preventDefault()
     const el = evtInfo.detail.target // window.selo.selection.focusNode.parentNode
-    console.error('contextmenuEvent ELEMENT ZZZZZZ')
-    // evtInfo.detail.screenX / evtInfo.detail.screenY
-    /*
-    var gb = window.selo.getPositionRange().getBoundingClientRect
-    // window.editorElementDynamic.style.left = `${calc.width / 2 + calc.left - editButtonWidth / 2}px`
-    // aaaa
 
-    var left = gb.left
-    var top = gb.top
-    var width = gb.width
+    // Well do not show menu
+    var parents = window.tempHelper.getParents($(el))
+    var targetEl = $(el)[0]
 
-    // if (window.editorElementDynamic.className.indexOf('active') === -1) {
-    console.error('Context menu left ' + left + ' and top :' + top)
-    */
+    var viewMenuType = null
+    var attrContentEditableIdx = -1 // el.attributes.indexOf('contenteditable')
+    for (var i = targetEl.attributes.length - 1; i >= 0; i--) {
+      if (targetEl.attributes[i].name === 'contenteditable') {
+        attrContentEditableIdx = i
+      }
+    }
 
-    // console.error(this)
-    window.vm.$store.commit('toggleViewMenu', true)
-    console.error('set new post of')
+    if (attrContentEditableIdx === -1) {
+      // Not found lets find closet parent...
+      var findParentObject = $(el).parents('[show-editor-menu]')
+      if (findParentObject.length >= 1) {
+        targetEl = findParentObject[0]
+        for (var i = targetEl.attributes.length - 1; i >= 0; i--) {
+          if (targetEl.attributes[i].name === 'show-editor-menu') {
+            attrContentEditableIdx = i
+            break
+          }
+        }
+      }
+    }
 
-    // var tmpLeft = evtInfo.detail.screenX || 0
-    // var tmpTop = evtInfo.detail.screenY || 0
-    var tmpLeft = evtInfo.detail.pageX || 0
-    var tmpTop = evtInfo.detail.pageY || 0
+    if (attrContentEditableIdx !== -1) {
+      // //console.error('THIS WAS A VALID CONTEXT MENU')
+    } else {
+      // Not a valid contextmenu option
+      return
+    }
 
-    var tmpOffset = $('.plekan-outerdiv')
-    tmpOffset = $(el).offset()
-    console.error('OFS3')
-    console.error(tmpOffset)
-    // if (tmpOffset && tmpOffset[0]) {
-    // tmpLeft -= tmpOffset[0].offsetLeft
-    // tmpTop -= tmpOffset[0].offsetTop
-    // }
-    console.error('a SCROLL TOP ?')
+    viewMenuType = targetEl.attributes[attrContentEditableIdx].value
 
-    var target_body = $(el).parents('body')
+    if (('' + viewMenuType) !== 'false') {
+      window.vm.$store.commit('toggleViewMenu', true)
 
-    console.error(target_body.scrollTop())
-    tmpTop -= target_body.scrollTop()
+      var tmpLeft = evtInfo.detail.pageX || 0
+      var tmpTop = evtInfo.detail.pageY || 0
 
-    // TODO: If position is > than window - 200px compute tmpLeft -= 200 (to mmake sure )
-    // context menu doesnt go out of screen
-    // if (tmpLeft >= winW-200 ) {
-    // }
+      var tmpOffset = $('.plekan-outerdiv')
+      tmpOffset = $(el).offset()
 
-    console.error({ top: tmpTop, left: tmpLeft })
-    window.vm.$store.commit('toggleViewPos', { top: tmpTop, left: tmpLeft })
-    // $('.right-click-menu')[0].style.display = 'block'
-    $('.right-click-menu')[0].style.top = tmpTop + 'px'
-    $('.right-click-menu')[0].style.left = tmpLeft + 'px'
+      var target_body = $(el).parents('body')
+
+      tmpTop -= target_body.scrollTop()
+
+      // TODO: If position is > than window - 200px compute tmpLeft -= 200 (to mmake sure )
+      // context menu doesnt go out of screen
+      // if (tmpLeft >= winW-200 ) {
+      // }
+
+      window.vm.$store.commit('toggleViewPos', { top: tmpTop, left: tmpLeft })
+      window.vm.$store.commit('toggleViewMenuType', viewMenuType)
+
+      // $('.right-click-menu')[0].style.display = 'block'
+      $('.right-click-menu')[0].style.top = tmpTop + 'px'
+      $('.right-click-menu')[0].style.left = tmpLeft + 'px'
+    }
   })
   /* eslint-enable */
 
   /* eslint-disable */
   bus.$on('selectionEnd', () => {
     if (!window.blogeditor) {
-      console.error('this is currently disabled....')
-      console.error('this is currently disabled....')
-      console.error('this is currently disabled....')
-      console.error('this is currently disabled....')
       return
     }
 
-    // console.error('selectionEND add event.. start')
     const el = window.selo.selection.focusNode.parentNode
-    console.error('ADDEDITOR ELEMENT ZZZZZZ')
-    console.error(el)
-    console.error(el.attributes)
 
     var attrContentEditableIdx = -1 // el.attributes.indexOf('contenteditable')
     for (var i = el.attributes.length - 1; i >= 0; i--) {
-      console.error('test content? ')
-      console.error(el.attributes[i])
-      // console.error('test content idx ? ' + ('' + el.attributes[i]).indexOf('contenteditable') + " vs " + el.attributes[i].value)
       if (el.attributes[i].name === 'contenteditable') {
         attrContentEditableIdx = i
       }
     }
 
     if (attrContentEditableIdx !== -1) {
-      console.error('ZZZ ADDEDITOR ELEMENT AAAAAAAA 1 idx : ' + attrContentEditableIdx)
-      console.error(el.attributes[attrContentEditableIdx].value)
       if (('' + el.attributes[attrContentEditableIdx].value) === 'false') {
-        console.error('ZZZ RETURN HERE')
         return
       }
     }
@@ -378,23 +326,7 @@ export const editorStart = (state) => {
 
     _left = _left > possibleLeft ? possibleLeft : _left
 
-
-    // find the corresponding iframe container
-    /*
-    var iframe = $('.arenatest').filter(function () {
-      var iframe_body = $(this).contents().find('body')
-      return iframe_body.get(0)
-    })
-    var tmpTop = $(iframe).offset().top
-    console.error('OLD TMP TOP')
-    */
-    // console.error(tmpTop)
-    // console.error(window.pageYOffset)
-    // console.error(d.pageYOffset)
-
-    // console.error($(iframe).offset().top)
     var oldTmpTop = $(d).scrollTop()
-    // window.editorElementDynamic.style.left = `${_left}px` // this is done in the mouseover...
     window.editorElementDynamic.style.top = `${_top}px`
     window.editorElementDynamic.attributes['top'] = `${_top}`
     window.editorElementDynamic.attributes['scrolltop'] = `${oldTmpTop}`
@@ -409,8 +341,6 @@ export const editorStart = (state) => {
   })
 
   bus.$on('selectionStart', () => {
-    console.error('selectionSTart add event.. start')
-
     // const d = document.getElementsByTagName('iframe')[0].contentWindow.document
     // gb = d.getBoundingClientRect
     gb = window.selo.getPositionRange().getBoundingClientRect
@@ -422,26 +352,17 @@ export const editorStart = (state) => {
     width = gb.width
 
     if (window.editorElementDynamic.className.indexOf('active') === -1) {
-    /*
-      console.error('ggaa set left to .... ' + left)
-      console.error(d)
-      console.error($('.plekan-outerdiv'))
-      console.error($('.plekan-outerdiv')[0].offsetLeft)
-      */
       var tmpOffset = $('.plekan-outerdiv')
       if (tmpOffset && tmpOffset[0]) {
         left += tmpOffset[0].offsetLeft
         top += tmpOffset[0].offsetTop
       }
 
-      // console.error($('.plekan-outerdiv')[0].offsetLeft + " vs " + )
       window.editorElementDynamic.style.left = `${left + width / 2 - tw / 2}px`
       window.editorElementDynamic.style.top = `${top - th}px`
     }
     state.sel = window.selo.saveSelection()
   })
 
-  console.error('editor Start CCC ....... ')
-  console.error(bus)
   bus.$on('selectionBeforeStart', () => {})
 }

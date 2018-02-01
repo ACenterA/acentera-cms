@@ -39,7 +39,7 @@
             <div v-if="username === null" class="field">
               <article class="message is-warning">
                 <div class="message-body">
-                  <strong>You must be logged in to enable SSH Keys</strong>
+                  <strong>You must be logged in to manage SSH Keys</strong>
                 </div>
               </article>
             </div>
@@ -67,8 +67,8 @@
                         @click="testFetch()">
                         <span>Test SSH Key</span>
                       </a>
-                      <a class="button rightfloat is-primary" title="Not yet implemented"
-                        @click="deleteSSHKeys()" disabled>
+                      <a class="button rightfloat is-primary" title="Delete the ssh key created"
+                        @click="deleteSSHKeys()">
                         <span>Delete SSH Key</span>
                       </a>
                     </p>
@@ -100,6 +100,7 @@ export default {
       type: 'Token',
       ID: '',
       pubKey: '',
+      creating: false,
       Password: '',
       healthData: {},
       sshValid: true,
@@ -120,7 +121,8 @@ export default {
     ...mapGetters({
       session: 'session',
       repoState: 'repoState',
-      isWebsite: 'isWebsite'
+      isWebsite: 'isWebsite',
+      github: 'github'
     }),
     healthKeys: function () {
       return Object.keys(this.healthData)
@@ -242,7 +244,79 @@ export default {
       })
     },
     deleteSSHKeys: function () {
+      var self = this
+      if (this.$store.state.app.website) {
+        // No SshKey when using the hosted version.
+        // We will use username / password passed on specific requests,
+        // as we do not store any credentials
+        return
+      }
 
+      this.$httpApi.get(window.apiUrl + '/sshkeys?action=test').then((response) => {
+        if (response.data.Data.indexOf('SSH Is Valid') >= 0) {
+          var keySuffix = response.data.Extra
+          if (keySuffix && keySuffix.startsWith('ssh-rsa')) {
+            // Ok lets delete it from Git user account ...
+            var userGetPath = '/user/keys'
+            var $gitobj = self.$github
+            if (self.$store.state.github && self.$store.state.github.logininfo && self.$store.state.github.logininfo.type === 'BitBucket') {
+              $gitobj = self.$bitbucket
+              userGetPath = '1.0/users/' + self.$store.state.github.logininfo.username + '/ssh-keys'
+            }
+            var gitInfo = self.github
+            $gitobj.setUserPass(gitInfo.logininfo.user, gitInfo.logininfo.pass)
+            $gitobj.get(userGetPath, {}, function (resp) {
+              // If BitBucket ?
+              var keyToDelete = null
+              var len = resp.length
+              for (var i = 0; i < len; i++) {
+                if (resp[i].key === keySuffix) {
+                  if ($gitobj === self.$bitbucket) {
+                    keyToDelete = resp[i].pk
+                  } else {
+                    keyToDelete = resp[i].id
+                  }
+                  break
+                }
+              }
+              var keyDeletePath = userGetPath
+              if (keyToDelete !== null) {
+                keyDeletePath += '/' + keyToDelete
+              }
+              $gitobj.delete(keyDeletePath, function (delResp) {
+                if (delResp.status >= 200 && delResp.status < 300) {
+                  self.sshValid = false
+                  self.$httpApi.post(window.apiUrl + '/sshkeys?action=delete', { Data: keySuffix }).then((response) => {
+                    if (response.status === 204) {
+                      self.sshValid = false
+                    } else {
+                      // error deleting?
+                    }
+                    self.toggleRepoState(6) // need to setup SSH Key for the user
+                  })
+                  .catch((error) => {
+                    self.$onError(error)
+                  })
+                }
+              }, (error) => {
+                self.$onError(error)
+              })
+            }, (error) => {
+              self.$onError(error)
+            })
+          }
+        }
+      })
+      .catch((error) => {
+        if (self.sshValid) {
+          self.sshValid = false
+          if (error && error.response && error.response.status === 500) {
+            self.toggleRepoState(6) // need to setup SSH Key for the user
+          } else {
+            self.$onError(error)
+          }
+        }
+      })
     },
     testFetch: function () {
       var self = this
@@ -253,11 +327,7 @@ export default {
       }
 
       this.$httpApi.get(window.apiUrl + '/sshkeys?action=test').then((response) => {
-        // console.log('ssh key test is')
-        // console.log(response)
-        // console.log(response.data.Data.indexOf('SSH Is Valid'))
         if (response.data.Data.indexOf('SSH Is Valid') >= 0) {
-          console.log('ssh valid set to true')
           self.sshValid = true
           self.toggleRepoState(0) // all good
         } else {
@@ -265,12 +335,8 @@ export default {
         }
       })
       .catch((error) => {
-        console.log('set ssh valid to false??')
-        console.log(error)
         if (self.sshValid) {
           self.sshValid = false
-          console.error(error)
-          console.error('err3')
           if (error.response.status === 500) {
             self.toggleRepoState(6) // need to setup SSH Key for the user
           } else {
@@ -280,62 +346,52 @@ export default {
       })
     },
     createSSHKey: function () {
-      console.log('creat ssh key')
       this.sshKeyCreateError = false
+      if (this.creating) {
+        // prevent double creates ...
+        return
+      }
+      this.creating = true
 
       var self = this
-      // console.log(this.logininfo)
-      // ensure to use login credentials first...
-      console.log('sshkey test a')
       var userGetPath = 'user'
       var userPostPath = '/user/keys'
       var $gitobj = this.$github
-      console.log('type test')
       if (this.$store.state.github && this.$store.state.github.logininfo && this.$store.state.github.logininfo.type === 'BitBucket') {
         $gitobj = this.$bitbucket
         userGetPath = '1.0/users/' + this.$store.state.github.logininfo.username
         userPostPath = '1.0/users/' + this.$store.state.github.logininfo.username + '/ssh-keys'
       }
-      console.log(this.$store.state.github.logininfo)
       $gitobj.setUserPass(this.logininfo.username, this.logininfo.pass)
       $gitobj.get(userGetPath, {}, function (next) {
-        console.log('success fully got user informations...')
         self.$http.get(window.apiUrl + '/sshkeys?action=create').then((response) => {
-          console.log('doing SSH KEY CREATE done')
           if (response.data !== undefined && response.data !== null) {
             self.pubKey = response.data.Data
             if (self.pubKey !== undefined && self.pubKey !== null) {
-              console.log(response.data)
               var githubPush = {
                 key: self.pubKey
               }
 
               if (self.$store.state.github.logininfo.type === 'BitBucket') {
                 githubPush['accountname'] = self.$store.state.github.logininfo.username
-                githubPush['label'] = 'ServerlessCMS Generated'
+                githubPush['label'] = 'ACenterA CMS Generated - ' + response.data.Extra
               }
-              console.log('will create ssh key')
-              console.log(githubPush)
-
               $gitobj.post(userPostPath, githubPush, function (resp) {
-                console.log('received git response for ssh key creation')
-                console.log(resp)
                 if (resp.status === 201 || resp.status === 200) { // 200 = BitBucket success response, 201 = Github success response
                   // SSH Key got created... NICE! Lets fetch
                   self.testFetch()
+                  self.creating = false
                 }
               }, function (err) {
-                console.log('recieved github error?')
-                console.log(err)
+                console.error(err)
+                self.creating = false
               })
             }
           }
           self.sshKeyCreateError = true
         })
         .catch((error) => {
-          console.error('got error of')
-          console.error(error)
-          console.error('err4')
+          this.creating = false
           if (error.response.status === 500) {
             this.sshKeyCreateError = true
           } else {

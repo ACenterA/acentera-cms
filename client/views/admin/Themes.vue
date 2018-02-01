@@ -91,9 +91,9 @@ export default {
 
   mounted: function () {
     var self = this
+    // TODO: Fetch from github, if fail get local file?
     this.$http.get('/assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
-      console.log('got monuted raw json')
       self.themes = response.data
       this.switchTab(0)
     }).catch((error) => {
@@ -117,40 +117,25 @@ export default {
       var self = this
 
       if (!this.$store.state.app.isLoaded) {
-        console.error('not loaded')
         return setTimeout(function () {
           self.switchTab(index)
         }, 1000)
       }
+      // TODO: This language selection is done from a global function refreshConfig now
+      // we should add a callback and do remaining logic here... in the callback function?
 
       this.$httpApi.get(window.apiUrl + '/settings').then((response) => {
-        console.log('got http get')
-        console.log(response)
         let result = response.data
-        console.log(result)
-
-        /*
-        let keys = Object.keys(result)
-        for (var i = 0; i < keys.length; i++) {
-          console.log(keys[i])
-          console.log(result[keys[i]])
-        }
-        */
         if (result.hasOwnProperty('theme')) {
           self.theme = result.theme
         }
         if (result.hasOwnProperty('languages')) {
-          console.log('LANGS ARE')
-          console.log(result.languages)
-
           var TempAvailablelanguages = []
           var TempAvailablelanguageshash = {}
 
           let langkeys = Object.keys(result.languages)
           self.allSettings = result
           for (var i = 0; i < langkeys.length; i++) {
-            console.log('Languages are:' + langkeys[i])
-            console.log(result.languages[langkeys[i]])
             var tmpLang = result.languages[langkeys[i]]
             tmpLang.id = langkeys[i]
             tmpLang.value = langkeys[i]
@@ -170,11 +155,8 @@ export default {
     },
     loadLanguageDetails (lang) {
       if (lang !== undefined) {
-        console.log('language load detail of' + lang.languagename)
-        console.log(lang)
         this.selectedLangItem = this.availableLanguagesHash[lang]
       }
-      console.log(this.availableLanguagesHash)
     },
     openModalBasic (index) {
       this.selectedIndex = index
@@ -193,10 +175,8 @@ export default {
       // this.showDeleteModal = false
     },
     save (json) {
-      // console.log(this.allSettings)
       var self = this
       this.$httpApi.post(window.apiUrl + '/settings', this.allSettings, {}).then((response) => {
-        console.log('SAVED')
         if (json !== undefined) {
           self.theme = json.Name
         }

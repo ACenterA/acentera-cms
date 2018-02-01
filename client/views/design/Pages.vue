@@ -68,21 +68,12 @@ export default {
 
   mounted: function () {
     var self = this
-    console.log('is github')
-    console.log(this)
-    console.log(this.github)
     this.$bus.$on('staticHtmlSelected', function (data) {
-      console.log('reciev inc dotal modal')
-      console.log(this)
       self.selectedObject = data
       self.showModal = true
     })
 
     this.$bus.$on('staticHtmlEdit', function (data) {
-      console.log('reciev edidt of ...data')
-      console.log(data)
-      // self.selectedObject = data
-      // self.showModal = true
       self.selectedPage = window.goHostUrl + '/' + data.original.Path + self.extra
     })
 
@@ -103,7 +94,6 @@ export default {
 
   events: {
     incrementTotal: function () {
-      console.log('total aaa')
     }
   },
 
@@ -111,19 +101,12 @@ export default {
     refreshData () {
       var self = this
       if (!this.$store.state.app.isLoaded) {
-        console.error('not loaded')
         return setTimeout(function () {
           self.refreshData()
         }, 1000)
       }
-      console.log('get file listing')
-      console.error('CALLED REFRESH DATA HERE.... using ' + window.apiUrl)
       this.$httpApi.get(window.apiUrl + '/filelist').then((response) => {
         this.$data.chart = response.data
-        // this.$store.commit('TOGGLE_SIDEBAR', false)
-        console.error('GOT FILE LIST DATA .....')
-        console.error(response)
-        // this.$store.commit('TOGGLE_SIDEBAR_TWO_DATA', response.data.StaticHtml) // response.data)
         this.$store.commit('TOGGLE_SIDEBAR_TWO_DATA', response.data) // response.data)
         this.$store.commit('TOGGLE_SIDEBAR_TWO', true)
       })
@@ -133,18 +116,9 @@ export default {
     },
 
     close () {
-      console.log('close here a')
       this.showModal = false
     },
-    /*
-    editObj () {
-      console.log('edit obj of a')
-    },
-    */
     createPage (obj) {
-      console.log('creating page using')
-      console.log(obj)
-
       var filetmp = obj.folder
       var filepath = filetmp
       var ctr = 0
@@ -171,8 +145,6 @@ export default {
         // headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {
-        console.log('got response')
-        console.log(response)
         self.refreshData()
         self.close()
         self.$notify({
@@ -183,23 +155,17 @@ export default {
         this.selectedPage = window.goHostUrl + '/' + postData.path + '/' + postData.filename + self.extra
       })
       .catch((error) => {
-        console.log('got error eee')
-        console.log(error)
         self.close()
         self.$onError(error)
       })
     },
 
     editObj (obj) {
-      console.log('edit obj of')
-      console.log(obj)
-      console.log(obj.original.Path)
       this.selectedPage = window.goHostUrl + '/' + obj.original.Path
       this.showModal = false
     },
 
     closeModalBasic () {
-      console.log('close modal basic here')
       this.selectedIndex = -1
       this.showModal = false
     },
@@ -210,11 +176,9 @@ export default {
     },
 
     incrementTotal: function () {
-      console.log('total aaa')
     },
 
     openWrench: function () {
-      console.log('azz')
     },
 
     encryptText: function () {

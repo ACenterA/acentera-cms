@@ -149,8 +149,6 @@
     },
     methods: {
       updateGituser: function (param) {
-        console.log('updagint paal data')
-        console.log(param)
         var loginfo = {
           user: this.tmpUsername,
           username: this.tmpUsername,
@@ -160,7 +158,6 @@
         Vue.set(this.parallelData, 'user', param)
         Vue.set(this.parallelData, 'logininfo', loginfo)
 
-        console.error('SET GITHUB HERE 00001')
         window.localStorage.setItem('github', JSON.stringify(this.parallelData))
         this.$store.commit('setGit', this.parallelData)
 
@@ -170,9 +167,6 @@
       },
 
       updateBitbucketuser: function (param) {
-        console.log('A2 updating bitbucket data')
-        console.log('UPDATING GIT TEST 01- CC ')
-        console.log(param)
         var loginfo = {
           user: this.tmpUsername,
           username: param.username,
@@ -183,7 +177,6 @@
         Vue.set(this.parallelData, 'user', param)
         Vue.set(this.parallelData, 'logininfo', loginfo)
 
-        console.error('SET GITHUB HERE 9999')
         window.localStorage.setItem('github', JSON.stringify(this.parallelData))
         this.$store.commit('setGit', this.parallelData)
 
@@ -202,23 +195,13 @@
         this.bitbucket = false
       },
       isLogIn: function () {
-        console.log('aaa')
-        console.log(this.username)
         return this.username !== null && this.username !== undefined
       },
       validateGithubLogin: function () {
-        console.log('validate githbu user')
-        console.log(this.tmpUsername)
-        console.log(this.password)
-
         this.$github.setUserPass(this.tmpUsername, this.password)
         this.$github.get('user', {}, this.updateGituser, this.gitError)
       },
       validateBitBucketLogin: function () {
-        console.log('validate githbu user')
-        console.log(this.tmpUsername)
-        console.log(this.password)
-
         this.$bitbucket.setUserPass(this.tmpUsername, this.password)
         this.$bitbucket.get('/2.0/user', {}, this.updateBitbucketuser, this.gitError)
       },
@@ -229,21 +212,15 @@
         return 'GitHub Username'
       },
       isGithubValid: function () {
-        console.log('difjkslfjl a : ' + ((this.tmpUsername === undefined)) + ' vs ' + this.tmpUsername)
         if ((this.tmpUsername === undefined || this.tmpUsername === '') || (this.password === undefined || this.password === '')) {
-          console.log('AA')
           return false
         }
-        console.log('BBB')
         return true
       },
       isBitBucketValid: function () {
-        console.log('difjkslfjl a : ' + ((this.tmpUsername === undefined)) + ' vs ' + this.tmpUsername)
         if ((this.tmpUsername === undefined || this.tmpUsername === '') || (this.password === undefined || this.password === '')) {
-          console.log('AA')
           return false
         }
-        console.log('BBB')
         return true
       },
       logoutGithub: function () {
@@ -252,7 +229,6 @@
         this.$store.commit('clearGit')
       },
       gitError: function (e) {
-        console.log('error')
         if (e.toString().indexOf('code 401')) {
           // Invalid user
         }

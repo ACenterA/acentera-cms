@@ -1,6 +1,6 @@
 <template>
   <modal :visible="visible" @close="close">
-      <div class="tile is-ancestor box is-vertical">
+      <div class="tile is-ancestor box is-vertical" style='min-height:330px'>
         <div class="tile">
 
           <!-- Left side -->
@@ -157,7 +157,6 @@ export default {
         // this.websiteProjectName = result
         return result
       } catch (ff) {
-        console.error(ff)
       }
     },
     repositoryNameValidator () {
@@ -170,11 +169,9 @@ export default {
         this.repositoryName = result
         return result
       } catch (ff) {
-        console.error(ff)
       }
     },
     closeAndLogout () {
-      console.error('SET GITHUB HERE LOGOUT CLEAR')
       window.localStorage.setItem('github', JSON.stringify({}))
       this.$store.commit('setGit', {})
       this.$emit('close')
@@ -183,16 +180,12 @@ export default {
       this.$emit('close')
     },
     gitError: function (e) {
-      console.log('error')
-      console.error(e)
       if (e.toString().indexOf('code 401')) {
         // Invalid user
       }
       this.processing = false
     },
     gitDeleteRepoError: function (e) {
-      console.log('error')
-      console.error(e)
       if (e.toString().indexOf('code 401')) {
         // Invalid user
       }
@@ -204,7 +197,6 @@ export default {
 
       this.processing = true
       var userPostPath = 'user/repos'
-      console.log('would create of repo : ')
       var $gitobj = this.$github
       var repoReqObj = {
         'name': self.repositoryNameValidator(),
@@ -221,16 +213,9 @@ export default {
           is_private: true
         }
       }
-      console.error('TEST STATE SESSION?')
-      console.error(self.$store.state)
-      console.error(self.$store.state.session.token)
-      console.log(this.$store.state.github.logininfo)
-
       $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
 
-      console.log(repoReqObj)
       $gitobj.post(userPostPath, repoReqObj, function (response) {
-        console.log('success fully Created new Repository...')
         var next = response.data
         // self.sendDeleteRepo()
         /*
@@ -307,26 +292,16 @@ export default {
           'title': self.websiteTitle,
           'repodetails': repoDetail,
           'theme': 'hugo-agency-theme',
-          'template_repo': 'https://github.com/FLavalliere/my-first-blog',
+          'template_repo': self.template.Repository, // 'https://github.com/FLavalliere/my-first-blog',
           'template_branch': 'master'
         }
 
         var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create'
-        console.error('posting to ' + initSiteRepoCall)
-        console.error(initSite)
 
         var h = { 'authorization': 'Bearer ' + self.$store.state.session.token }
-        // console.error(' TEST AUTHORIZATION ')
-        // console.error(h)
-
-        console.error('SENDINT POST A 01')
         self.$http.post(initSiteRepoCall, initSite, {
           headers: h
         }).then((response) => {
-          console.error('GOT RESP')
-          console.error('posted it')
-          console.error(response)
-          console.error('WILL SET PROJECT ID TO ' + response.data.projectId)
           self.$store.commit('setProjectIdForCreation', response.data.projectId)
           self.$store.commit('setWebsiteIdForCreation', response.data.websiteId)
           self.processing = false
@@ -346,7 +321,6 @@ export default {
           }
 
           $gitobj.delete(userDelPath, function (next) {
-            console.log('success fully deleted newly created Repo...')
             self.processing = false
           }, self.gitDeleteRepoError)
         })
@@ -455,7 +429,6 @@ export default {
             "subscribers_count": 1
           }
         */
-        // console.error(next)
       }, self.gitError)
     },
     sendDeleteRepo () {
@@ -463,29 +436,18 @@ export default {
       var self = this
       this.processing = true
       // ensure to use login credentials first...
-      console.log('github state')
-      console.log(this.$store.state.github)
-      console.log(this.$store.state)
-      console.log(this.$store.state.app.repoState.url)
-      console.log(this.$store.state.github.logininfo.username)
 
       var userPostPath = 'user/repos' // api/v3/users/' + this.$store.state.github.logininfo.username + '/' + 'repos' + '/' + self.repositoryNameValidator()
-      console.log('would create of repo : ')
-      // console.log(userGetPath)
       var $gitobj = this.$github
-      console.log('type test')
       // curl -H "Authorization: token xxx" https://github.COMPANY_NAME.com/api/v3/users/USER/repos
-      console.log($gitobj)
 
       if (this.$store.state.github.logininfo.type === 'BitBucket') {
         $gitobj = this.$bitbucket
         userPostPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + self.repositoryNameValidator()
       }
-      console.log(this.$store.state.github.logininfo)
       $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
 
       $gitobj.delete(userPostPath, function (next) {
-        console.log('success fully deleted newly created Repo...')
         self.processing = false
       }, this.gitDeleteRepoError)
     }

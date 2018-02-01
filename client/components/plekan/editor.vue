@@ -80,14 +80,6 @@ export default {
     }
   },
   mounted () {
-  /*
-    var offset = function (el) {
-      // var rect = el.getBoundingClientRect()
-      var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
-      var scrollTop = window.pageYOffset || document.documentElement.scrollTop
-      return { top: scrollTop, left: scrollLeft }
-    }
-*/
     /** @type {Array} Düzenlenebilir DOM elementleri */
     const editableTag = ['NAV', 'HEADER', 'SECTION', 'DIV', 'IFRAME', 'IMG', 'A', 'SCRIPT', 'UL', 'LI', 'SPAN']
     const d = document.getElementsByTagName('iframe')[0].contentWindow.document
@@ -112,11 +104,6 @@ export default {
     var oldTarget = null
     var oldIframe = null
     d.addEventListener('mouseover', (e) => {
-      console.error('zzz3a')
-      console.error(window.editorElementDynamic)
-      // console.error(document.querySelector('.plekan-editor .animated.dynamic-editor'))
-      console.error(window.editorElementDynamic)
-      console.error(window.editorElementDynamic.className)
       editorIsVisible =
         window.editorElementDynamic.className.indexOf('active') !== -1
 
@@ -127,21 +114,11 @@ export default {
       calc = target.getBoundingClientRect()
 
 
-      console.error('TEST EDITABLE TAG')
-      console.error(tagname)
       if (true || editableTag.indexOf(tagname) !== -1) {
         parents = hasParent(e.target, 'plekan-row-item')
-        console.error('TEST EDITABLE TAG A')
         if (parents) {
-          console.error('TEST EDITABLE TAG B')
-          console.error(self)
-          console.error(d)
-          console.error(e.target)
           const st = target.scrollTop
 
-          console.error('test aaaa')
-          console.error(target)
-          // console.error(target.attributes.hasOwnProperty('parameditable'))
           if (! target.attributes.hasOwnProperty('parameditable')) {
             editButton.style.display = 'none'
             editButton.classList.remove('is-visible')
@@ -168,7 +145,6 @@ export default {
 
           window.editorElementDynamic.attributes['top'] = `${calc.height / 2 + st + calc.top - editButtonHeight / 2 + window.pageYOffset}`
           window.editorElementDynamic.attributes['scrolltop'] = $(d).scrollTop()
-          console.error(window.editorElementDynamic.attributes)
           var left = $(oldIframe).offset().left + $(oldTarget).offset().left - $(d).scrollLeft()
 
           // This was used when using position: fixed ....
@@ -176,10 +152,6 @@ export default {
             // editButton.style.top = `${top - editButtonHeight / 2}px`
             // editButton.style.top = `${top - editButtonHeight / 2}px`
 
-          console.error('calc is ...')
-          console.error(calc)
-
-          console.error('let window editor?')
           editButton.style.left = `${calc.width / 2 + calc.left - editButtonWidth / 2}px`
         }
       } else if (target.parentNode !== editButton && target !== editButton) {
@@ -194,40 +166,22 @@ export default {
     // window.scroll = null; // unbind the event before scrolling
     d.addEventListener('scroll', function (event) {
 
-      console.error('scroll test A')
-      console.error(window.editorElementDynamic.classList)
-      console.error(editButton.classList)
       if (editButton.classList.contains('is-visible')) { // window.editorElementDynamic.classList.contains('active')) {
-        console.error('scroll test B')
         // This was used when using position: fixed ....
-
         // var top = $(oldIframe).offset().top + $(oldTarget).offset().top - $(d).scrollTop()
         var oldTmpTop = $(d).scrollTop()
-        console.error('TEST ...')
-        console.error(oldTmpTop)
-        console.error(window.editorElementDynamic.attributes['top'])
+
         var orig = window.editorElementDynamic.attributes['top']
         var scrollOrig = window.editorElementDynamic.attributes['scrolltop']
         var newScrollDiff = parseInt(scrollOrig) - oldTmpTop
         if (parseInt(scrollOrig) > oldTmpTop) {
           scrollOrig = scrollOrig - oldTmpTop
         }
-        console.error('set new top from ' + orig + ' to ' + newScrollDiff)
         //  scrollOrig = scrollOrig - oldTmpTop
         var _top = parseInt(orig) + parseInt(newScrollDiff)
-        console.error('TEST NEW TOP...' + _top)
         window.editorElementDynamic.style.top = `${_top}px`
-        console.error('update to ' + _top)
         editButton.style.top = `${_top}px`
         // editButton.style.top = `${_top}px`
-        /*
-        console.error('scroll test C')
-        const st = oldTarget.scrollTop
-        console.error('scroll test D')
-        calc = oldTarget.getBoundingClientRect()
-        console.error('scroll test E')
-        //editButton.style.top = `newScrollDiff}px`
-        */
       }
       /*
       if (editButton.style.display !== 'none') {
@@ -245,14 +199,9 @@ export default {
     const editorItems = document.querySelectorAll('.plekan-editor a')
 
     Object.keys(editorItems).map((e) => {
-      console.error('add event listener to')
-      console.error(editorItems[e])
       editorItems[e].addEventListener('click', (item) => {
-        console.error('ON CLICK HERE TSET')
-        console.error(item)
         item.preventDefault()
         const cmd = item.target.dataset.type
-        console.error(cmd)
         switch (cmd) {
           case 'createLink':
             document.querySelector('.create-link').classList.add('active')
@@ -262,7 +211,6 @@ export default {
           // ------------
           // eslint-disable-next-line
           case 'custom':
-            console.error('custom event test')
             const customButton = self.$customEditorButtons[e.target.dataset.index]
             customButton.callback({
               target: e.target,
@@ -272,7 +220,6 @@ export default {
             })
             break
           case 'close':
-            console.error('recv close')
             window.editorElementDynamic.classList.remove('active')
             break
           case 'color':
@@ -303,7 +250,6 @@ export default {
      * DOM element'inin değiştiğinde modal kapanır
      */
     this.$bus.$on('domupdated', () => {
-      console.error('received domupdated?')
       this.editableModal = false
     })
 
@@ -314,9 +260,7 @@ export default {
      *   1. Hangi modal'ın kapatıltığına göre işlem yapılması gerekir
      *   2. Modal içindeki değişikler sağlanmalı
      */
-    console.error('set request hidden modal 01...')
     this.$bus.$on('requestHiddenModal', () => {
-      console.error('request hidden modal 01')
       this.showColorModal = false
       this.editableModal = false
       this.showFileUploadModal = false

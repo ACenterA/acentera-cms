@@ -463,22 +463,9 @@ export default {
         }
         return
       }
-      /*
-      // populate new table data according to tab name
-      this.$http.get('/api/users?type=' + this.tabName).then((response) => {
-        this.tableData = response.data.result
-        this.csrf = response.headers['x-csrf-token']
-      })
-      .catch((error) => {
-        this.$onError(error)
-      })
-      */
 
-      console.error('TMP GIT TEST...')
-      console.error(this.$store.state.app.repoState)
       var tmpGit = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).lastIndexOf('/') + 1)
       tmpGit = tmpGit.substring(0, tmpGit.lastIndexOf('.git'))
-      console.log(tmpGit)
 
       var isGitHub = true
       var userPostPath = 'repos/' + this.$store.state.github.logininfo.username + '/' + tmpGit
@@ -503,42 +490,30 @@ export default {
 
       $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
       $gitobj.get(userPostPath, {}, function (next) {
-        console.log('success fully POSTED PULL informations...')
         if (isGitHub) {
 
         } else {
           // its bitbucket response..
-          console.log(next)
           // var page = next.page // current page
           // var pageLen = next.pagelen // nuber of elements total in a page
           // var size = next.size // current page number of element
           var pullReqs = next.values || next
           var theItems = []
-          console.log('pullreqz?' + index + ' and ' + isGitHub)
           if (index === 0 && !isGitHub) {
             // only for v1.0 bitbucket as no filtering yet
-            console.log('nice')
-            console.log(pullReqs)
             for (var property in pullReqs) {
               if (pullReqs.hasOwnProperty(property)) {
                 // do stuff
-                console.log('test branch ?')
-                console.log(pullReqs[property])
                 var branchInfo = pullReqs[property]
-                console.log(branchInfo['message'])
-                console.log(branchInfo['branch'])
-                console.log('test branch ? a' + branchInfo['branch'])
                 if (branchInfo['branch'] === 'master') {
                   theItems.push(branchInfo)
                 } else {
                   if ((branchInfo['branch'] === null) || (branchInfo['branch'] === 'null')) {
                    // its merged
-                    console.log('ignoring')
                   } else {
                     if (('' + branchInfo['message']).indexOf('Merged in') >= 0) {
 
                     } else {
-                      console.log('adding')
                       theItems.push(branchInfo)
                     }
                   }
@@ -547,15 +522,11 @@ export default {
             }
           } else {
             for (var v in pullReqs) {
-              console.log(pullReqs[v])
               if (index === 1) {
                 pullReqs[v]['branch'] = pullReqs[v].source.branch.name
                 pullReqs[v]['commit'] = pullReqs[v].source.commit.hash
                 theItems.push(pullReqs[v])
               } else {
-                console.log('test branch ?')
-                console.log(pullReqs[v]['message'])
-                console.log(pullReqs[v]['branch'])
                 if (pullReqs[v]['branch'] === null) {
                  // its merged
                 } else {
@@ -585,15 +556,6 @@ export default {
       this.showModal = true
     },
     switchTo (obj) {
-      console.log('Received switch to')
-      console.log(obj.branch)
-
-      console.log('close modal basic here')
-      console.log('got obj of')
-      console.log(obj)
-
-      console.log('got branch of ' + obj.branch)
-
       // TODO: Switch branch here
       // var self = this
       this.$httpApi.post(window.apiUrl + '/git?action=switch_branch',
@@ -645,7 +607,6 @@ export default {
       var tmpGit = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).lastIndexOf('/') + 1)
       var repoRef = ('' + this.$store.state.app.repoState.ref)
       tmpGit = tmpGit.substring(0, tmpGit.lastIndexOf('.git'))
-      console.log(tmpGit)
       var $gitobj = this.$github
       var userDeletePath = 'repos/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/git/' + repoRef
 
@@ -674,11 +635,9 @@ export default {
       /*
       // $gitobj.post(userPostPath, githubPush, function (resp) {
       $gitobj.post(userPostPath, pullReqObj, function (next) {
-        console.log('success fully POSTED PULL informations...')
-
         // success fully POSTED PULL informations.
         //  {"merge_commit": null, "description": "Desc here", "links": {"decline": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/decline"}, "commits": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/commits"}, "self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3"}, "comments": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/comments"}, "merge": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/merge"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/pull-requests/3"}, "activity": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/activity"}, "diff": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/diff"}, "approve": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/approve"}, "statuses": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/statuses"}}, "title": "a faf 32 f3 2", "close_source_branch": false, "reviewers": [], "destination": {"commit": {"hash": "1addbeecd463", "links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/commit/1addbeecd463"}}}, "repository": {"links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/avatar/32/"}}, "type": "repository", "name": "test-simple-website", "full_name": "Gizmodo1/test-simple-website", "uuid": "{a1526fe3-4e13-4d6f-bc36-b4eb55e45300}"}, "branch": {"name": "master"}}, "state": "OPEN", "closed_by": null, "source": {"commit": {"hash": "1ad4ff49dd3d", "links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/commit/1ad4ff49dd3d"}}}, "repository": {"links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/avatar/32/"}}, "type": "repository", "name": "test-simple-website", "full_name": "Gizmodo1/test-simple-website", "uuid": "{a1526fe3-4e13-4d6f-bc36-b4eb55e45300}"}, "branch": {"name": "Demo_Nelify"}}, "comment_count": 0, "author": {"username": "Gizmodo1", "display_name": "francis Lavalliere", "type": "user", "uuid": "{d1f483aa-fb4b-4a10-b7df-e58bd6a7500f}", "links": {"self": {"href": "https://api.bitbucket.org/2.0/users/Gizmodo1"}, "html": {"href": "https://bitbucket.org/Gizmodo1/"}, "avatar": {"href": "https://bitbucket.org/account/Gizmodo1/avatar/32/"}}}, "created_on": "2017-09-15T02:33:43.353448+00:00", "participants": [], "reason": "", "updated_on": "2017-09-15T02:33:43.398141+00:00", "type": "pullrequest", "id": 3, "task_count": 0}
-        // console.log(next)
+        // //console.log(next)
       }, this.gitError)
 
       this.$http.post('/api/users/revoke', {

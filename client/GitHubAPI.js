@@ -1,8 +1,6 @@
 (function () {
   function install (Vue, options) {
     // GitHub user Private Token or Personal Access Token
-    console.log('recieved view')
-    // console.log(Vue)
     var vv = Vue
     var token = 'you MUST provide an user Private Token or Personal Access Token'
     var username = 'you MUST provide an username'
@@ -180,7 +178,6 @@
        */
       setToken: function (newToken) {
         if (typeof newToken === 'undefined' || newToken == null || newToken === '') {
-          console.error('[vue-github-api] You MUST provide a non empty Private Token or Personal Access Token')
           return
         }
         token = newToken
@@ -245,20 +242,14 @@
        */
       get: function (uri, params, fillIn, errorCb) {
         // verifying what user sends to fill in
-        console.error('received get here')
         if (this._verifyFillIn(fillIn) !== true) {
           return
         }
-        console.log('received get here 1')
         // ensure leading slash on uri
         uri = uri.replace(/^\/?/, '/')
 
-        console.log('received get here 2')
-
         // downloading starts now
         this._updateStore('downloading')
-
-        console.log('received get here 3')
 
         // request it with headers an params
         var h = {
@@ -272,8 +263,6 @@
           var auth = Base64.encode(username + ':' + pass)
           h = { 'Authorization': 'Basic ' + auth }
         }
-        console.log('b64 is set')
-        console.log(h)
         vv.$http.get(
           apiUrl + uri,
           {
@@ -309,7 +298,6 @@
             console.error('[vue-github-api] GET ' + uri + ' failed: "' + response.body.message + '" on ' + apiUrl + ' (using token "' + token + '")')
           }
         })
-        console.log('received get here 5')
       },
 
       /**
@@ -353,7 +341,6 @@
           h = { 'Authorization': 'Basic ' + auth }
         }
         // request it with headers an params
-        console.log('posting start')
         vv.$http.post(
           apiUrl + uri,
           params,
@@ -364,7 +351,6 @@
           // no more downloading
 
           this._updateStore('downloaded')
-          console.log('posting response fillin?')
           if (typeof fillIn === 'function') {
             // sending back the full response
             fillIn(response)
@@ -379,8 +365,6 @@
           }
         }, (response) => {
           // no more downloading
-          console.log('got error here')
-          console.log(response)
           this._updateStore('downloaded')
 
           if (typeof errorCb === 'function') {
@@ -394,7 +378,6 @@
       },
 
       getBasicAuth: function () {
-        console.error('GITHUB geBasicAuth')
         if (isToken) {
           /*
           var h = {
@@ -449,7 +432,6 @@
           h = { 'Authorization': 'Basic ' + auth }
         }
         // request it with headers an params
-        console.log('posting start')
         vv.$http.delete(
           apiUrl + uri,
           {
@@ -459,7 +441,6 @@
           // no more downloading
 
           this._updateStore('downloaded')
-          console.log('posting response fillin?')
           if (typeof fillIn === 'function') {
             // sending back the full response
             fillIn(response)
@@ -474,8 +455,6 @@
           }
         }, (response) => {
           // no more downloading
-          console.log('got error here')
-          console.log(response)
           this._updateStore('downloaded')
 
           if (typeof errorCb === 'function') {

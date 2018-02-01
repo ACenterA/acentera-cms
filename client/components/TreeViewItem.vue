@@ -63,34 +63,22 @@
       },
 
       isObject: function (value) {
-        console.log('got is object check')
-        console.log(value)
         if (value.type === 'object') {
-          console.log('got is object check 1')
           if (value.subtype === 'file' || value.subtype === 'File') {
             this.open = false
           }
-          console.log('got is object check 2')
           if (value.subtype === true) {
             this.open = true
-            console.log('got is object check 3')
             return true
           }
-          console.log('got is object check 4')
           if (value.subtype === 'dir' || value.subtype === 'Dile') {
-            console.log('got is object check 1')
             return false
           }
         }
         return false
       },
       isDir: function (value) {
-        console.log('check if is dir')
-        console.log(value)
-
         if (!value) return false
-
-        console.log((value.subtype === 'dir' || value.subtype === 'Dir'))
         return (value.subtype === 'dir' || value.subtype === 'Dir')
       },
       isFile: function (value) {

@@ -23,7 +23,6 @@ export default {
     var self = this
     this.$http.get('/assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
-      console.log('got monuted raw json')
       self.themes = response.data
       for (var idx in self.themes) {
         if (self.themes[idx].Name === self.$route.params.id) {

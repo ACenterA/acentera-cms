@@ -1,9 +1,6 @@
 (function () {
   function install (Vue, options) {
     // GitHub user Private Token or Personal Access Token
-    console.log('recieved view')
-    // console.log(Vue)
-    // var vv = Vue
 
     var Base64 = {
 
@@ -127,12 +124,6 @@
       }
 
     }
-    console.log('basejdlkafjlakdsf lkasdfj lkjlk 32423423k lwjskljf')
-    console.log('basejdlkafjlakdsf lkasdfj lkjlk 32423423k lwjskljf')
-    console.log('basejdlkafjlakdsf lkasdfj lkjlk 32423423k lwjskljf')
-    console.log('basejdlkafjlakdsf lkasdfj lkjlk 32423423k lwjskljf')
-    console.log('basejdlkafjlakdsf lkasdfj lkjlk 32423423k lwjskljf')
-
     Vue.prototype.Base64 = {
 
       encode: function (encode) {

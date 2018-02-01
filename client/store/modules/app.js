@@ -9,6 +9,7 @@ const state = {
   projectId: null,
   websiteId: null,
   viewMenu: true,
+  viewMenuType: null,
   viewMenuPos: {
     top: 0,
     left: 0
@@ -16,6 +17,12 @@ const state = {
   device: {
     isMobile: false,
     isTablet: false
+  },
+  settings: {},
+  language: null,
+  languages: {
+    languages: [],
+    languagesHash: {}
   },
   topbar: {
     show: false,
@@ -60,8 +67,6 @@ const mutations = {
   },
 
   [types.TOGGLE_SIDEBAR] (state, opened) {
-    console.error('WILL GOGGLE toggle siebar to ' + opened)
-
     if (opened) {
       state.sidebar.hidden = false
     }
@@ -80,8 +85,6 @@ const mutations = {
       }
     }
     state.sidebartwo.opened = opened
-    console.error('sidebartwo... ' + state.sidebartwo.hidden)
-    console.error(state.sidebartwo)
   },
 
   [types.TOGGLE_SIDEBAR_BLOGDATA]  (state, opened) {
@@ -91,36 +94,13 @@ const mutations = {
       }
     }
     state.sidebartwo.opened = opened
-    // console.error('sidebartwo... ' + state.sidebartwo.hidden)
-    // console.error(state.sidebartwo)
   },
 
   [types.TOGGLE_BLOGDATA] (state, data) {
-    console.error('SET BLOG DATA DDATA')
-    console.error(data)
     state.sidebarblogData.json = data
   },
   [types.TOGGLE_SIDEBAR_TWO_DATA] (state, data) {
-    console.error('SET SIDEBATWO DDATA')
-    console.error(data)
     state.sidebartwo.json = data
-    /*
-    if (data instanceof Array) {
-      state.sidebartwo.json = data
-    } else {
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      console.error('SET SIDEBATWO DDATA NOT AN ARRAY')
-      state.sidebartwo.json = data
-    }
-    */
   },
 
   [types.SWITCH_EFFECT] (state, effectItem) {
@@ -129,10 +109,7 @@ const mutations = {
     }
   },
   [types.LOGOUT] (sate, vueObj) {
-    console.error(origState)
-    console.log('sendng loggout')
     var self = vueObj
-    console.log(self.$store.state.session)
     var state = self.$store.state
 
     if (state.website) {
@@ -162,7 +139,6 @@ const mutations = {
           vueObj.$store.commit('clearSession', origState)
         })
         .catch((error) => {
-          console.error(error)
           var msg = ''
           if (error.response && error.response.data) {
             msg = error.response.data.errorMessage
@@ -201,27 +177,22 @@ const mutations = {
     }
   },
   [types.REPO_STATE_UPATE] (state, update) {
-    // console.log('receiged repo update')
-    // console.log(state)
-    // Vue.set(state.repoState, 'updating', update)
     var origState = state.repoState
-
     origState.updating = update
-    if (update <= 0) {
-      // origState.isLoaded = true
-    } else {
-      // origState.isLoaded = false
-    }
 
+    if (!state.website) { // <== ?? required ?
+      if (update === 6) {
+        origState.sshKeyMissing = true
+      } else {
+        // ??
+        origState.sshKeyMissing = false
+      }
+    }
     state.repoState = origState
-    //  = update
-    // console.log(state)
   },
   [types.REPO_UPATE] (state, update) {
     var origState = state.repoState
     if (!(update && update.Data)) {
-      console.error('IGNORING REPO UPDATE HERE')
-      console.error(update)
       return
     }
     origState.Branch = update.Branch
@@ -241,8 +212,6 @@ const mutations = {
     }
 
     state.repoState = origState
-    //  = update
-    // console.log(state)
   },
 
   [types.REPO_URL_UPDATE] (state, update) {
@@ -254,11 +223,19 @@ const mutations = {
     origState.url = tmpUrl
     state.repoState = origState
   },
+
+  [types.SELECT_INITIAL_WEBSITE] (state, item) {
+    var tmp = {
+      projectId: item.projectId,
+      websites: {
+      }
+    }
+    item.type = 'ready'
+    tmp['websites'][item.websiteId] = item
+
+    state.project = tmp
+  },
   [types.SELECT_WEBSITE] (state, item) {
-    // var origState = state.repoState
-    // origState.url = tmpUrl
-    // state.repoState = origState
-    // console.error(window.vm.$store.getters)
     if (item == null) {
       // unselecting websites..
       state.websiteId = null
@@ -271,9 +248,6 @@ const mutations = {
       window.vm.$router.push({ 'path': '/' })
       return
     }
-    console.error('selected website...?')
-    console.error(item)
-    console.error(state)
     state.projectId = item.projectId
     state.websiteId = item.websiteId
 
@@ -284,46 +258,38 @@ const mutations = {
 
     window.localStorage.setItem('selectedWebsite', state.websiteId)
     window.localStorage.setItem('selectedProject', state.projectId)
-    /*  if we watn to refresh the website data..
-    console.error('vue obj')
-    console.error(item)
-    console.error(window.vm.$store.getters.session)
-    var session = window.vm.$store.getters.session
-    // var self = vueObj
-    // console.error(self)
-    // console.log(self.$store.state.session)
-    // var vueObjState = self.$store.state
-
-    console.error('Selected project of' + item.projectId + ' and ' + item.websiteId)
-    console.error('state is')
-    console.error(state)
-    console.error(self)
-    var getSiteInfoUrl = window.websiteapiUrl + '/sites/v1/websites/' + item.projectId + '/' + item.websiteId
-    var h = { 'authorization': 'Bearer ' + session.token }
-    window.vm.$http.get(getSiteInfoUrl, {
-      headers: h
-    }).then((response) => {
-      window.vm.$notify({
-        title: 'Website ready.',
-        message: 'Your website has been created.',
-        type: 'success'
-      })
-    }).catch((e) => {
-      window.vm.$notify({
-        title: 'Connection error',
-        message: 'We could not retreive your website informations.',
-        type: 'danger'
-      })
-    })
-    */
   },
   [types.SELECT_POST] (state, item) {
-    console.error('selected post...?')
-    console.error(item)
     if (state.topbar.selectedPost) {
       state.topbar.selectedPost.selected = false
     }
     state.topbar.selectedPost = item
+  },
+  [types.SITE_SETTINGS] (state, update) {
+    state.settings = update
+  },
+  [types.SITE_SETTING_SAVE] (state, update) {
+    var self = window.vm
+    self.$httpApi.post(window.apiUrl + '/settings', state.settings, {}).then((response) => {
+      // TODO: Set selecte theme in the state...
+      // In case they modified theme ?
+    })
+    .catch((error) => {
+      self.$onError(error)
+    })
+  },
+  [types.SITE_LANG_DEFAULT] (state, update) {
+    if (state.language === undefined || state.language === null) {
+      state.language = update
+    }
+  },
+  [types.SITE_LANG_SELECT] (state, update) {
+    state.language = update
+  },
+  [types.SITE_AVAILABLE_LANG] (state, update) {
+    // update.languages
+    // update.languagesHash
+    state.languages = update
   }
 }
 

@@ -41,7 +41,6 @@ export default {
       this.onFileChange(e)
     },
     onFileChange (e) {
-      console.error(e)
       const files = e.target.files || e.dataTransfer.files
 
       if (!files.length) return
@@ -70,9 +69,7 @@ export default {
       const reader = new FileReader()
       const vm = this
 
-      console.error('test new image test a')
       reader.onload = (e) => {
-        console.error(e)
         vm.image = e.target.result
 
         this.fileChange({

@@ -1,18 +1,20 @@
 [
-  { "Name": "simple-one-pager",
-    "Author": "jweslley",
-    "License": "MIT",
-    "Title": "Simple One Pager",
-    "Repository": "https://github.com/jweslley/hugo-conference/",
-    "Preview": "https://jweslley.github.io/hugo-conference/",
-    "ShortDesc": "Simple test template"
-  },
   { "Name": "hugo-agency-theme",
     "Author": "digitalcraftsman",
     "License": "MIT",
     "Title": "Hugo Agency Theme",
-    "Repository": "https://github.com/digitalcraftsman/hugo-agency-theme/",
-    "Preview": "https://themes.gohugo.io/theme/agency/",
+    "Repository": "https://github.com/ACenterA/website-hugo-agency",
+    "Screenshot": "https://github.com/digitalcraftsman/hugo-agency-theme/raw/master/images/screenshot.png",
+    "Preview": "http://616c2f00-f63c-11e7-a0b4-2ba2b42003ae.workspace.acentera.com",
     "ShortDesc": "A minimalist corporate website."
+  },
+  { "Name": "hugo-agency-theme",
+    "Author": "digitalcraftsman",
+    "License": "MIT",
+    "Title": "Hugo Agency Theme (duplica)",
+    "Repository": "https://github.com/ACenterA/website-hugo-agency",
+    "Screenshot": "https://github.com/digitalcraftsman/hugo-agency-theme/raw/master/images/screenshot.png",
+    "Preview": "http://616c2f00-f63c-11e7-a0b4-2ba2b42003ae.workspace.acentera.com",
+    "ShortDesc": "A minimalist corporate website. (duplica)"
   }
 ]

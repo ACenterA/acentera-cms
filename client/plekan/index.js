@@ -9,7 +9,6 @@ import plekanComponentMixin from './src/core/mixin'
 /** @type {Object} Eklentinin ta kendisi lol */
 const plekan = {}
 
-console.error('test plekan 01')
 /**
    * @description Varsayılan seçenekler
    * @type {Object}
@@ -41,8 +40,6 @@ const plekanOptions = {
 
 plekan.install = (Vue, optionsOut) => {
   /** plekan komponnetinin kayıt edilmesi */
-  console.error('INSTALATION???')
-  console.error(Vue)
   const options = Object.assign({}, plekanOptions, optionsOut)
   options.plekanEvent = Object.assign(
     {},
@@ -63,7 +60,6 @@ plekan.install = (Vue, optionsOut) => {
      * Register component initilaze
      * @TODO : Validate template for existing ?????
     */
-  console.error(store)
   store.commit('setLanguage', options.languages)
   /*
     * İnit rows
@@ -93,13 +89,7 @@ plekan.install = (Vue, optionsOut) => {
       return true;
     });
 
-    console.error('fafa');
-    console.error(m);
-    console.error(m.context);
-    console.error(m.name);
     try {
-
-      console.error('CREATE COMPONENT OF...')
       if (m.hasOwnProperty('AnewContext')) {
         var tt = {};
         Object.assign(tt,m.context);
@@ -110,7 +100,6 @@ plekan.install = (Vue, optionsOut) => {
         Vue.component(m.name, Object.assign({}, m.context));
       }
     } catch (f) {
-      console.error(f.stack);
     }
 
     delete m.context;
@@ -139,20 +128,12 @@ plekan.install = (Vue, optionsOut) => {
         if (RegExp.test(url)) {
           return url;
         }
-        console.error('MAKE URL' + prefix + url)
         return prefix + url;
       },
     };
 
 };
 
-console.error('test plekan 02')
-/*
-module.export = {
-  plekan: plekan,
-  plekanComponentMixin:plekanComponentMixin
-}
-*/
 export default {
   plekan  : plekan,
   plekanComponentMixin: plekanComponentMixin

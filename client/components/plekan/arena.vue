@@ -1,8 +1,8 @@
 <template>
   <div class="plekan-area">
     <ul id="right-click-menu" tabindex="-1" @blur="closeMenu" class="right-click-menu" style="display: none;">
-      <li>First list item</li>
-      <li>Second list item</li>
+      <li v-if="viewMenuType === 'imageonly'">Change Image</li>
+      <li v-if="viewMenuType === 'nav'">Modify Navigation</li>
     </ul>
 
     <!-- This components for Preview and Translate language change  -->
@@ -141,11 +141,11 @@ export default {
      * @return {Array} Store rows
      */
     viewMenu () {
-      console.error('VIEW MENU A')
-      console.error(this)
-      console.error(this.store.state)
-      console.error(this.store.state.app.viewMenu)
       return this.store.state.app.viewMenu
+    },
+
+    viewMenuType () {
+      return this.store.state.app.viewMenuType
     },
 
     top () {
@@ -220,9 +220,7 @@ export default {
      * Sortable options init , see: https://github.com/RubaXa/Sortable
     */
     const d = document.getElementsByTagName('iframe')[0].contentWindow.document
-    console.error('ELL TEST')
     const el = d.getElementById('plekan-sortable-list')
-    console.error(el)
     Sortable.create(el, {
       ...arenaSortableOptions,
       onAdd: this.onAdd,
@@ -235,27 +233,13 @@ export default {
      * @TODO : Move function in requestHiddenModal from to  new function
     */
 
-    // var d = document.getElementsByTagName('iframe')[0].contentWindow.document
-    console.error(document)
-    console.error(window)
-    // var d = document.getElementsByTagName('iframe')[0].contentWindow.document
-
     this.$bus.$on('requestHiddenModal', () => {
-      console.error('received request Hidden..')
       if (this.editRow.row) {
         /* eslint-disable */
         Object.keys(this.editRow).map((e) => this.editRow[e] = null)
         /* eslint-enable */
       }
     })
-
-/*
-    // without jQuery (doesn't work in older IEs)
-    document.getElementsByTagName('iframe')[0].addEventListener('readystatechange', () => {
-      // your code goes here
-      console.error('DOM CONTENT LOADED');
-    }, false);
-    */
   },
   methods: {
     setMenu: function (top, left) {
@@ -271,13 +255,11 @@ export default {
     },
 
     closeMenu: function () {
-      console.error('ON BLUR CALLED')
       this.$store.commit('toggleViewMenu', false)
       // this.viewMenu = false
     },
 
     openMenu: function (e) {
-      console.error('OPEN MENU HERE A')
       this.viewMenu = true
 
       Vue.nextTick(function () {

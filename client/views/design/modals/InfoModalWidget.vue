@@ -209,8 +209,6 @@ export default {
       this.$emit('close')
     },
     edit (obj) {
-      console.log('emiting editObj')
-      console.log(obj)
       this.$emit('editObj', obj)
     },
     addPage () {

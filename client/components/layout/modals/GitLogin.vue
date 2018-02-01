@@ -23,7 +23,7 @@
           </div>
 
 
-          <!-- Right column -->        
+          <!-- Right column -->
           <div v-if="username !== null" class="column is-6">
               <p class="control" style="float:right;">
                 <a class="button leftfloat " title="Test your ssh key"
@@ -157,7 +157,6 @@ export default {
     },
     nextStep () {
       var self = this
-      console.error('eiting next step')
       self.$emit('nextStep', self.template)
     },
     confirmed () {

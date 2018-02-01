@@ -502,10 +502,8 @@ export default {
       try {
         JSON.parse(str)
       } catch (e) {
-        console.log(false)
         return false
       }
-      console.log(true)
       return true
     },
 

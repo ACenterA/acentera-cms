@@ -13,44 +13,65 @@ export const toggleRepoUrl = ({ commit }, newState) => commit(types.REPO_URL_UPD
 
 export const selectWebsite = ({ commit }, item) => commit(types.SELECT_WEBSITE, item)
 
+export const saveNewSettings = ({ commit }, item) => commit(types.SITE_SETTING_SAVE, item)
+
 export const toggleDevice = ({ commit }, device) => commit(types.TOGGLE_DEVICE, device)
 
 export const logOut = ({ commit }, vue) => commit(types.LOGOUT, vue)
 
-const refreshConfig = (state) => {
-  console.error('called refresh config')
+const refreshSettings = (state) => {
   var self = window.vm
-  console.error('called refresh config state')
-  console.error(state)
+
+  self.$httpApi.get(window.apiUrl + '/settings').then((response) => {
+    let result = response.data
+
+    if (result.hasOwnProperty('languages')) {
+      var TempAvailablelanguages = []
+      var TempAvailablelanguageshash = {}
+
+      let langkeys = Object.keys(result.languages)
+      // self.allSettings = result
+      self.$store.commit(types.SITE_SETTINGS, result)
+
+      for (var i = 0; i < langkeys.length; i++) {
+        var tmpLang = result.languages[langkeys[i]]
+        tmpLang.id = langkeys[i]
+        tmpLang.value = langkeys[i]
+        TempAvailablelanguageshash[langkeys[i]] = tmpLang
+        TempAvailablelanguageshash[result.languages[langkeys[i]].languagename] = tmpLang
+        // if (self.selectedLang === undefined) {
+          // self.selectedLang = langkeys[i].languagename
+        self.$store.commit(types.SITE_LANG_DEFAULT, langkeys[i].languagename)
+        // }
+        TempAvailablelanguages.push(tmpLang)
+      }
+      // self.availableLanguages = TempAvailablelanguages
+      // self.availableLanguagesHash = TempAvailablelanguageshash
+      self.$store.commit(types.SITE_AVAILABLE_LANG, { languages: TempAvailablelanguages, languagesHash: TempAvailablelanguageshash })
+    }
+  })
+  .catch((error) => {
+    self.$onError(error)
+  })
+}
+
+const refreshConfig = (state) => {
+  var self = window.vm
   try {
-    console.error('called refresh config state 1')
-    console.error(window.vm)
-    console.error(window.vm.$httpApi)
-    console.error('called refresh config state 1a with ' + window.apiUrl)
     window.vm.$httpApi.get(window.apiUrl + '/git?action=config&loc=nav').then((response) => {
-      console.error('called refresh config state 2')
-      console.error('called refresh config state 2 (a)')
       self.$store.commit(types.REPO_URL_UPDATE, response.data.Data)
-      console.error('called refresh config state 2 (b)')
       if (response !== null && response.data !== null) {
-        console.error('called refresh config state 2 (c)')
         self.$store.commit(types.REPO_UPATE, response.data)
       }
 
-      console.error('test Inet?')
-      console.error(self.$store.state.app.inet)
       if (self.$store.state.app.inet) {
-        console.error('pull here 01 9a')
         self.$store.commit(types.REPO_STATE_UPATE, 0) // first set valid
-        console.error(self.$store.getters.getBasicAuth)
         var basicAuth = self.$store.getters.getBasicAuth
         /*
         if (self.$store.state.github === null || self.$store.state.github.logininfo === null) {
           return
         }
         */
-        console.error('DOING PULL AUTH IS')
-        console.error(basicAuth)
         if (basicAuth !== null) { // TODO: If in Dev
           self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', { headers: { 'Authorization': basicAuth } }).then((response) => {
             self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
@@ -70,13 +91,11 @@ const refreshConfig = (state) => {
             }
           })
         }
+
+        refreshSettings()
       }
     })
     .catch((error) => {
-      console.error('called refresh config state 2err')
-      console.error(error)
-      console.error('err2a')
-      console.error(error)
       try {
         if (error.response.status === 500) {
           self.$store.commit(types.REPO_STATE_UPATE, 5) // State 5 = no .git/config file....
@@ -88,7 +107,6 @@ const refreshConfig = (state) => {
       }
     })
   } catch (f) {
-    console.error(f.stack)
   }
 }
 
@@ -96,9 +114,6 @@ export const selectPost = ({ commit }, obj) => {
   if (obj.item) {
     obj.item.selected = true
     commit(types.SELECT_POST, obj.item)
-    console.error('selected to updateEditFrame using OBJ URL..')
-    console.error(obj)
-    console.error(obj.$bus)
     // TOOD: What about :1313/ replacement variables ???
     obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/'))
   }
@@ -118,32 +133,17 @@ export const switchEffect = ({ commit }, effectItem) => {
 }
 
 export const refreshUser = ({ commit }, obj) => {
-  console.log('aaa selfslkajflak')
   var vue = obj.vue
   var callback = obj.callback
-  // console.error(vue)
-  // console.error(callback)
-  console.log(vue.$store.state)
   var state = vue.$store.state
   var self = vue
-  console.error('wiill set is loaded here a 01')
-  console.error(state.session)
-  console.error(state.app.website)
   if (!state.app.website) {
     // Local Dev Version
-    console.error('here refresh a 1')
     window.localStorage.removeItem('selectedWebsite')
-    console.error('here refresh a 2')
     window.localStorage.removeItem('selectedProject')
-    console.error('here refresh a 3 and..' + state.app.isLoaded)
 
     if (!state.app.isLoaded) {
-      console.error('here refresh a 4')
-      console.error('GET OF GITHUB GET 033')
-
       let raw = state.github || window.localStorage.getItem('github')
-      console.error('REFRESHE USER  OF PARRALEL DATA TEST OF.... ')
-      console.error(typeof raw)
       if (typeof raw === 'string') {
         state.github = JSON.parse(raw)
       } else {
@@ -151,19 +151,18 @@ export const refreshUser = ({ commit }, obj) => {
       }
       // var $gitobj = this.$github
 
-      console.error('WTFA AA')
       state.app.sidebarglobal.opened = false
       state.app.sidebarglobal.hidden = true
 
       state.app.sidebar.opened = true
       state.app.sidebar.hidden = false
+      // self.selectWebsite()
       refreshConfig(state)
       state.app.isLoaded = true
     }
   } else {
     // Hosted Version
     if (state.session && state.session.token) {
-      console.log('test sesion 1')
       var h = { 'Authorization': 'Bearer ' + state.session.token }
       // request it with headers an param
       vue.$http.get(window.websiteapiUrl + '/customer/v1/websites/me',
@@ -171,98 +170,70 @@ export const refreshUser = ({ commit }, obj) => {
           headers: h
         }
       ).then((response) => {
-        console.error('REFRESHSED DATA')
-        console.error(response.data)
-        console.error('afa')
         var lstProjects = response.data.projects
         var defProject = response.data.defaultProject
         if (state.app.project && state.project.app.projectId) {
           if (!(lstProjects.hasOwnProperty(state.app.project.projectId))) {
-            console.error('fafag')
             state.app.project = null
           }
         }
-        console.error('ggg')
         if (defProject === null || defProject === undefined) {
           defProject = null
         }
         if (state.app.project == null) {
-          console.error('kaka')
           if (defProject !== null) {
             // fetch default project...
-            console.error('STATE PROJECT B?')
             vue.$http.get(window.websiteapiUrl + '/api/projects/v1/' + defProject,
               {
                 headers: h
               }
             ).then((projectDefinitionResponse) => {
-              console.error('got projectDefinitionResponse of ')
               state.app.project = projectDefinitionResponse.data
-              // this.$store.commit('clearSession')
-              // console.error(state.project
-              // state.app.sidebarglobal.opened = true
-              // state.app.sidebarglobal.hidden = false
-
               if (state.app.websiteId === null) {
                 if (state.app.project.websites.hasOwnProperty(window.localStorage.getItem('selectedWebsite'))) {
-                  console.error('TEST SELECT WEBSITE AAAAA')
                   state.app.websiteId = window.localStorage.getItem('selectedWebsite')
                   state.app.projectId = window.localStorage.getItem('selectedProject')
-                  self.$store.commit('selectWebsite')// (state)
+                  window.vm.$store.commit('SELECT_WEBSITE', {projectId: state.app.projectId, websiteId: state.app.websiteId})
+                  // self.$store.commit('selectWebsite')// (state)
                 }
               }
-              console.error('TEST LOADED SITE: ' + state.app.isLoaded)
               if (state.app.websiteId !== null) {
                 if (!state.app.isLoaded) {
-                  console.error('GET OF GITHUB GET 033')
-
                   let raw = state.github || window.localStorage.getItem('github')
-                  console.error('REFRESHE USER  OF PARRALEL DATA TEST OF.... ')
-                  console.error(typeof raw)
                   if (typeof raw === 'string') {
                     state.github = JSON.parse(raw)
                   } else {
                     state.github = raw
                   }
-                  // var $gitobj = this.$github
-
-                  console.error('WTFA AA')
                   state.app.sidebarglobal.opened = false
                   state.app.sidebarglobal.hidden = true
 
                   state.app.sidebar.opened = true
                   state.app.sidebar.hidden = false
-                  refreshConfig(state)
-                  state.app.isLoaded = true
+                  setTimeout(function () {
+                    refreshConfig(state)
+                    state.app.isLoaded = true
+                  }, 400)
                 }
               }
               if (callback) {
-                console.error('calling callback01')
                 callback()
               } else {
-                console.error('NOT calling callback01')
               }
-              console.error('loaded D')
               state.app.isLoaded = true
             }).catch((error) => {
-              console.error('loaded C')
               var msg = ''
               if (error.response && error.response.data) {
                 msg = error.response.data.errorMessage
               }
-              console.error('ERROR ZZ....')
-              console.error(error)
-              console.error(error.response)
               self.$notify({
                 title: 'error retreiving project.',
                 message: msg,
                 type: 'danger'
               })
               if (callback) {
-                console.error('calling callback02')
                 callback()
               } else {
-                console.error('NOT calling callback02')
               }
               state.app.isLoaded = true
             })
@@ -270,32 +241,24 @@ export const refreshUser = ({ commit }, obj) => {
             window.localStorage.removeItem('selectedWebsite')
             window.localStorage.removeItem('selectedProject')
             if (callback) {
-              console.error('calling callback02')
               callback()
             } else {
-              console.error('NOT calling callback02')
             }
             state.app.isLoaded = true
           }
         } else {
           window.localStorage.removeItem('selectedWebsite')
           window.localStorage.removeItem('selectedProject')
-          console.error('here refresh 01')
 
           if (callback) {
-            console.error('calling callback02')
             callback()
-          } else {
-            console.error('NOT calling callback02')
           }
-          console.error('loaded B')
           state.app.isLoaded = true
         }
       })
       .catch((error) => {
         window.localStorage.removeItem('selectedWebsite')
         window.localStorage.removeItem('selectedProject')
-        console.error(error.stack)
         var msg = ''
         if (error.response && error.response.data) {
           msg = error.response.data.errorMessage
@@ -312,12 +275,8 @@ export const refreshUser = ({ commit }, obj) => {
         window.localStorage.removeItem('selectedWebsite')
         window.localStorage.removeItem('selectedProject')
         if (callback) {
-          console.error('calling callback03')
           callback()
-        } else {
-          console.error('NOT calling callback03')
         }
-        console.error('loaded A')
         state.app.isLoaded = true
       })
     }
