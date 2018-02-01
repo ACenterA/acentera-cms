@@ -88,7 +88,7 @@
                 Submit for Review
             </a>
 
-            <a v-if="hasSession() && isSavePushAvailOrisTestMissing()" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
+            <a v-if="hasSession() && isSavePushAvailOrisTestMissing() && repoState.pending == true" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 Publish
             </a>
 
@@ -405,6 +405,9 @@ export default {
     },
     closeModalSaveBasic (obj) {
       if (!obj) {
+        // only receied close
+        this.selectedIndex = -1
+        this.showModalComment = false
         return
       }
       this.$httpApi.post(window.apiUrl + '/git?action=save',

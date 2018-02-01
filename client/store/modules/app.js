@@ -33,6 +33,7 @@ const state = {
     updatingCount: 0,
     Master: null,
     Branch: null,
+    pending: false,
     Ref: null,
     Provider: null,
     url: null,
@@ -176,6 +177,9 @@ const mutations = {
       })
     }
   },
+  [types.REPO_STATE_PENDING] (state, pending) {
+    state.repoState.pending = pending
+  },
   [types.REPO_STATE_UPATE] (state, update) {
     var origState = state.repoState
     origState.updating = update
@@ -273,6 +277,13 @@ const mutations = {
     self.$httpApi.post(window.apiUrl + '/settings', state.settings, {}).then((response) => {
       // TODO: Set selecte theme in the state...
       // In case they modified theme ?
+      if (!state.repoState.pending) {
+        // validate if somehting changed, unless we are already in pending mode...
+        window.vm.$store.commit('REFRESH_CONFIG', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
+      } else {
+        // Optional ??
+        window.vm.$store.commit('REFRESH_SETTINGS', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
+      }
     })
     .catch((error) => {
       self.$onError(error)
@@ -290,6 +301,100 @@ const mutations = {
     // update.languages
     // update.languagesHash
     state.languages = update
+  },
+  [types.REFRESH_SETTINGS] (state, update) {
+    var self = window.vm
+    self.$httpApi.get(window.apiUrl + '/settings').then((response) => {
+      let result = response.data
+
+      if (result.hasOwnProperty('languages')) {
+        var TempAvailablelanguages = []
+        var TempAvailablelanguageshash = {}
+
+        let langkeys = Object.keys(result.languages)
+        // self.allSettings = result
+        self.$store.commit(types.SITE_SETTINGS, result)
+
+        for (var i = 0; i < langkeys.length; i++) {
+          var tmpLang = result.languages[langkeys[i]]
+          tmpLang.id = langkeys[i]
+          tmpLang.value = langkeys[i]
+          TempAvailablelanguageshash[langkeys[i]] = tmpLang
+          TempAvailablelanguageshash[result.languages[langkeys[i]].languagename] = tmpLang
+          // if (self.selectedLang === undefined) {
+            // self.selectedLang = langkeys[i].languagename
+          self.$store.commit(types.SITE_LANG_DEFAULT, langkeys[i].languagename)
+          // }
+          TempAvailablelanguages.push(tmpLang)
+        }
+        // self.availableLanguages = TempAvailablelanguages
+        // self.availableLanguagesHash = TempAvailablelanguageshash
+        self.$store.commit(types.SITE_AVAILABLE_LANG, { languages: TempAvailablelanguages, languagesHash: TempAvailablelanguageshash })
+      }
+    })
+    .catch((error) => {
+      self.$onError(error)
+    })
+  },
+  [types.REFRESH_CONFIG] (state, update) {
+    var self = window.vm
+    try {
+      window.vm.$httpApi.get(window.apiUrl + '/git?action=config&loc=nav').then((response) => {
+        self.$store.commit(types.REPO_URL_UPDATE, response.data.Data)
+        if (response !== null && response.data !== null) {
+          self.$store.commit(types.REPO_UPATE, response.data)
+        }
+
+        if (self.$store.state.app.inet) {
+          self.$store.commit(types.REPO_STATE_UPATE, 0) // first set valid
+          var basicAuth = self.$store.getters.getBasicAuth
+          /*
+          if (self.$store.state.github === null || self.$store.state.github.logininfo === null) {
+            return
+          }
+          */
+          if (basicAuth !== null) { // TODO: If in Dev
+            self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', { headers: { 'Authorization': basicAuth } }).then((response) => {
+              self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
+              if (response.data.Extra === 'pending') {
+                self.$store.commit(types.REPO_STATE_PENDING, 1) // all good
+              } else {
+                self.$store.commit(types.REPO_STATE_PENDING, 0) // all good
+              }
+            })
+            .catch((error) => {
+              if (error.response.status === 500) {
+                if (error.response.data.Data === 'reference not found') {
+                  self.$notify({
+                    title: 'Website Version',
+                    message: 'This website version does not exists anymore... Please select a new version.',
+                    type: 'warning'
+                  })
+                }
+                self.$store.commit(types.REPO_STATE_UPATE, 6) // need to setup SSH Key for the user
+              } else {
+                self.$onError(error)
+              }
+            })
+          }
+
+          window.vm.$store.commit('REFRESH_SETTINGS', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
+          // refreshSettings()
+        }
+      })
+      .catch((error) => {
+        try {
+          if (error.response.status === 500) {
+            self.$store.commit(types.REPO_STATE_UPATE, 5) // State 5 = no .git/config file....
+          } else {
+            self.$onError(error)
+          }
+        } catch (ee) {
+          self.$store.commit(types.REPO_STATE_UPATE, 5) // State 5 = no .git/config file....
+        }
+      })
+    } catch (f) {
+    }
   }
 }
 
