@@ -5,10 +5,17 @@ const sidebar = state => state.app.sidebar
 const sidebarglobal = state => state.app.sidebarglobal
 const sidebartwo = state => state.app.sidebartwo
 const sidebarblogData = state => state.app.sidebarblogData
+
 const inBlog = state => {
+  /*
+  console.error('in blog a1 ?')
   if (state.app.repoState && state.app.repoState.updating >= 3) {
+    console.error('in blog a2 ?')
+    console.error(state.app.repoState)
     return false
   }
+  console.error('in blog a3 ?')
+  */
   return state.app.topbar.show === true
 }
 
@@ -30,7 +37,45 @@ const isWebsite = state => (state.app.website === true)
 const session = state => state.session
 const topbar = state => state.app.topbar
 const repoState = state => state.app.repoState
-const github = state => state.github
+const github = state => {
+  if (state.github && state.github.logininfo !== null) {
+    console.error('OK AAAA')
+    var url = null
+    if (state.app) {
+      console.error('OK AAAA 33')
+      if (state.app.repoState) {
+        console.error('OK AAAA 44')
+        console.error(state.app.isLoaded)
+        console.error(state.app.repoState.url)
+        url = state.app.repoState.url
+      }
+      console.error('OK AAAA 55')
+    } else {
+      console.error('OK AAAA 66')
+      if (state.repoState) {
+        console.error('OK AAAA 77')
+        url = state.repoState.url
+      }
+      console.error('OK AAAA 88')
+    }
+    console.error(url + ' test')
+    if (url !== null) {
+      console.error(url + ' vs ' + state.github.logininfo.type.toLowerCase())
+      if (url.indexOf(state.github.logininfo.type.toLowerCase()) === -1) {
+        // Wrong account logged in...
+        window.vm.$store.commit('clearGit')
+        window.vm.$notify({
+          title: 'Must re-login',
+          message: 'We have detected wrong account / git access.',
+          type: 'warning'
+        })
+      }
+    }
+  }
+
+  return state.github
+}
+
 const websiteAndNotLoggedIn = state => {
   return state.app.website && !state.session
 }
@@ -60,7 +105,7 @@ const getBasicAuth = state => {
 
     return gitobj.getBasicAuth()
   } else {
-    return null
+    return ''
   }
 }
 
@@ -99,10 +144,6 @@ const selectedWebsite = (state) => {
     if (state.session && window.localStorage.getItem('session') === null) {
       return null
     }
-
-    // TODO: Specify which workspace ???
-    window.apiUrl = 'http://' + state.app.websiteId + '.workspace.acentera.com/api'
-    window.goHostUrl = 'http://' + state.app.websiteId + '.workspace.acentera.com'
 
     return state.app.project.websites[state.app.websiteId]
   }

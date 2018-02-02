@@ -5,27 +5,30 @@ export const setSession = (state, session) => {
 }
 
 export const clearSession = (state, origState) => {
-  state.projectSelected = null
-  state.session = null
-  state.app.project = null
-  state.app.projectId = null
-  state.app.websiteId = null
   this.clearGit(state)
-  window.localStorage.removeItem('session')
-  var newState = JSON.parse(JSON.stringify(origState))
 
-  for (var key in newState) {
-    state.app[key] = newState[key]
+  // website only
+  if (state.app.website) {
+    var newState = JSON.parse(JSON.stringify(origState))
+    for (var key in newState) {
+      state.app[key] = newState[key]
+    }
+    window.localStorage.removeItem('session')
+    state.projectSelected = null
+    state.session = null
+    state.app.project = null
+    state.app.projectId = null
+    state.app.websiteId = null
+
+    state.app.sidebar.hidden = true
+    state.app.sidebar.opened = false
+    state.app.sidebartwo.hidden = true
+    state.app.sidebartwo.opened = false
+    state.app.sidebarglobal.hidden = true
+    state.app.sidebarglobal.opened = false
+
+    window.location.href = '#/'
   }
-
-  state.app.sidebar.hidden = true
-  state.app.sidebar.opened = false
-  state.app.sidebartwo.hidden = true
-  state.app.sidebartwo.opened = false
-  state.app.sidebarglobal.hidden = true
-  state.app.sidebarglobal.opened = false
-
-  window.location.href = '#/'
 }
 
 export const setInet = (state, val) => {

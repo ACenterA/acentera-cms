@@ -1,18 +1,6 @@
 <template>
   <div v-if="loaded" class="app-inner-content">
-    <div v-if="isRepoError()">
-      <div class="tile is-ancestor is-vertical fullheight">
-
-          <article class="padleft tile is-child box">
-              <label v-if="!isWebsite" class="label">Your current repository is in error. <br/><br/>Please logout / login again from the left login menu.. Ask for help on our slack channel.</label>
-              <label v-else class="label">Please go to the left section, and proceed with Logout / Login and try again.</label>
-          </article>
-
-      </div>
-    </div>
-
-
-    <div class="fullheight" v-if="!isRepoError()">
+    <div class="fullheight">
       <modal :visible="showModal" :object="selectedObject " :type="type" @close="closeModalBasic" @createPage="createPage($event)" @editObj="editObj($event)"></modal>
       <sidebartwo :jsonData="sidebartwo.json" :show="sidebartwo.opened && !sidebartwo.hidden"></sidebartwo>
       <div class="tile is-ancestor is-vertical fullheight">

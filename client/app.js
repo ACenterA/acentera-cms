@@ -565,6 +565,7 @@ window.getEditorProperty = function ( propertyName, object ) {
     property = object || this;
 
   for ( i = 0; i < length; i++ ) {
+    console.error('get of ' + parts[i])
     try {
       property = property[parts[i]];
     } catch (err) {

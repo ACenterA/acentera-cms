@@ -200,7 +200,7 @@ export default {
       var $gitobj = this.$github
       var repoReqObj = {
         'name': self.repositoryNameValidator(),
-        'description': self.websiteProjectName || 'Static website created from ServerlessCMS.com'
+        'description': self.websiteProjectName || 'Website generated from ACenterA CMS (https://ACenterA.com)'
       }
 
       if (this.$store.state.github.logininfo.type === 'BitBucket') {
@@ -209,7 +209,7 @@ export default {
         repoReqObj = {
           scm: 'git',
           fork_policy: 'no_public_forks',
-          description: self.websiteProjectName || 'Static website created from ServerlessCMS.com',
+          description: self.websiteProjectName || 'Website generated from ACenterA CMS (https://ACenterA.com)',
           is_private: true
         }
       }
@@ -353,7 +353,7 @@ export default {
             },
             "private": false,
             "html_url": "https://github.com/FLavalliere/my-first-blog",
-            "description": "Static website created from ServerlessCMS.com",
+            "description": "Website generated from ACenterA CMS (https://ACenterA.com)",
             "fork": false,
   REPOSITORY =>           "url": "https://api.github.com/repos/FLavalliere/my-first-blog",
             "forks_url": "https://api.github.com/repos/FLavalliere/my-first-blog/forks",

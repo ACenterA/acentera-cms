@@ -1,17 +1,6 @@
 <template>
   <div class="app-inner-content">
-    <div v-if="isRepoError()">
-      <div class="tile is-ancestor is-vertical fullheight">
-
-          <article class="padleft tile is-child box">
-              <label v-if="!isWebsite" class="label">Your current repository is in error. <br/><br/>Please logout / login again from the left login menu.. Ask for help on our slack channel.</label>
-              <label v-else class="label">Please go to the left section, and proceed with Logout / Login and try again.</label>
-          </article>
-
-      </div>
-    </div>
-
-    <div v-if="!isRepoError() && loaded" class="fullheight">
+    <div v-if="loaded" class="fullheight">
       <plekan></plekan>
     </div>
   </div>
@@ -121,11 +110,20 @@ export default {
         }, 1000)
       }
 
+      // goHostUrl => https://.....workspace in hosted version
+      // goHostUrl => //localhost:XXXX in local version
+      // TODO: We should parameterizse this.. (ie: /pageX, /, /...)
       var currentUrl = window.goHostUrl + '/'
-
       this.$bus.$emit('updateEditFrame', currentUrl.replace('localhost:1313/', 'localhost:8081/'))
-    },
 
+      /*
+      if (obj.item.link.indexOf('localhost:') >= 0 && obj.item.link.indexOf('localhost:') <= 8) {
+        obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/'))
+      } else {
+        obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + obj.item.link)
+      }
+      */
+    },
     close () {
       this.showModal = false
     },
@@ -254,7 +252,6 @@ export default {
     isRepoError () {
       return (this.repoState.updating >= 5)
     },
-
     changeKey: function () {
       this.editing = true
     }
