@@ -69,23 +69,70 @@ export const hasParent = (el, parentClassName) => {
 }
 
 export const setActiveEditorButtons = () => {
-  console.error('will set SELO FOCUS ActiveEditor Buttons??')
+  console.error('will set SELO FOCUS ActiveEditor Buttons A1??')
   console.error(store.state)
   console.error(window.selo)
   console.error(window.selo.selection)
   const el = window.selo.selection.focusNode.parentNode
   const parents = getParents(el)
 
+  console.error('ADDEDITOR ELEMENT AAAAAAAA')
+  console.error(el)
+  console.error(el.attributes)
+
+  var attrContentEditableIdx = -1 ; // el.attributes.indexOf('contenteditable')
+  for(var i = el.attributes.length - 1; i >= 0; i--) {
+    console.error('test content? ')
+    console.error(el.attributes[i])
+    // console.error('test content idx ? ' + ('' + el.attributes[i]).indexOf('contenteditable') + " vs " + el.attributes[i].value)
+    if (el.attributes[i].name === 'contenteditable') {
+      attrContentEditableIdx = i
+    }
+  }
+
+  if (attrContentEditableIdx !== -1) {
+    console.error('ADDEDITOR ELEMENT AAAAAAAA 1 idx : ' + attrContentEditableIdx)
+    console.error(el.attributes[attrContentEditableIdx].value)
+    if (('' + el.attributes[attrContentEditableIdx].value) === 'false') {
+      console.error('ADDEDITOR ELEMENT AAAAAAAA  was false?2')
+      // Do not allow inline editding... for now..
+
+      const allAnchorTag = document.getElementsByTagName('a')
+
+      Object.keys(allAnchorTag).map((index) => {
+        console.error('ADDEDITOR REMOVE 4')
+        allAnchorTag[index].classList.remove('active')
+        return true
+      })
+
+
+      parents.map((e) => {
+        const sc = document.querySelector(`a[data-tagname="${e.tagName}"]`)
+        if (sc) {
+          console.error('ADDEDITOR ELEMENT REMOVED 6')
+          sc.classList.remove('active')
+        }
+        return true
+      })
+
+      return
+    }
+    console.error('ADDEDITOR ELEMENT AAAAAAAA  was not found as false')
+  }
+  console.error('ADDEDITOR ELEMENT AAAAAAAA 3')
   const allAnchorTag = document.getElementsByTagName('a')
 
   Object.keys(allAnchorTag).map((index) => {
+    console.error('ADDEDITOR ELEMENT AAAAAAAA 4')
     allAnchorTag[index].classList.remove('active')
     return true
   })
 
+  console.error('ADDEDITOR ELEMENT AAAAAAAA 5')
   parents.map((e) => {
     const sc = document.querySelector(`a[data-tagname="${e.tagName}"]`)
     if (sc) {
+      console.error('ADDEDITOR ELEMENT AAAAAAAA 6')
       sc.classList.add('active')
     }
     return true

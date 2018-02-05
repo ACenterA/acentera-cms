@@ -8,6 +8,11 @@ const state = {
   project: null,
   projectId: null,
   websiteId: null,
+  viewMenu: true,
+  viewMenuPos: {
+    top: 0,
+    left: 0
+  },
   device: {
     isMobile: false,
     isTablet: false

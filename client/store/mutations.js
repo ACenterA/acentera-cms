@@ -84,6 +84,40 @@ export const setLanguage = (state, val) => {
   state.languages = val
 }
 
+export const toggleViewMenu = (state, val) => {
+  console.error('state togglle here')
+  console.error(state)
+  console.error('VAL IS:')
+  console.error(val)
+  if (state.app) {
+    state.app.viewMenu = val
+  } else {
+    state.viewMenu = val
+  }
+  if ($('.right-click-menu').length > 0) {
+    if (val) {
+      console.error('set VISIBLE')
+      // $('.right-click-menu')[0].style.display = 'block'
+      $('.right-click-menu').show()
+      $('.right-click-menu').focus()
+    } else {
+      console.error('set HIDDEN')
+      $('.right-click-menu').hide()
+      // $('.right-click-menu')[0].style.display = 'hidden'
+    }
+  }
+}
+
+export const toggleViewPos = (state, val) => {
+  console.error('state togglle here')
+  console.error(state)
+  if (state.app) {
+    state.app.viewMenuPos = val
+  } else {
+    state.viewMenuPos = val
+  }
+}
+
 export const setRows = (state, val) => {
   state.rows = val
 }
@@ -237,6 +271,62 @@ export const editorStart = (state) => {
   })
 
   /* eslint-disable */
+  bus.$on('contextMenuEvent', (evtInfo) => {
+    evtInfo.detail.preventDefault()
+    const el = evtInfo.detail.target // window.selo.selection.focusNode.parentNode
+    console.error('contextmenuEvent ELEMENT ZZZZZZ')
+    // evtInfo.detail.screenX / evtInfo.detail.screenY
+    /*
+    var gb = window.selo.getPositionRange().getBoundingClientRect
+    // window.editorElementDynamic.style.left = `${calc.width / 2 + calc.left - editButtonWidth / 2}px`
+    // aaaa
+
+    var left = gb.left
+    var top = gb.top
+    var width = gb.width
+
+    // if (window.editorElementDynamic.className.indexOf('active') === -1) {
+    console.error('Context menu left ' + left + ' and top :' + top)
+    */
+
+    // console.error(this)
+    window.vm.$store.commit('toggleViewMenu', true)
+    console.error('set new post of')
+
+    // var tmpLeft = evtInfo.detail.screenX || 0
+    // var tmpTop = evtInfo.detail.screenY || 0
+    var tmpLeft = evtInfo.detail.pageX || 0
+    var tmpTop = evtInfo.detail.pageY || 0
+
+    var tmpOffset = $('.plekan-outerdiv')
+    tmpOffset = $(el).offset()
+    console.error('OFS3')
+    console.error(tmpOffset)
+    // if (tmpOffset && tmpOffset[0]) {
+    // tmpLeft -= tmpOffset[0].offsetLeft
+    // tmpTop -= tmpOffset[0].offsetTop
+    // }
+    console.error('a SCROLL TOP ?')
+
+    var target_body = $(el).parents('body')
+
+    console.error(target_body.scrollTop())
+    tmpTop -= target_body.scrollTop()
+
+    // TODO: If position is > than window - 200px compute tmpLeft -= 200 (to mmake sure )
+    // context menu doesnt go out of screen
+    // if (tmpLeft >= winW-200 ) {
+    // }
+
+    console.error({ top: tmpTop, left: tmpLeft })
+    window.vm.$store.commit('toggleViewPos', { top: tmpTop, left: tmpLeft })
+    // $('.right-click-menu')[0].style.display = 'block'
+    $('.right-click-menu')[0].style.top = tmpTop + 'px'
+    $('.right-click-menu')[0].style.left = tmpLeft + 'px'
+  })
+  /* eslint-enable */
+
+  /* eslint-disable */
   bus.$on('selectionEnd', () => {
     if (!window.blogeditor) {
       console.error('this is currently disabled....')
@@ -247,6 +337,30 @@ export const editorStart = (state) => {
     }
 
     // console.error('selectionEND add event.. start')
+    const el = window.selo.selection.focusNode.parentNode
+    console.error('ADDEDITOR ELEMENT ZZZZZZ')
+    console.error(el)
+    console.error(el.attributes)
+
+    var attrContentEditableIdx = -1 // el.attributes.indexOf('contenteditable')
+    for (var i = el.attributes.length - 1; i >= 0; i--) {
+      console.error('test content? ')
+      console.error(el.attributes[i])
+      // console.error('test content idx ? ' + ('' + el.attributes[i]).indexOf('contenteditable') + " vs " + el.attributes[i].value)
+      if (el.attributes[i].name === 'contenteditable') {
+        attrContentEditableIdx = i
+      }
+    }
+
+    if (attrContentEditableIdx !== -1) {
+      console.error('ZZZ ADDEDITOR ELEMENT AAAAAAAA 1 idx : ' + attrContentEditableIdx)
+      console.error(el.attributes[attrContentEditableIdx].value)
+      if (('' + el.attributes[attrContentEditableIdx].value) === 'false') {
+        console.error('ZZZ RETURN HERE')
+        return
+      }
+    }
+
     window.editorElementDynamic.classList.add('active')
     try {
       document.querySelector('.create-link').classList.remove('active')

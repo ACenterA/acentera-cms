@@ -1,17 +1,23 @@
 <template>
   <div class="plekan-area">
+    <ul id="right-click-menu" tabindex="-1" @blur="closeMenu" class="right-click-menu" style="display: none;">
+      <li>First list item</li>
+      <li>Second list item</li>
+    </ul>
+
     <!-- This components for Preview and Translate language change  -->
     <!-- change-language v-if="store.state.languages.length > 1"></change-language -->
     <!-- Arena Container  -->
     <div :class="{'plekan-translate-mode' : translateMode}"
          class="plekan-container" style="height:100%">
-      <i-frame class="arenatest" style="width:100%; height:100%">
+      <i-frame class="arenatest" style="width:100%; height:100%" @contextmenu="openMenu()">
       <!-- Arena Column - Preview  -->
       <arena-column :isTranslate="false"
                     :rows="rows"
                     :editAsHTMLRow="editAsHTMLRow"
                     :language="currentLanguge"></arena-column>
       </i-frame>
+
       <!-- Edit As HTML Modal  -->
       <modal :show="editRow.row ? true : false"
              class="edit-modal">
@@ -134,6 +140,22 @@ export default {
      * Clean observable object
      * @return {Array} Store rows
      */
+    viewMenu () {
+      console.error('VIEW MENU A')
+      console.error(this)
+      console.error(this.store.state)
+      console.error(this.store.state.app.viewMenu)
+      return this.store.state.app.viewMenu
+    },
+
+    top () {
+      return this.store.state.app.viewMenuPos.top
+    },
+
+    left () {
+      return this.store.state.app.viewMenuPos.left
+    },
+
     returnStoreRows () {
       return JSON.parse(JSON.stringify(this.store.state.rows))
     },
@@ -236,6 +258,35 @@ export default {
     */
   },
   methods: {
+    setMenu: function (top, left) {
+      var largestHeight = window.innerHeight - this.$$.right.offsetHeight - 25
+      var largestWidth = window.innerWidth - this.$$.right.offsetWidth - 25
+
+      if (top > largestHeight) top = largestHeight
+
+      if (left > largestWidth) left = largestWidth
+
+      this.top = top + 'px'
+      this.left = left + 'px'
+    },
+
+    closeMenu: function () {
+      console.error('ON BLUR CALLED')
+      this.$store.commit('toggleViewMenu', false)
+      // this.viewMenu = false
+    },
+
+    openMenu: function (e) {
+      console.error('OPEN MENU HERE A')
+      this.viewMenu = true
+
+      Vue.nextTick(function () {
+        this.$$.right.focus()
+
+        this.setMenu(e.y, e.x)
+      }.bind(this))
+      e.preventDefault()
+    },
     /**
      * Bu method arena-column komponent'i içerisinden çağrılır. Bu method
      * arena-column komponentine özellik olarak geçilir (pass edilir).
@@ -294,3 +345,34 @@ export default {
   }
 }
 </script>
+<style>
+
+  .right-click-menu{
+      background: #FAFAFA;
+      border: 1px solid #BDBDBD;
+      box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);
+      display: block;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      position: absolute;
+      width: 250px;
+      z-index: 999999;
+  }
+
+  .right-click-menu li {
+      border-bottom: 1px solid #E0E0E0;
+      margin: 0;
+      padding: 5px 35px;
+  }
+
+  .right-click-menu li:last-child {
+      border-bottom: none;
+  }
+
+  .right-click-menu li:hover {
+      background: #1E88E5;
+      color: #FAFAFA;
+  }
+
+</style>
