@@ -102,8 +102,6 @@ export default {
     inBlog: Boolean
   },
   mounted: function () {
-    console.log('MOUTNED SESSION')
-    console.log(this.session)
     if (this.session) {
     } else {
       this.flip('login', null)
@@ -124,23 +122,17 @@ export default {
       if (e !== null) {
         e.preventDefault()
       }
-      console.log('set witch active')
       if (which !== this.active) {
-        console.log('set witch active AAA')
         $('#form-' + this.active).removeClass('active')
-        console.log('set witch active BBB')
         $('#form-' + which).addClass('active')
-        console.log('set witch active CCC')
         $('#' + which + '-form').addClass('active')
         $('#' + this.active + '-form').removeClass('active')
 
-        console.log('set witch active DDD')
         this.active = which
       }
     },
     keyDownCheck: function (e) {
       if (e.code === 'Space') {
-        console.log(e)
         e.preventDefault()
       }
     },
@@ -179,14 +171,11 @@ export default {
             var regH = { 'Authorization': 'Basic ' + regAuth }
 
             // request it with headers an params
-            console.log('posting start')
             this.$http.post(window.websiteapiUrl + '/customer/v1/websites/signup',
             data, {
               headers: regH
             })
             .then((response) => {
-              console.error(response)
-
               this.$notify({
                 title: 'Account created.',
                 message: 'We are loading your account informations.',
@@ -195,7 +184,6 @@ export default {
 
               // construct session data
               var jsonTokenData = this.parseJwt(response.data.token)
-              console.log(jsonTokenData)
               var expiration = jsonTokenData.exp
               // var iat = jsonTokenData.iat
               // var tokenId = jsonTokenData.id = id
@@ -214,9 +202,27 @@ export default {
               }
 
               // store session data in localstorage
-
+              // TODO: this is duplicated code with /login this is bad
               window.localStorage.setItem('session', JSON.stringify(session))
               this.$store.commit('setSession', session)
+
+              var self = this
+              this.refreshUser({ vue: this,
+                callback: function () {
+                  if (self.project && self.project.websites) {
+                    // Only if no project is selected..
+                    // window.vm.$store.state.app.isLoaded
+                    if (!self.$store.state.app.isLoaded) {
+                      self.$store.state.app.sidebarglobal.opened = true
+                      self.$store.state.app.sidebarglobal.hidden = false
+                    }
+                  } else {
+                    // NO PROJECT YET ??
+                    self.$store.state.app.sidebarglobal.opened = false
+                    self.$store.state.app.sidebarglobal.hidden = true
+                  }
+                }
+              })
             })
             .catch((error) => {
               this.loginSubmit = modalSubmitLogin
@@ -245,15 +251,7 @@ export default {
             var auth = this.$Base64.encode(data.user + ':' + data.password)
             var h = { 'Authorization': 'Basic ' + auth }
 
-            // request it with headers an params
-            console.log('posting start')
-
-            // querystring.stringify({...});
-
             // customer/v1/{project}/password/reset
-            console.log(window.websiteapiUrl + '/customer/v1/websites/login')
-            console.log(h)
-            console.log(data)
             this.$http.post(window.websiteapiUrl + '/customer/v1/websites/login',
               {},
               {
@@ -270,7 +268,6 @@ export default {
 
               // construct session data
               var jsonTokenData = this.parseJwt(response.data.token)
-              console.log(jsonTokenData)
               var expiration = jsonTokenData.exp
               // var iat = jsonTokenData.iat
               // var tokenId = jsonTokenData.id = id
@@ -295,20 +292,15 @@ export default {
               var self = this
               this.refreshUser({ vue: this,
                 callback: function () {
-                  console.error('callll back is called 03')
                   if (self.project && self.project.websites) {
                     // Only if no project is selected..
-                    console.error('callll back is called 03 A')
                     // window.vm.$store.state.app.isLoaded
                     if (!self.$store.state.app.isLoaded) {
-                      console.error('callll back is called 03 AC')
-                      console.error('callll back is called 03 AD')
                       self.$store.state.app.sidebarglobal.opened = true
                       self.$store.state.app.sidebarglobal.hidden = false
                     }
                   } else {
                     // NO PROJECT YET ??
-                    console.error('callll back is called 03 B')
                     self.$store.state.app.sidebarglobal.opened = false
                     self.$store.state.app.sidebarglobal.hidden = true
                   }
@@ -316,7 +308,6 @@ export default {
               })
             })
             .catch((error) => {
-              console.error(error)
               this.loginSubmit = modalSubmitLogin
               $('#' + which + 'Submit').removeClass('disabled')
 

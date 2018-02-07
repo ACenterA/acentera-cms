@@ -13,6 +13,7 @@ import Message from 'vue-bulma-message'
 import hljs from 'highlight.js'
 import cloneDeep from 'lodash/cloneDeep'
 
+// For IE: Fix console.XX in case of debug
 if (!window.console) {
   window.console = {
     log: function () {
@@ -21,26 +22,31 @@ if (!window.console) {
     }
   }
 }
+window.tempHelper = {
+  getParents: function getParents (el) {
+    var a = el
+    var parents = []
+
+    while (a) {
+      parents.unshift(a)
+      a = a.parentNode
+    }
+    return parents
+  }
+}
 
 $.fn.outerHTMLEditor = function (doc) {
-  console.error('ignoring of ... and cloning of a')
-  console.error(this)
-  console.error('ignoring of ... and cloning of b')
-  console.error(this.eq(0))
-  console.error('ignoring of ... and cloning of c')
-  console.error(this.eq(0).clone())
-  console.error('ignoring of ... and cloning of d')
   var tmpDiv = $('<div editor-ignore="true"/>')
   var html = tmpDiv.append(this.eq(0).clone()).html()
   tmpDiv.remove()
   return html
 }
 
+// Helper used to clone objects
 Vue.prototype.$clone = function (object) {
-  console.error('recieved clone of')
-  console.error(object)
   return cloneDeep(object)
 }
+
 window.currentParents = null
 import dynamicObj from './plekan/src/core/modules/dynamic.vue'
 window.dynamicObjClone = Vue.prototype.$clone(dynamicObj)
@@ -48,7 +54,6 @@ window.dynamicObjClone = Vue.prototype.$clone(dynamicObj)
 Vue.prototype.$http = axios
 Vue.axios = axios
 Vue.use(NProgress)
-console.error(plekan)
 Vue.use(plekan.plekan, {
   defaultLanguage: 'en',
   languages: ['tr', 'en'],
@@ -57,57 +62,27 @@ Vue.use(plekan.plekan, {
   thumbnailPath: '/static/thumbnails/',
   plekanEvent: {
     onAdd: (evt) => {
-      // console.log('on add..')
-      // console.log(evt);
-      // console.log(store.state);
-
     },
     onInit: () => {
-
-      // console.log('onInit called')
-      // console.log(store);
-
-      // var newComponent = Vue.component('custom',{
-      //   mixins:[plekanComponentMixin],
-      //    data:function () {
-     //       return {
-    //         DEFAULT_CONTENT : '<div contenteditable="true" >Hi</div>'
-      //     }
-//         },
-//         template :'#custom'
-//       })
-//
-//       var customComponents = [
-//         {
-//           info : {
-//             "name"      : "awesomecomponent",
-//             "group"     : "image",
-//             "thumbnail"   : "https://vuejs.org/images/logo.png"
-//           },
-//           component : newComponent
-//         }
-//      ];
-//      console.error(store)
-  //    //store.addRow(customComponents)
-
     }
   },
   plekan_buttons: {
-    // Special buttons
+    /* Special buttons
     save: {
       text: 'Show Result',
       class: 'plekan-footer-button save',
       callback (rows) {
-        console.log(rows)
+        // debug.log(rows)
       }
     },
     cancel: {
       text: 'Cancel',
       class: 'plekan-footer-button cancel',
       callback (rows) {
-        console.table(JSON.parse(JSON.stringify(rows[0].contents)))
+        // debug.table(JSON.parse(JSON.stringify(rows[0].contents)))
       }
     }
+    */
   }
 })
 
@@ -157,12 +132,24 @@ if (window.location.href.indexOf('acentera.com') !== -1) {
   document.domain = 'acentera.com' // TODO: Use en environment variable ...
   store.commit('setWebsite', true) // weird ?
   window.withCredentials = true
+  // window.apiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev/api'
+  window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev/'
 } else {
   // Enable devtools
-  // store.commit('isLoaded', true)
-  window.withCredentials = false // required
+  // Local Dev
   Vue.config.devtools = true
-  store.commit('setWebsite', false) // weird ?
+  window.withCredentials = false
+
+  // Local Dev with Remote
+  /*
+  Vue.config.devtools = true
+  try {
+    document.domain = 'acentera.com' // TODO: Use en environment variable ...
+  } catch (e) {
+  }
+  store.commit('setWebsite', true) // weird ?
+  window.withCredentials = true
+  */
 }
 // } // end if (hosted version)
 // store.commit('setProjectSelected', false)
@@ -183,7 +170,6 @@ if (state.app.website) {
     store.commit('setInet', true)
   }
   Vue.prototype.$checkInetBad = function () {
-    console.error('CHECK OF INET')
     $.ajax({
       url: 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/',
       type: 'GET',
@@ -191,16 +177,9 @@ if (state.app.website) {
       crossDomain: true,
       // dataType: 'jsonp',
       success: function (response) {
-        console.error('CHECK OF INET resp')
-        console.log('got response')
-        console.log(response)
         store.commit('setInet', true)
-        // ready()
       },
       error: function (error) {
-        console.error('CHECK OF INET err')
-        console.error('got response test of error')
-        console.error(error)
         if (error.readyState === 0) {
           return store.commit('setInet', true) // weird ?
         }
@@ -230,7 +209,6 @@ window.hasProcessed = false
 
 router.beforeEach((route, redirect, next) => {
   $('body').removeClass('overflow-hidden')
-  // console.error('befoure route next is')
   store.commit('deleteAllRows', 0, 1)
   window.hasProcessed = false
 
@@ -240,8 +218,6 @@ router.beforeEach((route, redirect, next) => {
     store.commit('REPO_STATE_UPATE', 0) // all good
   }
 
-  console.error(route)
-  console.error(this.a)
   window.currVemTest = this
 
   store.state.app.viewMenu = false // reset menu right click
@@ -284,16 +260,6 @@ Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
 })
 
-/** EDITOR START **/
-// const modules = []
-
-// console.error('plekan test')
-// console.error(Plekan)
-
-// const nplekan = new Plekan()
-// console.error(nplekan)
-/** EDITOR END **/
-
 const app = new Vue({
   router,
   store,
@@ -327,8 +293,6 @@ Vue.prototype.$notify = openNotification
 
 function handleError (error) {
   // if the server gave a response message, print that
-  console.log('got error....')
-  console.log(error)
   try {
     if (error.response.data.error) {
       openNotification({
@@ -336,7 +300,6 @@ function handleError (error) {
         message: error.response.data.error,
         type: 'danger'
       })
-      console.log(error.response.data.error)
     } else {
       if (error.response.status === 403) {
         // either user is not logged in, or user's actions were denied by vault
@@ -366,7 +329,6 @@ function handleError (error) {
           type: 'danger'
         })
       }
-      console.log(error.response.data)
     }
   } catch (e) {
     //  if error == Network Error ....
@@ -580,6 +542,63 @@ window.xml2json = function (xml, tab) {
    var json = X.toJson(X.toObj(X.removeWhite(xml)), xml.nodeName, "\t");
    return "{\n" + tab + (tab ? json.replace(/\t/g, tab) : json.replace(/\t|\n/g, "")) + "\n}";
 }
+
+/**
+ * A function to take a string written in dot notation style, and use it to
+ * find a nested object property inside of an object.
+ *
+ * Useful in a plugin or module that accepts a JSON array of objects, but
+ * you want to let the user specify where to find various bits of data
+ * inside of each custom object instead of forcing a standardized
+ * property list.
+ *
+ * @param String nested A dot notation style parameter reference (ie "urls.small")
+ * @param Object object (optional) The object to search
+ *
+ * @return the value of the property in question
+ */
+
+window.getEditorProperty = function ( propertyName, object ) {
+  var parts = propertyName.split( "." ),
+    length = parts.length,
+    i,
+    property = object || this;
+
+  for ( i = 0; i < length; i++ ) {
+    try {
+      property = property[parts[i]];
+    } catch (err) {
+
+    }
+  }
+
+  return property;
+}
+
+window.updateEditorProperty = function ( propertyName, object, newVal ) {
+  var parts = propertyName.split( "." ),
+    length = parts.length,
+    i,
+    property = object || this
+
+  var prevProperty = property
+  for ( i = 0; i < length; i++ ) {
+    prevProperty = property
+    if (!property.hasOwnProperty[parts[i]]) {
+      if (i !== length-1) {
+        if (!property.hasOwnProperty('' + parts[i])) {
+          property[parts[i]] = {}
+        }
+      } else {
+        property[parts[i]] = newVal // set value
+      }
+    }
+    property = property[parts[i]]
+  }
+  return property;
+}
+
+
 /* eslint-enable */
 
 export { app, router, store }

@@ -57,7 +57,6 @@ export default {
     },
 
     incrementTotal: function () {
-      console.log('total aazza')
     },
 
     shouldExpandMatchItem (route) {

@@ -25,15 +25,6 @@
           original: extendObj,
           value: valueToTransform
         }
-        /*
-        for (var v in extendObj) {
-          if (extendObj.hasOwnProperty(v)) {
-            if (v !== 'children' && v !== 'items' && v !== 'key') {
-              tmpE[v] = extendObj[v]
-            }
-          }
-        }
-        */
         return tmpE
       },
 
@@ -42,8 +33,6 @@
       // a string or the Index as an integer
       generateChildrenFromCollection: function (collection) {
         var rr = _.map(collection, (value, keyOrIndex) => {
-          console.log('procesing value of')
-          console.log(value)
           if (this.isObject(value)) {
             if (value.hasOwnProperty('Folders')) {
               if (value.Folders.prop && value.Folders.prop.constructor === Array) {
@@ -57,8 +46,6 @@
                 }
                 value.items = value.Files
               } else {
-                console.log('got folxerr')
-                console.log(value.Folders)
                 var tmpArr1 = []
                 for (var k1 in value.Folders) {
                   if (value.Folders.hasOwnProperty(k1)) {
@@ -69,8 +56,6 @@
                 }
                 value.items = value.Files.concat(tmpArr1)
               }
-              console.log('got zzzaaa' + value.Name)
-              console.log(value)
               // var extendObj = $.extend({}, oldObject)
               // var extendObj = value
               var extendObj = JSON.parse(JSON.stringify(value))
@@ -81,16 +66,12 @@
               }
             } else {
               if (value.Name !== undefined && !value.hasOwnProperty('Folders')) {
-                console.log('NAME FILE')
                 return this.transformObject(value, value.Name, 'File', false, value)
               } else {
-                console.log('NAME DIR')
                 return this.transformObject(value, value, true, value)
               }
             }
           }
-          console.log('test here aaa for')
-          console.log(value)
           if (this.isArray(value)) {
             return this.transformArray(value, keyOrIndex, value)
           }
@@ -133,18 +114,6 @@
           original: extendObj,
           children: this.generateChildrenFromCollection(objectToTransform)
         }
-        /*
-        console.log('transofrm object for type ' + subType)
-        console.log(tmpE)
-        console.log(extendObj)
-        for (var v in extendObj) {
-          if (extendObj.hasOwnProperty(v)) {
-            if (v !== 'children' && v !== 'items' && v !== 'key') {
-              tmpE[v] = extendObj[v]
-            }
-          }
-        }
-        */
         return tmpE
       },
 

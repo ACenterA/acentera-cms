@@ -8,7 +8,6 @@ selectionPolify.start();
 
 ;(function () {
   function Selo(props) {
-    console.error('SELO START A');
     if (!props.els) {
 
         var log = props.log != undefined ? props.log : true
@@ -21,45 +20,33 @@ selectionPolify.start();
     if (!document) {
       throw "[Platfrom] not supported"
     }
-    console.error('iframe 1');
     if (!props.iframe) {
        this._document = document;
     } else {
        this._document = props.iframe;
     }
     if (!props.window) {
-    console.error('iframe 2');
        this._window = window;
     } else {
        this._window = props.window;
     }
-    console.error('iframe 3');
-
 
     this._arena      = null;
     this.selection  = null;
-    console.error('iframe 4');
     this.els         = props.els || this._document.body;
     this._bus        = props.bus;
 
-    console.log('in selo...');
-    console.log(this);
-    console.error('iframe 5');
     this.init()
   }
 
   Selo.prototype.init = function () {
     this._arena = this.els;
-    console.error('window.getSelection????');
-    console.error(this);
-    console.error(this._document);
     this.selection = this._window.getSelection()
 
     this.attachEvent();
   }
 
   Selo.prototype.attachEvent = function () {
-       console.error('attachEvent...');
        var selectionEndTimeout = null,
           contextMenuEvent    = new CustomEvent('contextMenuEvent'),
           endEvent            = new CustomEvent('selectionEnd'),
@@ -86,49 +73,26 @@ selectionPolify.start();
         "contextmenu",
         "keydown"
       ].map(function(e) {
-        console.error('fff addEventListener........ for');
-        console.error(this);
-        console.error(this._document);
         this._document.addEventListener(e.toString(), function(evt/*event*/) {
-          console.error(evt);
-          console.error('RECEIVED evt.type of ' + evt.type)
           if (evt.type != "selectionchange" && evt.type != "mouseup") {
             if (evt.type === "contextmenu") {
-              console.error('contextmenu ON ITEM 01 A dispatch');
-
-              // contextMenuEvent.target = evt.target
-              console.error('TARGET IS')
-              console.error(evt.target)
-              console.error(evt)
               var tmpcontextMenuEvent = new CustomEvent('contextMenuEvent', { detail: evt  })
               // {detail:this.selection}),
               // TODO: Should we check the target is editable ??
               if (this._bus !== undefined) {
-                   console.error('AZTEST emit of ' + tmpcontextMenuEvent.type + ' ==> event vs ' + tmpcontextMenuEvent.type);
-                   console.error(tmpcontextMenuEvent)
                    this._bus.$emit(contextMenuEvent.type, tmpcontextMenuEvent);
               } else {
                    this._document.dispatchEvent(tmpcontextMenuEvent);
               }
               return
             } else if (evt.type == "click") {
-          		console.error('CLICK ON ITEM 01 A dispatch');
-          		console.error(evt);
-          		// evt.preventDefault();
-          		// if (evt.target.className == 'close-modal') {
-          			// console.error('trgger click');
-          			// evt.target.click();
-          		// }
-              // this._document.dispatchEvent(evt);
-	    } else if (evt.type == "keydown") {
-              map[evt.keyCode] = true
-
+      	    } else if (evt.type == "keydown") {
+                    map[evt.keyCode] = true
             }else{
 
               if (map[65] && map[91] ) {
                 if (this.hasText()) {
               		  if (this._bus !== undefined) {
-              			     console.error('emit end event 03 testa');
               		       this._bus.$emit(endEvent.type, endEvent);
               		  } else {
                     	   this._document.dispatchEvent(endEvent);
@@ -138,7 +102,6 @@ selectionPolify.start();
               else if ((map[16] && map[37]) || (map[16] && map[38]) || (map[16] && map[39]) || (map[16] && map[40]) ) {
                 if (this.hasText()) {
               		  if (this._bus !== undefined) {
-              			   console.error('emit end event 01 test a?');
               		   	 this._bus.$emit(endEvent.type, endEvent);
               		  } else {
                        this._document.dispatchEvent(endEvent);
@@ -155,22 +118,14 @@ selectionPolify.start();
 
           if (evt.type == "selectionchange") {
             // if (this.selection.type == "Range") {
-              console.error('selection change A1?');
-              console.error(this.hasText());
               if (this.hasText()) {
-                  console.error('NICE NICE 99');
-                  console.error(this);
-                  console.error(this._bus);
             		  if (this._bus !== undefined) {
-            			     console.error('emit start event');
             		  	   this._bus.$emit(startEvent.type, startEvent);
             		  } else {
                        this._document.dispatchEvent(startEvent);
             		  }
               } else {
-                console.error('has tetxt aaa');
                 if (this._bus !== undefined) {
-                     console.error('emit end event 02 testa');
                      this._bus.$emit(clearEvent.type, clearEvent); //only clearEventType is usefull
                 } else {
                      this._document.dispatchEvent(clearEvent);
@@ -187,7 +142,6 @@ selectionPolify.start();
           selectionEndTimeout = setTimeout(function(){
               if (evt.type == "mouseup" && this.hasText()) {
             		  if (this._bus !== undefined) {
-            			     console.error('emit endevent mouseup event');
             		  	   this._bus.$emit(endEvent.type, endEvent);
             		  } else {
                     	this._document.dispatchEvent(endEvent);
@@ -237,7 +191,6 @@ selectionPolify.start();
     }
 
     Selo.prototype.saveSelection = function ()  {
-        console.error('save sel test?');
         if (this._window.getSelection) {
             var sel = this._window.getSelection();
             if (sel.getRangeAt && sel.rangeCount) {
@@ -263,15 +216,12 @@ selectionPolify.start();
 
 
   if (typeof exports == "object") {
-    console.error('export object');
     module.exports = Selo
   } else if (typeof define == "function" && define.amd) {
   define([], function () {
-    console.error('return selo');
     return Selo
   })
   } else if (window.Vue) {
-    console.error('return vue solo..');
     window.Selo = Selo
   }
 

@@ -59,7 +59,7 @@
               </div>
 
           </div>
-          
+
           <!-- No website yet... -->
           <section v-if="! ( project && project.websites )">
             <div class="">
@@ -170,12 +170,9 @@ import { mapActions, mapGetters } from 'vuex'
 export default {
 
   data () {
-    console.log(this.$store.state)
     return {
       pkg: this.$store.state.pkg,
       getVueObj: function () {
-        console.error('get vue obj')
-        console.error(this)
         return this
       }
     }
@@ -189,20 +186,10 @@ export default {
       return this.$store.state.app.isLoaded
     },
     project: function () {
-      console.error('project updated?')
-      console.error(this.$store.state.app.project)
-      console.error(this.selectedProject)
       return this.selectedProject
-      // return this.$store.state.app.project
     },
     baaadselectedWebsite: function () {
-      console.error('project selected website?')
       if (this.$store.state.app.project && this.$store.state.app.project.websites) {
-        console.error('A11 project website updated using : ?' + this.$store.state.app.websiteId)
-        console.error(this.$store.state.app.project.websites)
-
-        console.error('return of')
-        console.error(this.$store.state.app.project.websites[this.$store.state.app.websiteId])
         return this.$store.state.app.project.websites[this.$store.state.app.websiteId]
       }
       return this.$store.state.app.websiteId
@@ -225,9 +212,11 @@ export default {
       'toggleRepoState',
       'toggleRepo',
       'toggleRepoUrl',
-      'isWebsite',
       'selectWebsite',
       'refreshUser'
+    ]),
+    ...mapGetters([
+      'isWebsite'
     ]),
     isRepoUpdating () {
       return (this.repoState.updating === 1)
@@ -242,18 +231,9 @@ export default {
       return (this.repoState.updating === 6)
     },
     preview: (item) => {
-      console.error('preview of ')
-      console.error(item)
     },
     select: (item) => {
-      console.error('selectWebsite')
-      console.error(window.vm)
-      // console.error(window.vm)
-      // vm.$store.commit('SELECT_WEBSITE', item.projectId, item.websiteId)
-      console.error(window.vm.$store.getters)
-      console.error(window.vm.$store.getters.session)
       window.vm.$store.commit('SELECT_WEBSITE', item.projectId, item.websiteId, window.vm.$store.getters.session)
-      // (item.projectId, item.websiteId)
     }
   }
 

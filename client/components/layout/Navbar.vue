@@ -24,7 +24,7 @@
           </div>
         </div>
         <div class="nav-center">
-          <div v-if="!isLoggedIn && isWebsiteSelected()">
+          <div v-if="!isLoggedIn && isWebsiteSelected() && isKeyMissing()">
             <p class="red">
               You must Login to your 'Git' account first. (Login on the left menu)
             </p>
@@ -89,6 +89,10 @@
             </a>
 
             <a v-if="hasSession() && isSavePushAvailOrisTestMissing()" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
+                Publish
+            </a>
+
+            <a v-if="hasSession() && isSavePushAvailOrisTestMissing()" @click="saveModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 Save
             </a>
           </div>
@@ -165,18 +169,7 @@ export default {
   mounted: function () {
     this.toggleRepoState(1)
     var self = this
-    // var state = self.$store.state
-    console.error('IS WEBSITE?? HOSTED VERSION?')
-    console.error(this.getSelectedWebsite)
 
-    if (self.$store.state.app.website && !this.selectedWebsite) {
-      console.error('IS WEBSITE?? HOSTED VERSION YES ?')
-    } else {
-      // nothing
-      // not good this.getSelectedWebsite()
-    }
-
-    console.log('nav mounted a')
     // if session cookie is still valid, load session data
     let raw = window.localStorage.getItem('session')
     if (raw) {
@@ -188,20 +181,13 @@ export default {
           message: 'Please login again',
           type: 'warning'
         })
-        console.error('CLEAR SESSION HEREA')
         this.$store.commit('clearSession')
       } else {
-        console.error('CLEAR SESSION HEREB')
         this.$store.commit('setSession', session)
       }
     } else {
       self.toggleRepoState(0) // all good
-      // console.error('CLEAR SESSION HEREC')
-      // already cleared this.$store.commit('clearSession')
     }
-
-    // uncomment this to see the details of the session everytime you refresh the page
-    // console.log(JSON.stringify(this.session))
   },
   computed: {
     ...mapGetters({
@@ -218,17 +204,9 @@ export default {
       return this.selectedWebsite
     },
     getSelectedWebsite: function () {
-      // var self = this
-      console.error('TEST LOADED AA GGE')
-      console.error(this.$store.state.app.isLoaded)
       if (!this.$store.state.app.isLoaded) {
-        console.error('not loaded')
         return
       }
-      // if (this.selectedWebsite !== null) {
-      //
-      // }
-      console.error('taa 3')
       if (this.$store.state.app.website) {
         return this.selectedWebsite
       } else {
@@ -244,11 +222,10 @@ export default {
       'logOut',
       'toggleRepoUrl',
       'toggleSidebar',
-      'selectWebsite'
+      'selectWebsite',
+      'saveNewSettings'
     ]),
     isManual () {
-      console.log('manualttt')
-      console.log(this.$route.path)
       if ((('' + this.$route.path)).indexOf('/template') >= 0) {
         if ((('' + this.$route.path)).indexOf('/preview') >= 0) {
           this.manual = 'Preview'
@@ -263,16 +240,11 @@ export default {
     },
     hasSession () {
       if (this.$store.state.app.website) {
-        console.error('its a website session?')
         if (this.session && this.session.display_name) {
           return true
         }
       } else {
-        console.error('its a website not session?')
         if (this.$store.state && this.$store.state.github) {
-          console.error('GIT TEST?')
-          console.error(this.$store.state.github.logininfo)
-          console.error(this.$store.state.app)
           return (this.$store.state.github.logininfo)
         }
       }
@@ -313,7 +285,7 @@ export default {
       return (this.repoState.isLoaded && (this.repoState.Master === this.repoState.Branch))
     },
     isKeyMissing () {
-      return (this.repoState.updating === 6)
+      return (this.repoState.sshKeyMissing || this.repoState.updating === 6)
     },
     isOffline () {
       return (this.app.inet === false)
@@ -350,28 +322,24 @@ export default {
       this.showModal = true
     },
     saveAndPreviewAndPushModal () {
-      console.log('Hit save and Preview Modal')
       this.showModalReviewComment = true
     },
     saveAndPushModal () {
-      console.log('save and push')
       this.showModalComment = true
+    },
+    saveModal () {
+      this.showModalComment = false
+      this.saveNewSettings()
     },
     closeCreateSiteModal () {
       this.selectedIndex = -1
       this.showCreateModal = false
     },
     nextStep (nextstep) {
-      console.error('next step')
     },
     GitLogin () {
-      // console
-
     },
     closeModalSaveReview (obj) {
-      console.log('close modal review here')
-      console.log('got obj of')
-      console.log(obj)
       if (obj === undefined) {
         this.selectedIndex = -1
         this.showModalReviewComment = false
@@ -379,29 +347,14 @@ export default {
         var self = this
         if (self) {
         }
-        // console.log(this.logininfo)
-        // ensure to use login credentials first...
-        console.log('github state')
-        console.log(this.$store.state.github)
-        console.log(this.$store.state)
-        console.log(this.$store.state.app.repoState.url)
-        console.log(this.$store.state.github.logininfo.username)
-
         var fullGitPath = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).indexOf('/') + 1)
         fullGitPath = fullGitPath.substring(0, fullGitPath.lastIndexOf('.git'))
         var tmpGit = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).lastIndexOf('/') + 1)
         tmpGit = tmpGit.substring(0, tmpGit.lastIndexOf('.git'))
-        console.log(tmpGit)
-
-        var userGetPath = 'repos/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/pulls'
-        console.log(userGetPath)
-
-        console.log('create pull request')
         var userPostPath = 'repos/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/pulls'
         if (userPostPath) {
         }
         var $gitobj = this.$github
-        console.log('type test')
 
         var pullReqObj = {
           'title': obj.title || 'New Pull Request',
@@ -411,11 +364,7 @@ export default {
         }
         if (this.$store.state.github && this.$store.state.github.logininfo && this.$store.state.github.logininfo.type === 'BitBucket') {
           $gitobj = this.$bitbucket
-          userGetPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/pullrequests'
           userPostPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/pullrequests'
-          console.log('TEST TITLE')
-          console.log(obj)
-          console.log(obj.Title)
           pullReqObj = {
             title: obj.title || 'New Pull Request',
             description: obj.desc || 'Desc here',
@@ -438,17 +387,13 @@ export default {
 
         if (pullReqObj) {
         }
-        console.log(this.$store.state.github.logininfo)
         $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
 
-        console.log(pullReqObj)
         // $gitobj.post(userPostPath, githubPush, function (resp) {
         $gitobj.post(userPostPath, pullReqObj, function (next) {
-          console.log('success fully POSTED PULL informations...')
-
           // success fully POSTED PULL informations.
           //  {"merge_commit": null, "description": "Desc here", "links": {"decline": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/decline"}, "commits": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/commits"}, "self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3"}, "comments": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/comments"}, "merge": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/merge"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/pull-requests/3"}, "activity": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/activity"}, "diff": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/diff"}, "approve": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/approve"}, "statuses": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/pullrequests/3/statuses"}}, "title": "a faf 32 f3 2", "close_source_branch": false, "reviewers": [], "destination": {"commit": {"hash": "1addbeecd463", "links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/commit/1addbeecd463"}}}, "repository": {"links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/avatar/32/"}}, "type": "repository", "name": "test-simple-website", "full_name": "Gizmodo1/test-simple-website", "uuid": "{a1526fe3-4e13-4d6f-bc36-b4eb55e45300}"}, "branch": {"name": "master"}}, "state": "OPEN", "closed_by": null, "source": {"commit": {"hash": "1ad4ff49dd3d", "links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website/commit/1ad4ff49dd3d"}}}, "repository": {"links": {"self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/test-simple-website"}, "html": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/test-simple-website/avatar/32/"}}, "type": "repository", "name": "test-simple-website", "full_name": "Gizmodo1/test-simple-website", "uuid": "{a1526fe3-4e13-4d6f-bc36-b4eb55e45300}"}, "branch": {"name": "Demo_Nelify"}}, "comment_count": 0, "author": {"username": "Gizmodo1", "display_name": "francis Lavalliere", "type": "user", "uuid": "{d1f483aa-fb4b-4a10-b7df-e58bd6a7500f}", "links": {"self": {"href": "https://api.bitbucket.org/2.0/users/Gizmodo1"}, "html": {"href": "https://bitbucket.org/Gizmodo1/"}, "avatar": {"href": "https://bitbucket.org/account/Gizmodo1/avatar/32/"}}}, "created_on": "2017-09-15T02:33:43.353448+00:00", "participants": [], "reason": "", "updated_on": "2017-09-15T02:33:43.398141+00:00", "type": "pullrequest", "id": 3, "task_count": 0}
-          // console.log(next)
+          // debug.log(next)
         }, this.gitError)
 
         this.selectedIndex = -1
@@ -456,7 +401,6 @@ export default {
       }
     },
     executeLogout () {
-      console.log('sending logout')
       this.logOut(this)
     },
     closeModalSaveBasic (obj) {
@@ -503,26 +447,9 @@ export default {
       this.showModalComment = false
     },
     selectVersion () {
-      console.error('please select new version modal....')
     },
     closeModalBasic (obj) {
-      console.log('close modal basic here')
-      console.log('got obj of')
-      console.log(obj)
-
-      console.log('got title of ' + obj.title)
-
-      // TODO: Create Pull Request Here
-      // var self = this
-      /*
-      this.$httpApi.post(window.apiUrl + '/git?action=create_pull',
-      querystring.stringify(obj), {
-        headers: {'X-CSRF-Token': this.csrf}
-      })
-      */
-
-      // getBasicAuth
-
+      // Creating Pull Request Here
       this.$httpApi.post(window.apiUrl + '/git?action=create_pull',
       obj, {
         headers: {
@@ -530,25 +457,17 @@ export default {
         }
       })
       .then((response) => {
-        /*
-          this.toggleRepoUrl(response.data.Data)
-          console.log('toggle repo data')
-          if (response !== null && response.data !== null) {
-            this.toggleRepo(response.data)
-          }
-        */
-        this.$message({
-          message: 'Your change ID is: ' + response.data.result,
-          type: 'success',
-          duration: 0,
-          showCloseButton: true
-        })
-
         if (response.data.error !== '') {
           this.$notify({
-            title: 'Slack webhook',
+            title: 'Git Request',
             message: response.data.error,
             type: 'warning'
+          })
+        } else {
+          this.$notify({
+            title: 'Git Request',
+            message: 'Success fully saved.',
+            type: 'success'
           })
         }
       })
@@ -625,6 +544,7 @@ export default {
 
 .navheighfix.button {
   margin-left:30px;
+  float: left;
 }
 
 .nav-center {

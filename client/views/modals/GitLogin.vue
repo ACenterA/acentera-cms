@@ -36,7 +36,7 @@
               <div v-if="username === null" class="field">
                 <article class="message is-warning">
                   <div class="message-body">
-                    <strong>You must be logged in to enable SSH Keys</strong>
+                    <strong>You must be logged in to enable SSH Keys.</strong>
                   </div>
                 </article>
               </div>
@@ -157,7 +157,6 @@ export default {
     },
     nextStep () {
       var self = this
-      console.error('eiting next step')
       self.$emit('nextStep', self.template)
     },
     confirmed () {

@@ -129,37 +129,24 @@ export default {
       var self = this
 
       if (!this.$store.state.app.isLoaded) {
-        console.error('not loaded')
         return setTimeout(function () {
           self.switchTab(index)
         }, 1000)
       }
 
+      // TODO: This got moved into the refreshConfig ...
+      // we should add a refreshConfig callback and execute remaining stuff here
+
       this.$httpApi.get(window.apiUrl + '/settings').then((response) => {
-        console.log('got http get')
-        console.log(response)
         let result = response.data
-        console.log(result)
 
-        /*
-        let keys = Object.keys(result)
-        for (var i = 0; i < keys.length; i++) {
-          console.log(keys[i])
-          console.log(result[keys[i]])
-        }
-        */
         if (result.hasOwnProperty('languages')) {
-          console.log('LANGS ARE')
-          console.log(result.languages)
-
           var TempAvailablelanguages = []
           var TempAvailablelanguageshash = {}
 
           let langkeys = Object.keys(result.languages)
           self.allSettings = result
           for (var i = 0; i < langkeys.length; i++) {
-            console.log('Languages are:' + langkeys[i])
-            console.log(result.languages[langkeys[i]])
             var tmpLang = result.languages[langkeys[i]]
             tmpLang.id = langkeys[i]
             tmpLang.value = langkeys[i]
@@ -180,11 +167,8 @@ export default {
     },
     loadLanguageDetails (lang) {
       if (lang !== undefined) {
-        console.log('language load detail of' + lang.languagename)
-        console.log(lang)
         this.selectedLangItem = this.availableLanguagesHash[lang]
       }
-      console.log(this.availableLanguagesHash)
     },
     openModalBasic (index) {
       this.selectedIndex = index
@@ -203,9 +187,8 @@ export default {
       // this.showDeleteModal = false
     },
     save () {
-      console.log(this.allSettings)
       this.$httpApi.post(window.apiUrl + '/settings', this.allSettings, {}).then((response) => {
-        console.log('SAVED')
+        // TODO: Return this.$notify scucess message.. feedback.
       })
       .catch((error) => {
         this.$onError(error)

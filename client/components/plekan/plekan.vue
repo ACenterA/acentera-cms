@@ -40,9 +40,6 @@ export default {
     window.editorvm = this
   },
   mounted() {
-    console.error('editor start init aa');
-    // this.store.commit('editorStart')
-    // this.$plekanEvent.onInit()
   }
 }
 </script>

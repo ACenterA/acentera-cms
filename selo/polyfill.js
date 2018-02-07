@@ -68,14 +68,10 @@ var selectionchange = (function (undefined) {
   }
 
   function on(el, eventType, handler) {
-    console.error('ONNN AADDD VE ENVET')
-    console.error(el)
     el.addEventListener(eventType, handler, true);
   }
 
   function off(el, eventType, handler) {
-    console.error('OFFF REMOE VE ENVET on..')
-    console.error(el)
     el.removeEventListener(eventType, handler, true);
   }
 
