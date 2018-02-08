@@ -1,8 +1,8 @@
 {
-  "name": "ServerlessCMS",
+  "name": "ACenterA CMS",
   "version": "0.4.0",
-  "description": "Serverless CMS, a CMS For Serverless and Static Site Generators",
-  "repository": "acenterainc/serverless-cms",
+  "description": "ACenterA CMS, a CMS for GoHugo Static Site Generators and Serverless solutions",
+  "repository": "acenterainc/acentera-cms",
   "homepage": "",
   "license": "MPL 2.0",
   "author": {
