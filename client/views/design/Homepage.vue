@@ -4,7 +4,8 @@
       <div class="tile is-ancestor is-vertical fullheight">
 
           <article class="padleft tile is-child box">
-              <label class="label">Your current repository is in error. <br/><br/>Validate if you have a .git/config file, in your folder or ask for help on our gitter channel.</label>
+              <label v-if="!isWebsite" class="label">Your current repository is in error. <br/><br/>Please logout / login again from the left login menu.. Ask for help on our slack channel.</label>
+              <label v-else class="label">Please go to the left section, and proceed with Logout / Login and try again.</label>
           </article>
 
       </div>

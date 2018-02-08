@@ -92,11 +92,14 @@ export default {
       return (this.object.subtype === 'File')
     },
     cancel () {
+      this.close()
+      /*
       if (this.editing === true) {
         this.editing = false
       } else {
         this.close()
       }
+      */
     },
     close () {
       this.$emit('close')
