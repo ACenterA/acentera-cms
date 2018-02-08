@@ -14,13 +14,13 @@
         </p>
         </div>
         <div v-if="!isLogIn">
+            <!--
               <p>
-              <strong>Choose provider : {{ bitbucket }}</strong>
                 <article class="tile">
                 <div v-if="repoState.Provider === null || repoState.Provider === 'Github'">
                     <p class="control">
                       <a class="button leftfloat is-primary"
-                        @click="selectGitHub()">
+                        @click="selectGitHub()" :disabled="!loaded">
                             <span>Github</span>
                       </a>
                     </p>
@@ -28,7 +28,7 @@
                   <div v-if="repoState.Provider === null || repoState.Provider === 'BitBucket'">
                     <p class="control">
                       <a class="button leftfloat is-primary" style="margin-left:30px"
-                        @click="selectBitBucket()">
+                        @click="selectBitBucket()" :disabled="!loaded">
                             <span>Bitbucket</span>
                       </a>
                     </p>
@@ -36,6 +36,7 @@
 
                 </article>
               </p>
+            -->
 
               </article>
               <br/><br/>
@@ -62,7 +63,7 @@
 
 
 
-                      <div v-if="!isBitBucket()">
+                      <div v-if="loaded && !isBitBucket()">
 
                         <p class="control">
                         <a class="button rightfloat is-primary"
@@ -74,7 +75,7 @@
 
                       </div>
 
-                      <div v-if="isBitBucket()">
+                      <div v-if="loaded && isBitBucket()">
 
                         <p class="control">
                         <a class="button rightfloat is-primary"
@@ -98,6 +99,7 @@
 
   // import _ from 'lodash'
   import Vue from 'vue'
+  import { mapGetters } from 'vuex'
 
   export default {
     data: function () {
@@ -123,6 +125,9 @@
     },
 
     computed: {
+      ...mapGetters({
+        loaded: 'loaded'
+      }),
       isLogIn: function () {
         this.parallelData = this.github()
         if (this.parallelData.logininfo) {
@@ -263,8 +268,25 @@
         this.$store.commit('clearGit')
       },
       gitError: function (e) {
-        if (e.toString().indexOf('code 401')) {
-          // Invalid user
+        if (e.response === undefined) {
+          this.$notify({
+            title: 'Cannot login',
+            message: 'Do you have internet access?',
+            type: 'danger '
+          })
+        } else {
+          if (e.response && e.response.status === 401) {
+            var type = 'GitHub'
+            if (this.isBitBucket()) {
+              type = 'BitBucket'
+            }
+            // Invalid user
+            this.$notify({
+              title: 'Cannot login',
+              message: 'Invalid username / password. Are you trying to connect to your ' + type + ' account ?',
+              type: 'danger'
+            })
+          }
         }
       },
       monitorkey: function (e) {

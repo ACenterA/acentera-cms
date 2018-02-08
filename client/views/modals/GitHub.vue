@@ -229,8 +229,25 @@
         this.$store.commit('clearGit')
       },
       gitError: function (e) {
-        if (e.toString().indexOf('code 401')) {
-          // Invalid user
+        if (e.response === undefined) {
+          this.$notify({
+            title: 'Cannot login',
+            message: 'Do you have internet access?',
+            type: 'danger '
+          })
+        } else {
+          if (e.response && e.response.status === 401) {
+            var type = 'GitHub'
+            if (this.isBitBucket()) {
+              type = 'BitBucket'
+            }
+            // Invalid user
+            this.$notify({
+              title: 'Cannot login',
+              message: 'Invalid username / password. Are you trying to connect to your ' + type + ' account ?',
+              type: 'danger'
+            })
+          }
         }
       },
       monitorkey: function (e) {

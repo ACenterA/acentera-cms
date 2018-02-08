@@ -4,7 +4,6 @@
         <!-- Left side -->
         <div class="column is-6">
           <article v-if="isGitHub()"  class="tile is-parent is-5 is-vertical">
-
             <!-- Login tile -->
             <article class="tile is-child is-marginless is-paddingless">
               <GitHub></GitHub>
@@ -252,7 +251,7 @@ export default {
         return
       }
 
-      this.$httpApi.get(window.apiUrl + '/sshkeys?action=test').then((response) => {
+      this.$httpApi.get(window.apiUrl + '/sshkeys?action=test&loc=login&i=1').then((response) => {
         if (response.data.Data.indexOf('SSH Is Valid') >= 0) {
           var keySuffix = response.data.Extra
           if (keySuffix && keySuffix.startsWith('ssh-rsa')) {
@@ -308,12 +307,18 @@ export default {
         }
       })
       .catch((error) => {
-        if (self.sshValid) {
-          self.sshValid = false
-          if (error && error.response && error.response.status === 500) {
-            self.toggleRepoState(6) // need to setup SSH Key for the user
-          } else {
-            self.$onError(error)
+        self.$store.state.app.repoState.sshKeyMissing = true
+        if (error && error.response && error.response.status === 504) {
+          self.$store.commit('REPO_STATE_UPATE', 0) // all good
+          self.$store.commit('setInet', false)
+        } else {
+          if (self.sshValid) {
+            self.sshValid = false
+            if (error && error.response && error.response.status === 500) {
+              self.toggleRepoState(6) // need to setup SSH Key for the user
+            } else {
+              self.$onError(error)
+            }
           }
         }
       })
@@ -326,7 +331,7 @@ export default {
         return
       }
 
-      this.$httpApi.get(window.apiUrl + '/sshkeys?action=test').then((response) => {
+      this.$httpApi.get(window.apiUrl + '/sshkeys?action=test&loc=login&i=2').then((response) => {
         if (response.data.Data.indexOf('SSH Is Valid') >= 0) {
           self.sshValid = true
           self.toggleRepoState(0) // all good
@@ -335,12 +340,18 @@ export default {
         }
       })
       .catch((error) => {
-        if (self.sshValid) {
-          self.sshValid = false
-          if (error.response.status === 500) {
-            self.toggleRepoState(6) // need to setup SSH Key for the user
-          } else {
-            this.$onError(error)
+        self.$store.state.app.repoState.sshKeyMissing = true
+        if (error && error.response && error.response.status === 504) {
+          self.$store.commit('REPO_STATE_UPATE', 0) // all good
+          self.$store.commit('setInet', false)
+        } else {
+          if (self.sshValid) {
+            self.sshValid = false
+            if (error.response.status === 500) {
+              self.toggleRepoState(6) // need to setup SSH Key for the user
+            } else {
+              this.$onError(error)
+            }
           }
         }
       })

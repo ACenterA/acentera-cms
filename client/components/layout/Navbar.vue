@@ -3,7 +3,20 @@
 
     <!-- Navbar Content -->
     <div class="hero-head">
-      <nav class="nav">
+      <nav class="nav" v-if="!loaded">
+        <div class="nav-left">
+        </div>
+        <div class="nav-center">
+          <div>
+            <p class="blue">
+              Please wait while we are loading....
+            </p>
+          </div>
+        </div>
+        <div class="nav-right is-flex">
+        </div>
+      </nav>
+      <nav class="nav" v-if="loaded">
         <div class="nav-left">
           <a class="nav-item is-hidden-tablet" @click="toggleSidebar(!sidebar.opened)">
             <i class="fa fa-bars" aria-hidden="true"></i>
@@ -24,10 +37,17 @@
           </div>
         </div>
         <div class="nav-center">
-          <div v-if="!isLoggedIn && isWebsiteSelected() && isKeyMissing()">
-            <p class="red">
-              You must Login to your 'Git' account first. (Login on the left menu)
-            </p>
+          <div v-if="!isLoggedIn && isWebsiteSelected()">
+            <div v-if="isWebsite">
+             <p class="red">
+               You must Login to your 'Git' account first to perform changes. (Login on the left menu)
+             </p>
+            </div>
+            <div v-else>
+              <p v-if="isKeyMissing()" class="red">
+                You must Login to your 'Git' account first. (Login on the left menu)
+              </p>
+            </div>
           </div>
           <div v-else>
             <div v-if="isWebsiteSelected()">
@@ -76,25 +96,26 @@
             Logged in as: {{session.display_name}}
           </a>
 
-          <div v-if="hasSession() && !isWebsite || (hasSession() && isWebsite && isWebsiteSelected())">
+          <div v-if="( ((hasSession() && !isWebsite) || !isKeyMissing()) || (hasSession() && isWebsite && isWebsiteSelected()) )">
             <!--
             <a v-if="hasSession() && isTestMissing()" @click="createPreviewSite()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 Create Preview Site
             </a>
             -->
 
-            <!-- this is same .. as Save.. -->
+            <!-- not yet enabled
             <a v-if="hasSession() && isSavePushAvail()" @click="saveAndPreviewAndPushModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 Submit for Review
             </a>
-
-            <a v-if="hasSession() && isSavePushAvailOrisTestMissing() && repoState.pending == true" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
+            -->
+            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile" :disabled="(!(repoState.pending == true))">
                 Publish
             </a>
 
-            <a v-if="hasSession() && isSavePushAvailOrisTestMissing()" @click="saveModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
+            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="saveModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
                 Save
             </a>
+
           </div>
 
           <div v-if="isWebsite && isWebsiteSelected()">
@@ -195,6 +216,8 @@ export default {
       pkginfo: 'pkg',
       sidebar: 'sidebar',
       app: 'app',
+      github: 'github',
+      loaded: 'loaded',
       repoState: 'repoState',
       isLoggedIn: 'isLoggedIn',
       getBasicAuth: 'getBasicAuth',
@@ -285,7 +308,11 @@ export default {
       return (this.repoState.isLoaded && (this.repoState.Master === this.repoState.Branch))
     },
     isKeyMissing () {
-      return (this.repoState.sshKeyMissing || this.repoState.updating === 6)
+      if (this.$store.state.app.website) {
+        return false
+      } else {
+        return this.repoState.sshKeyMissing
+      }
     },
     isOffline () {
       return (this.app.inet === false)
@@ -303,20 +330,49 @@ export default {
       if (!this.isLoggedIn) {
         return false
       }
-      return (this.isTestMissing() || this.isSavePushAvail())
+      if (this.$store.state.app.website) {
+        if (this.$store.state.app.websiteId === null || this.$store.state.app.websiteId === undefined) {
+          // if we clicked on change website this must be removed
+          return false
+        }
+      }
+
+      var githubObj = this.github
+      if (!githubObj) {
+        // No Git Login
+        if (!this.isKeyMissing()) {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        // got git access
+        return true
+      }
     },
     isSavePushAvail () {
       if (!this.isLoggedIn) {
         return false
       }
-      if (this.isTestMissing()) {
-        return false
+      if (this.$store.state.app.website) {
+        if (this.$store.state.app.websiteId === null || this.$store.state.app.websiteId === undefined) {
+          // if we clicked on change website this must be removed
+          return false
+        }
       }
 
-      if (!this.repoState.isLoaded && (this.isRepoNotWorking() || this.isKeyMissing() || this.isTestMissing() || this.isRepoMissing() || this.isRepoUpdating() || this.isOffline())) {
-        return false
+      var githubObj = this.github
+      if (!githubObj) {
+        // No Git Login
+        if (!this.isKeyMissing()) {
+          return (this.repoState.isLoaded && (this.repoState.Master !== this.repoState.Branch))
+        } else {
+          return false
+        }
+      } else {
+        // got git access
+        return (this.repoState.isLoaded && (this.repoState.Master !== this.repoState.Branch))
       }
-      return true
     },
     createPreviewSite () {
       this.showModal = true
@@ -325,7 +381,9 @@ export default {
       this.showModalReviewComment = true
     },
     saveAndPushModal () {
-      this.showModalComment = true
+      if (this.$store.statep.app.repoState.pending === true) {
+        this.showModalComment = true
+      }
     },
     saveModal () {
       this.showModalComment = false

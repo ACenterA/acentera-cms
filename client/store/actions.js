@@ -35,7 +35,15 @@ export const selectPost = ({ commit }, obj) => {
     obj.item.selected = true
     commit(types.SELECT_POST, obj.item)
     // TOOD: What about :1313/ replacement variables ???
-    obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/'))
+
+    console.error('OBJ ITEM TEST')
+    console.error(obj.item)
+    console.error(obj.item.link)
+    if (obj.item.link.indexOf('localhost:') >= 0 && obj.item.link.indexOf('localhost:') <= 8) {
+      obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/'))
+    } else {
+      obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + obj.item.link)
+    }
   }
 }
 
@@ -78,18 +86,21 @@ export const refreshUser = ({ commit }, obj) => {
       state.app.sidebar.hidden = false
       // self.selectWebsite()
       refreshConfig(state)
-      state.app.isLoaded = true
+      // state.app.isLoaded = true
     }
   } else {
     // Hosted Version
+    console.error('select website 01')
     if (state.session && state.session.token) {
       var h = { 'Authorization': 'Bearer ' + state.session.token }
       // request it with headers an param
+      console.error('select website 02')
       vue.$http.get(window.websiteapiUrl + '/customer/v1/websites/me',
         {
           headers: h
         }
       ).then((response) => {
+        console.error('select website 03')
         var lstProjects = response.data.projects
         var defProject = response.data.defaultProject
         if (state.app.project && state.project.app.projectId) {
@@ -97,22 +108,28 @@ export const refreshUser = ({ commit }, obj) => {
             state.app.project = null
           }
         }
+        console.error('select website 04')
         if (defProject === null || defProject === undefined) {
           defProject = null
         }
+        console.error('select website 05')
         if (state.app.project == null) {
           if (defProject !== null) {
+            console.error('select website 06')
             // fetch default project...
             vue.$http.get(window.websiteapiUrl + '/api/projects/v1/' + defProject,
               {
                 headers: h
               }
             ).then((projectDefinitionResponse) => {
+              console.error('select website 07')
               state.app.project = projectDefinitionResponse.data
               if (state.app.websiteId === null) {
                 if (state.app.project.websites.hasOwnProperty(window.localStorage.getItem('selectedWebsite'))) {
+                  console.error('select website 08')
                   state.app.websiteId = window.localStorage.getItem('selectedWebsite')
                   state.app.projectId = window.localStorage.getItem('selectedProject')
+                  console.error('select website 09')
                   window.vm.$store.commit('SELECT_WEBSITE', {projectId: state.app.projectId, websiteId: state.app.websiteId})
                   // self.$store.commit('selectWebsite')// (state)
                 }
@@ -130,17 +147,16 @@ export const refreshUser = ({ commit }, obj) => {
 
                   state.app.sidebar.opened = true
                   state.app.sidebar.hidden = false
-                  setTimeout(function () {
-                    refreshConfig(state)
-                    state.app.isLoaded = true
-                  }, 400)
+                  refreshConfig(state)
+                  // state.app.isLoaded = true
+                  console.error('gry loaded 2')
                 }
+              } else {
+                state.app.isLoaded = true
               }
               if (callback) {
                 callback()
-              } else {
               }
-              state.app.isLoaded = true
             }).catch((error) => {
               var msg = ''
               if (error.response && error.response.data) {
@@ -155,7 +171,9 @@ export const refreshUser = ({ commit }, obj) => {
                 callback()
               } else {
               }
-              state.app.isLoaded = true
+              console.error('gry loaded 4?')
+              refreshConfig(state)
+              // state.app.isLoaded = true
             })
           } else {
             window.localStorage.removeItem('selectedWebsite')
@@ -164,6 +182,7 @@ export const refreshUser = ({ commit }, obj) => {
               callback()
             } else {
             }
+            console.error('gry loaded 7?')
             state.app.isLoaded = true
           }
         } else {
@@ -173,6 +192,9 @@ export const refreshUser = ({ commit }, obj) => {
           if (callback) {
             callback()
           }
+
+          console.error('gry loaded 8?')
+          // refreshConfig(state)
           state.app.isLoaded = true
         }
       })
@@ -197,6 +219,7 @@ export const refreshUser = ({ commit }, obj) => {
         if (callback) {
           callback()
         }
+        console.error('gry loaded 9a?')
         state.app.isLoaded = true
       })
     }

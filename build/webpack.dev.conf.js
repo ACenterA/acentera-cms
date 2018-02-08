@@ -31,7 +31,7 @@ module.exports = merge(baseWebpackConfig, {
     }),
     // https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
-      title: 'Serverless CMS',
+      title: 'ACenterA CMS',
       filename: 'index.html',
       template: 'index.html',
       inject: true,

@@ -11,7 +11,11 @@
           Apologize for the issue.
           <br/>
         </div>
-        <div v-if="!invalidRepo">
+        <div v-if="!invalidRepo && notLoggedIn">
+          You must be logged in with your Git account.<br/>
+          Please navigate to the Login screen using the left menu <br/>
+        </div>
+        <div v-if="!invalidRepo && !notLoggedIn">
           <!-- Tab navigation -->
           <div class="tabs is-medium is-boxed is-fullwidth">
             <ul>
@@ -278,6 +282,7 @@
 <script>
 import Modal from './modals/InfoModal'
 import ConfirmModal from './modals/ConfirmModal'
+import { mapGetters } from 'vuex'
 
 var TabNames = ['token', 'userpass', 'approle']
 var TabColumns = [
@@ -371,6 +376,16 @@ export default {
       }
       return true
     },
+    notLoggedIn: function () {
+      var tmpGitHub = this.github()
+      if (!tmpGitHub) {
+        return true
+      }
+      if (!tmpGitHub.logininfo) {
+        return true
+      }
+      return (!tmpGitHub.logininfo.pass)
+    },
     selectedItemTitle: function () {
       if (this.selectedIndex !== -1) {
         return String(this.tableData[this.selectedIndex][this.tableColumns[0]])
@@ -438,7 +453,17 @@ export default {
   },
 
   methods: {
+    ...mapGetters([
+      'github'
+    ]),
     switchTab: function (index, ctr) {
+      var self = this
+      if (!this.$store.state.app.isLoaded) {
+        return setTimeout(function () {
+          self.switchTab(index, ctr)
+        }, 300)
+      }
+
       if (ctr == null) {
         ctr = 0
       }
@@ -454,7 +479,6 @@ export default {
         regex: false,
         regexp: null
       }
-      var self = this
       if (this.$store.state.app.repoState.url == null) {
         if (ctr <= 10) {
           setTimeout(function () {
@@ -464,31 +488,37 @@ export default {
         return
       }
 
+      var gitInfo = this.github()
       var tmpGit = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).lastIndexOf('/') + 1)
       tmpGit = tmpGit.substring(0, tmpGit.lastIndexOf('.git'))
 
       var isGitHub = true
-      var userPostPath = 'repos/' + this.$store.state.github.logininfo.username + '/' + tmpGit
+      if (!gitInfo) {
+        return
+      }
+      var userPostPath = 'repos/' + gitInfo.logininfo.username + '/' + tmpGit
       if (index === 1) {
         userPostPath = '/pulls'
       }
       if (userPostPath) {
       }
       var $gitobj = this.$github
-      if (this.$store.state.github.logininfo.type === 'BitBucket') {
+      console.error('IS THIS GIT OR BIT?')
+      console.error(gitInfo)
+      if (gitInfo.logininfo.type === 'BitBucket') {
         $gitobj = this.$bitbucket
-        // userGetPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + tmpGit;
-        userPostPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + tmpGit
+        // userGetPath = '2.0/repositories/' + gitInfo.logininfo.username + '/' + tmpGit;
+        userPostPath = '2.0/repositories/' + gitInfo.logininfo.username + '/' + tmpGit
         if (index === 1) {
           userPostPath = userPostPath + '/pullrequests'
         } else {
-          userPostPath = '/1.0/repositories/' + this.$store.state.github.logininfo.username + '/' + tmpGit + '/branches'
-          // userPostPath + '/refs/branches' // ?sort=-updated_on' // q=state="new"&
+          userPostPath = '/1.0/repositories/' + gitInfo.logininfo.username + '/' + tmpGit + '/branches'
         }
         isGitHub = false
       }
 
-      $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+      $gitobj.setUserPass(gitInfo.logininfo.username, gitInfo.logininfo.pass)
+
       $gitobj.get(userPostPath, {}, function (next) {
         if (isGitHub) {
 
