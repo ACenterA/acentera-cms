@@ -8,9 +8,40 @@
         <div v-if="isWebsite()">
           <!-- For Each Websites -->
           <div v-if="project && project.websites">
-
               <div v-if="selectedWebsite">
-                Selected website of : {{selectedWebsite.title}}
+
+                  <h1 class="is-title is-bold">{{ pkg.name.replace('-', ' ').replace('CMS', ' CMS') }}</h1>
+
+                  <p>
+                    <strong>{{ pkg.description }}</strong>
+                  </p>
+
+                  <br/>
+                  <h2 class="is-title">Selected website: {{selectedWebsite.title}}</h2>
+
+                  <div v-if="isRepoUpdating()">
+                    <p>Please wait, we are trying to gather latest updates on your website...</p>
+                  </div>
+
+                  <div v-if="isRepoUpdated()">
+                    <p>Start designing and adding content to your website by using the left toolbar in the design section.</p>
+                    <p>Select new theme, without code changes</p>
+                  </div>
+
+                  <div v-if="isRepoMissing()">
+                    <p>There is an error with your repository configuration. We could not sync from it</p>
+                  </div>
+
+                  <br/>
+
+                  <div v-if="repoUrl">
+                    <br/>
+                    Your current Repository Informations: <br/><br/>
+                    Repository: {{ repoUrl }}
+                    <br/>
+                    Branch: {{ repoState.Branch }}
+                    <br/>
+                  </div>
               </div>
               <div v-else="selectedWebsite">
                 <div class="box box-template" v-for="item in project.websites"  style="min-height:300px; height:auto;">
@@ -131,7 +162,7 @@
 
         </div>
         <div v-else>
-          <h1 class="is-title is-bold">{{ pkg.name.replace('-', ' ') }}</h1>
+          <h1 class="is-title is-bold">{{ pkg.name.replace('-', ' ').replace('CMS', ' CMS') }}</h1>
 
           <p>
             <strong>{{ pkg.description }}</strong>
@@ -142,7 +173,8 @@
           </div>
 
           <div v-if="isRepoUpdated()">
-            <p>Start designing your website by using the left toolbar in the design section.</p>
+            <p>Start designing and adding content to your website by using the left toolbar in the design section.</p>
+            <p>Select new theme, without code changes</p>
           </div>
           <div v-if="isRepoMissing()">
             <p>There is an error with your repository. You do not have a .git/config file.</p>
@@ -150,7 +182,12 @@
 
           <br/>
           <div v-if="repoUrl">
-          Repository Information: {{ repoUrl }}
+            <br/>
+            Your current Repository Informations: <br/><br/>
+            Repository: {{ repoUrl }}
+            <br/>
+            Branch: {{ repoState.Branch }}
+            <br/>
           </div>
 
           <div v-if="isKeyMissing()">

@@ -1,8 +1,8 @@
 <template>
   <div class="plekan-area">
     <ul id="right-click-menu" tabindex="-1" @blur="closeMenu" class="right-click-menu" style="display: none;">
-      <li v-if="viewMenuType === 'imageonly'">Change Image</li>
-      <li v-if="viewMenuType === 'nav'">Modify Navigation</li>
+      <li v-if="getViewMenuType === 'imageonly'" @click="changeImageMenu">Change Image</li>
+      <li v-if="getViewMenuType === 'nav'">Modify Navigation</li>
     </ul>
 
     <!-- This components for Preview and Translate language change  -->
@@ -35,7 +35,6 @@
         </footer>
       </modal>
     </div>
-
 
     <div class="plekan-container">
       <!-- <pre>{{store.state.rows}}</pre> -->
@@ -75,6 +74,7 @@ Vue.component('i-frame', {
     this.iApp.children = Object.freeze(this.$slots.default)
   },
   methods: {
+    // WARNING THIS IS FOR THE IFRAME ONLY
     renderChildren () {
       if (window.location.href.indexOf('acentera.com') !== -1) {
         window.document.domain = 'acentera.com'
@@ -136,6 +136,14 @@ export default {
     arenaColumn
   },
   computed: {
+    getViewMenuType () {
+      if (this.viewMenuType) {
+        if (this.viewMenuType.type) {
+          return this.viewMenuType.type
+        }
+      }
+      return ''
+    },
     /**
      * Clean observable object
      * @return {Array} Store rows
@@ -242,6 +250,9 @@ export default {
     })
   },
   methods: {
+    changeImageMenu: function () {
+      this.$bus.$emit('TOGGLE_EDITABLE_ELEMENT', this.viewMenuType.el) // set the target
+    },
     setMenu: function (top, left) {
       var largestHeight = window.innerHeight - this.$$.right.offsetHeight - 25
       var largestWidth = window.innerWidth - this.$$.right.offsetWidth - 25

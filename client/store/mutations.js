@@ -27,7 +27,12 @@ export const clearSession = (state, origState) => {
     state.app.sidebarglobal.hidden = true
     state.app.sidebarglobal.opened = false
 
-    window.location.href = '#/'
+    window.location.href = '/'
+  }
+  // Send logout of social account ...
+  state.app.github = {} // reset ...
+  if ((window.vueAuth.getToken())) {
+    window.vueAuth.logout()
   }
 }
 
@@ -65,6 +70,23 @@ export const setDefaultGitProvider = (state, g) => {
 export const clearGit = (state) => {
   window.localStorage.removeItem('github')
   state.github = null
+  if (state.repoSstate) {
+    if (state.repoSstate.updating) {
+      state.repoState.updating = 0 // well it will refresh on next login..
+    }
+  }
+
+  /*
+  if (state.github) {
+    if (state.github.logininfo) {
+      state.github = {}
+    }
+  }
+  */
+  state.github = {}
+  if ((window.vueAuth.getToken())) {
+    window.vueAuth.logout()
+  }
 }
 
 export const setLanguage = (state, val) => {
@@ -231,12 +253,15 @@ export const editorStart = (state) => {
     // Well do not show menu
     var parents = window.tempHelper.getParents($(el))
     var targetEl = $(el)[0]
-
     var viewMenuType = null
     var attrContentEditableIdx = -1 // el.attributes.indexOf('contenteditable')
     for (var i = targetEl.attributes.length - 1; i >= 0; i--) {
       if (targetEl.attributes[i].name === 'contenteditable') {
         attrContentEditableIdx = i
+        break
+      } else if (targetEl.attributes[i].name === 'show-editor-menu') {
+        attrContentEditableIdx = i
+        break
       }
     }
 
@@ -261,9 +286,12 @@ export const editorStart = (state) => {
       return
     }
 
-    viewMenuType = targetEl.attributes[attrContentEditableIdx].value
+    viewMenuType = {
+      el: targetEl,
+      type: targetEl.attributes[attrContentEditableIdx].value
+    }
 
-    if (('' + viewMenuType) !== 'false') {
+    if (('' + viewMenuType.type) !== 'false') {
       window.vm.$store.commit('toggleViewMenu', true)
 
       var tmpLeft = evtInfo.detail.pageX || 0
@@ -313,6 +341,7 @@ export const editorStart = (state) => {
     }
 
     window.editorElementDynamic.classList.add('active')
+    window.editorElementStable.classList.add('active')
     try {
       document.querySelector('.create-link').classList.remove('active')
     } catch (e) {
@@ -334,6 +363,18 @@ export const editorStart = (state) => {
     window.editorElementDynamic.attributes['top'] = `${_top}`
     window.editorElementDynamic.attributes['scrolltop'] = `${oldTmpTop}`
 
+
+    var iframe = $('.arenatest').filter(function () {
+      var iframe_body = $(this).contents().find('body')
+      return iframe_body.get(0)
+    })
+    var iframeLeft = $(iframe).offset().left - 30 // - $(d).scrollLeft() + $(oldTarget).offset().left - $(d).scrollLeft()
+    var iframeTop= 100 + $(iframe).offset().top
+    window.editorElementStable.style.top = `${iframeTop}px`
+    window.editorElementStable.style.left = `${iframeLeft}px`
+    window.editorElementStable.attributes['top'] = `${_top}`
+    window.editorElementStable.attributes['scrolltop'] = `${oldTmpTop}`
+
     setActiveEditorButtons()
     state.sel = window.selo.saveSelection()
   })
@@ -341,6 +382,7 @@ export const editorStart = (state) => {
 
   bus.$on('removeSelectionEditor', () => {
     window.editorElementDynamic.classList.remove('active')
+    window.editorElementStable.classList.remove('active')
   })
 
   bus.$on('selectionStart', () => {

@@ -9,7 +9,8 @@ module.exports = {
   },
   globals: {
     "$": true,
-    "jQuery": true
+    "jQuery": true,
+    "Turndown": true
   },
   // https://github.com/feross/standard/blob/master/RULES.md#javascript-standard-style
   extends: 'standard',

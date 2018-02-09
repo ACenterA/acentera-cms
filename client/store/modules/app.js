@@ -8,6 +8,7 @@ const state = {
   project: null,
   projectId: null,
   websiteId: null,
+  websiteInCreationMode: false,
   viewMenu: true,
   viewMenuType: null,
   viewMenuPos: {
@@ -20,6 +21,10 @@ const state = {
   },
   settings: {},
   language: null,
+  languageSelected: null,
+  nodata: false,
+  createItem: false,
+  selectedItem: null,
   languages: {
     languages: [],
     languagesHash: {}
@@ -211,12 +216,10 @@ const mutations = {
       origState.Provider = 'Unknown'
     }
     if (!((update.Branch === '' || update.Branch === undefined) || (update.Master === '' || update.Master === undefined))) {
-      console.error('gry loaded 89999a?')
       origState.isLoaded = true
     } else {
       origState.isLoaded = false
     }
-
     state.repoState = origState
   },
 
@@ -242,10 +245,8 @@ const mutations = {
     state.project = tmp
   },
   [types.SELECT_WEBSITE] (state, item) {
-    console.error('select website aaa')
     if (item == null) {
       // unselecting websites..
-      console.error('select website aaa 1')
       state.websiteId = null
       window.localStorage.removeItem('selectedWebsite')
       window.localStorage.removeItem('selectedProject')
@@ -253,11 +254,16 @@ const mutations = {
       state.sidebarglobal.opened = true
       state.sidebar.hidden = true
       state.sidebar.opened = false
-      console.error('select website aaa 2')
+
+      if (state.repoState) {
+        state.repoState.Provider = null
+        state.repoState.url = null
+        state.repoState.isLoaded = false
+      }
+
       window.vm.$router.push({ 'path': '/' })
       return
     }
-    console.error('select website aaa 3')
     state.projectId = item.projectId
     state.websiteId = item.websiteId
 
@@ -266,17 +272,15 @@ const mutations = {
     state.sidebar.hidden = false
     // && !sidebarglobal.hidden
 
-    console.error('select website aaa 4')
     window.localStorage.setItem('selectedWebsite', state.websiteId)
     window.localStorage.setItem('selectedProject', state.projectId)
 
     // TODO: Specify which workspace ???
-    console.error('item website?')
-    console.error(item)
     window.apiUrl = 'http://' + item.websiteId + '.workspace.acentera.com/api'
     window.goHostUrl = 'http://' + item.websiteId + '.workspace.acentera.com'
 
-    console.error('select website aaa 5')
+    window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
+    // window.vm.$store.commit('REFRESH_SETTINGS', state) // we still want to refresh settings, for offline version...
   },
   [types.SELECT_POST] (state, item) {
     if (state.topbar.selectedPost) {
@@ -285,13 +289,12 @@ const mutations = {
     state.topbar.selectedPost = item
   },
   [types.SITE_SETTINGS] (state, update) {
-    console.error('UPDATE SETTINGS TO')
-    console.error(update)
     state.settings = update
-    console.error(state)
   },
   [types.SITE_SETTING_SAVE] (state, update) {
     var self = window.vm
+    var pendingReload = window.reloadOnSave
+    window.reloadOnSave = false
     self.$httpApi.post(window.apiUrl + '/settings', state.settings, {}).then((response) => {
       // TODO: Set selecte theme in the state...
       // In case they modified theme ?
@@ -304,14 +307,33 @@ const mutations = {
       }
 
       // Small Hack to only show it once...
-      var uniqueMsg = 'Saved'
-      if (!($('.notifications').find('.title.is-5').text() === uniqueMsg)) {
-        // only show it once..
-        self.$notify({
-          title: 'Saved',
-          message: 'Changes has been saved locally.',
-          type: 'success'
-        })
+      if (!pendingReload) {
+        var uniqueMsg = 'Saved'
+        if (!($('.notifications').find('.title.is-5').text() === uniqueMsg)) {
+          // only show it once..
+          self.$notify({
+            title: 'Saved',
+            message: 'Changes has been saved locally.',
+            type: 'success'
+          })
+        }
+      } else {
+        var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
+        // force refresh
+        // hack to leave enough time for backend to process the change
+        setTimeout(function () {
+          self.$bus.$emit('LANGUAGE_CHANGE_EVENT', selectedLangItem)
+
+          var uniqueMsg = 'Saved'
+          if (!($('.notifications').find('.title.is-5').text() === uniqueMsg)) {
+            // only show it once..
+            self.$notify({
+              title: 'Saved',
+              message: 'Changes has been saved locally.',
+              type: 'success'
+            })
+          }
+        }, 700)
       }
     })
     .catch((error) => {
@@ -319,12 +341,11 @@ const mutations = {
     })
   },
   [types.SITE_LANG_DEFAULT] (state, update) {
-    if (state.language === undefined || state.language === null) {
-      state.language = update
-    }
-  },
-  [types.SITE_LANG_SELECT] (state, update) {
     state.language = update
+  },
+  [types.SITE_SELECT_LANG] (state, update) {
+    state.languageSelected = update
+    window.localStorage.setItem('languageSelected', update)
   },
   [types.SITE_AVAILABLE_LANG] (state, update) {
     // update.languages
@@ -333,36 +354,56 @@ const mutations = {
   },
   [types.REFRESH_SETTINGS] (state, update) {
     var self = window.vm
-    console.error('fresfresh settings start s')
     self.$httpApi.get(window.apiUrl + '/settings').then((response) => {
       let result = response.data
-      console.error('SELFT COMMIT SITE SETTINGSsettings start s')
-      console.error(result)
-      console.error('fresfresh settings start  ok as')
       self.$store.commit(types.SITE_SETTINGS, result)
       if (result.hasOwnProperty('languages')) {
-        console.error('fresfresh settings start  ok ab? ')
         var TempAvailablelanguages = []
         var TempAvailablelanguageshash = {}
 
         let langkeys = Object.keys(result.languages)
         // self.allSettings = result
 
+        var selectedLang = window.localStorage.getItem('languageSelected')
+        var setDefaultLang = null
+        var firstlang = null
         for (var i = 0; i < langkeys.length; i++) {
           var tmpLang = result.languages[langkeys[i]]
-          tmpLang.id = langkeys[i]
-          tmpLang.value = langkeys[i]
-          TempAvailablelanguageshash[langkeys[i]] = tmpLang
-          TempAvailablelanguageshash[result.languages[langkeys[i]].languagename] = tmpLang
-          // if (self.selectedLang === undefined) {
-            // self.selectedLang = langkeys[i].languagename
-          self.$store.commit(types.SITE_LANG_DEFAULT, langkeys[i].languagename)
-          // }
-          TempAvailablelanguages.push(tmpLang)
+          if (tmpLang) {
+            tmpLang.id = langkeys[i]
+            tmpLang.value = langkeys[i]
+            TempAvailablelanguageshash[langkeys[i]] = tmpLang
+            TempAvailablelanguageshash[result.languages[langkeys[i]].languagename] = tmpLang
+            // if (self.selectedLang === undefined) {
+              // self.selectedLang = langkeys[i].languagename
+            // }
+            if (firstlang === null) {
+              firstlang = result.languages[langkeys[i]].languagename
+            }
+            if (langkeys[i] === result.defaultcontentlanguage) { // result.languages[langkeys[i]].languagename === 'English') {
+              setDefaultLang = result.languages[langkeys[i]].languagename
+            }
+
+            // In case we changed to french language and refresh browser
+            // we take the last localStorage language selected
+            if (selectedLang === result.languages[langkeys[i]].languagename) {
+              selectedLang = result.languages[langkeys[i]].languagename
+            }
+            TempAvailablelanguages.push(tmpLang)
+          }
+        }
+        if (!setDefaultLang) {
+          setDefaultLang = firstlang
+        }
+
+        if (!selectedLang) {
+          selectedLang = setDefaultLang
         }
         // self.availableLanguages = TempAvailablelanguages
         // self.availableLanguagesHash = TempAvailablelanguageshash
         self.$store.commit(types.SITE_AVAILABLE_LANG, { languages: TempAvailablelanguages, languagesHash: TempAvailablelanguageshash })
+        self.$store.commit(types.SITE_LANG_DEFAULT, setDefaultLang)
+        self.$store.commit(types.SITE_SELECT_LANG, selectedLang)
       }
     })
     .catch((error) => {
@@ -388,7 +429,12 @@ const mutations = {
           */
 
           var fctRefresh = function () {
-            self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', { headers: { 'Authorization': basicAuth } }).then((response) => {
+            self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', {
+              headers: {
+                'Authorization': basicAuth,
+                'Token': window.vueAuth.getToken()
+              }
+            }).then((response) => {
               self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
               if (response.data.Extra === 'pending') {
                 self.$store.commit(types.REPO_STATE_PENDING, 1) // all good
@@ -401,29 +447,54 @@ const mutations = {
             .catch((error) => {
               state.isLoaded = true
               window.vm.$store.commit('REFRESH_SETTINGS', state) // Might only be becaise user is not logged in.... still usefull to have latest settings
-              if (error.response.status === 500) {
+              if (error.response && error.response.status === 500) {
+                self.$store.commit(types.REPO_STATE_UPATE, 6) // need to setup SSH Key for the user, or wrong login ?
                 if (error.response.data.Data === 'reference not found') {
-                  self.$notify({
-                    title: 'Website Version',
-                    message: 'This website version does not exists anymore... Please select a new version.',
-                    type: 'warning'
-                  })
+                  var uniqueMsg = 'Website Version'
+                  if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsg))) {
+                    // only show it once..
+                    self.$notify({
+                      title: uniqueMsg,
+                      message: 'This website version does not exists anymore... Please select a new version.',
+                      type: 'warning'
+                    })
+                  }
+                } else if (error.response.data.Data === 'authentication required') {
+                  // Ensure user is logged in.
+                  if (self.$store.state.github && self.$store.state.github.logininfo) {
+                    var uniqueMsgAcc = 'Wrong Account?'
+                    if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsgAcc))) {
+                      // only show it once..
+                      self.$notify({
+                        title: uniqueMsgAcc,
+                        message: 'The Git account you are logged with, is not able to perform refresh or updates. Please validate your git account.',
+                        type: 'warning'
+                      })
+                    }
+                    self.$store.commit(types.REPO_STATE_UPATE, 7) // need to setup SSH Key for the user, or wrong login ?
+                  }
+                } else if (error.response.data.Data) {
+                  var uniqueMsgErr = 'A problem occured.'
+                  if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsgErr))) {
+                    // only show it once..
+                    self.$notify({
+                      title: uniqueMsgErr,
+                      message: error.response.data.Data,
+                      type: 'error'
+                    })
+                  }
                 }
-                self.$store.commit(types.REPO_STATE_UPATE, 6) // need to setup SSH Key for the user
               } else {
                 self.$onError(error)
               }
             })
           }
-
-          if (basicAuth !== null) { // TODO: If in Dev
+          if (basicAuth !== null || window.vueAuth.getToken()) { // TODO: If in Dev
               // OK we got a username / password...
             fctRefresh()
           } else {
               // Not logged in, but maybe we have an ssh key ?
             self.$httpApi.get(window.apiUrl + '/sshkeys?action=test&loc=app').then((response) => {
-              console.error('got response test')
-              console.error(response)
               if (response.data.Data.indexOf('SSH Is Valid') >= 0) {
                 fctRefresh()
                 state.repoState.sshKeyMissing = false
@@ -451,9 +522,8 @@ const mutations = {
       })
       .catch((error) => {
         try {
-          console.error('LOADED zzz3')
           state.isLoaded = true
-          if (error.response.status === 500) {
+          if (error.response && error.response.status === 500) {
             self.$store.commit(types.REPO_STATE_UPATE, 5) // State 5 = no .git/config file....
           } else {
             self.$onError(error)

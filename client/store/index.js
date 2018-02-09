@@ -21,6 +21,7 @@ const store = new Vuex.Store({
     menuglobal
   },
   state: {
+    isAuthenticated: false,
     pkg,
     // projectId: null,
     github: window.localStorage.getItem('github') || {},

@@ -28,6 +28,11 @@
             </router-link>
           </div>
           <!-- Force Refresh -->
+          <div v-if="isWebsite && isWebsiteSelected()">
+            <a v-if="hasSession()" @click="selectWebsite()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
+                change site
+            </a>
+          </div>
           <div v-if="getSelectedWebsiteName" class="nav-item">Editing: {{getSelectedWebsiteName.title }} &nbsp;&nbsp;
               <span v-if="getSelectedWebsite" class="blue" style="cursor:hand;" @click='selectVersion()'>[ {{ repoState.Branch }} ]</span>
             </div>
@@ -74,7 +79,10 @@
                 </div>
 
                 <div v-if="isRepoMissing()">
-                  <p class="blue">Could not validate Git conenction.</p>
+                  <p class="blue">Could not validate Git connection.</p>
+                </div>
+                <div v-if="isWrongGitAccount()">
+                  <p class="blue">Wrong GIT account? Please log out from both here and your Git provider.</p>
                 </div>
               </div>
 
@@ -116,12 +124,6 @@
                 Save
             </a>
 
-          </div>
-
-          <div v-if="isWebsite && isWebsiteSelected()">
-            <a v-if="hasSession()" @click="selectWebsite()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
-                change site
-            </a>
           </div>
 
           <a v-if="hasSession()" @click="executeLogout()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
@@ -249,6 +251,9 @@ export default {
       'saveNewSettings'
     ]),
     isManual () {
+      if (this.$store.state.app.websiteInCreationMode) { // disable user from changing page while creating website ...
+        return false
+      }
       if ((('' + this.$route.path)).indexOf('/template') >= 0) {
         if ((('' + this.$route.path)).indexOf('/preview') >= 0) {
           this.manual = 'Preview'
@@ -279,6 +284,9 @@ export default {
     isRepoMissing () {
       return (this.repoState.updating === 5)
     },
+    isWrongGitAccount () {
+      return (this.repoState.updating === 7)
+    },
     isWebsiteSelected () {
       if (!this.$store.state.app.website) {
         // Self - Hosted version ( dev )
@@ -287,6 +295,9 @@ export default {
 
       // Is local Version
       if (this.$store.state.app.websiteId) {
+        if (this.$store.state.app.websiteInCreationMode) {
+          return false
+        }
         return true
       }
       return false
@@ -387,7 +398,8 @@ export default {
     },
     saveModal () {
       this.showModalComment = false
-      this.saveNewSettings()
+      this.$bus.$emit('SAVE_CMD')
+      // this.saveNewSettings()
     },
     closeCreateSiteModal () {
       this.selectedIndex = -1
@@ -445,7 +457,13 @@ export default {
 
         if (pullReqObj) {
         }
-        $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+
+        if (window.vueAuth.getToken()) {
+          // validate if window.vueAuth.getToken() is same as this.$store.state.github.logininfo.token ??
+          $gitobj.setToken(window.vueAuth.getToken())
+        } else {
+          $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+        }
 
         // $gitobj.post(userPostPath, githubPush, function (resp) {
         $gitobj.post(userPostPath, pullReqObj, function (next) {
@@ -471,7 +489,8 @@ export default {
       this.$httpApi.post(window.apiUrl + '/git?action=save',
       obj, {
         headers: {
-          'Authorization': this.getBasicAuth
+          'Authorization': this.getBasicAuth,
+          'Token': window.vueAuth.getToken()
         }
       })
       .then((response) => {
@@ -514,7 +533,8 @@ export default {
       this.$httpApi.post(window.apiUrl + '/git?action=create_pull',
       obj, {
         headers: {
-          'Authorization': this.getBasicAuth
+          'Authorization': this.getBasicAuth,
+          'Token': window.vueAuth.getToken()
         }
       })
       .then((response) => {

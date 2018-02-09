@@ -35,14 +35,23 @@ export const selectPost = ({ commit }, obj) => {
     obj.item.selected = true
     commit(types.SELECT_POST, obj.item)
     // TOOD: What about :1313/ replacement variables ???
+    window.vm.$store.state.app.selectedItem = obj
 
-    console.error('OBJ ITEM TEST')
-    console.error(obj.item)
-    console.error(obj.item.link)
+    var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
+    var langPrefix = '/' + selectedLangItem.id
+    if (window.vm.$store.state.app.language === window.vm.$store.state.app.languageSelected) {
+      langPrefix = '' // no prefix, this is the default site...
+    }
+
     if (obj.item.link.indexOf('localhost:') >= 0 && obj.item.link.indexOf('localhost:') <= 8) {
-      obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/'))
+      if (langPrefix !== '') {
+        if (!langPrefix.endsWith('/')) {
+          langPrefix += '/'
+        }
+      }
+      obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/' + langPrefix))
     } else {
-      obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + obj.item.link)
+      obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + langPrefix + obj.item.link)
     }
   }
 }
@@ -90,48 +99,55 @@ export const refreshUser = ({ commit }, obj) => {
     }
   } else {
     // Hosted Version
-    console.error('select website 01')
     if (state.session && state.session.token) {
       var h = { 'Authorization': 'Bearer ' + state.session.token }
       // request it with headers an param
-      console.error('select website 02')
       vue.$http.get(window.websiteapiUrl + '/customer/v1/websites/me',
         {
           headers: h
         }
       ).then((response) => {
-        console.error('select website 03')
         var lstProjects = response.data.projects
         var defProject = response.data.defaultProject
+        var hasWebsites = false
         if (state.app.project && state.project.app.projectId) {
           if (!(lstProjects.hasOwnProperty(state.app.project.projectId))) {
             state.app.project = null
           }
         }
-        console.error('select website 04')
         if (defProject === null || defProject === undefined) {
           defProject = null
         }
-        console.error('select website 05')
         if (state.app.project == null) {
           if (defProject !== null) {
-            console.error('select website 06')
             // fetch default project...
             vue.$http.get(window.websiteapiUrl + '/api/projects/v1/' + defProject,
               {
                 headers: h
               }
             ).then((projectDefinitionResponse) => {
-              console.error('select website 07')
               state.app.project = projectDefinitionResponse.data
+              if (state.app.project && state.app.project.websites) {
+                var websiteLen = Object.keys(state.app.project.websites).length
+                if (websiteLen >= 1) {
+                  hasWebsites = true
+                }
+              }
+
               if (state.app.websiteId === null) {
                 if (state.app.project.websites.hasOwnProperty(window.localStorage.getItem('selectedWebsite'))) {
-                  console.error('select website 08')
                   state.app.websiteId = window.localStorage.getItem('selectedWebsite')
                   state.app.projectId = window.localStorage.getItem('selectedProject')
-                  console.error('select website 09')
                   window.vm.$store.commit('SELECT_WEBSITE', {projectId: state.app.projectId, websiteId: state.app.websiteId})
-                  // self.$store.commit('selectWebsite')// (state)
+                  // check for ._router.push({ path }) in case we are in /template ...
+                  // We had an error with left sidebar not showing up.. somehow on
+                  // a page reload from bookmark
+                  if (state.app.websiteId) {
+                    if (window.vm._route.path === '/templates') {
+                      window.location.href = '/' // vm._router.push({ 'path': '/' })
+                      return
+                    }
+                  }
                 }
               }
               if (state.app.websiteId !== null) {
@@ -142,6 +158,7 @@ export const refreshUser = ({ commit }, obj) => {
                   } else {
                     state.github = raw
                   }
+                  // well we are in a selected website (app.websiteId) so lets not show the global menu...
                   state.app.sidebarglobal.opened = false
                   state.app.sidebarglobal.hidden = true
 
@@ -149,14 +166,32 @@ export const refreshUser = ({ commit }, obj) => {
                   state.app.sidebar.hidden = false
                   refreshConfig(state)
                   // state.app.isLoaded = true
-                  console.error('gry loaded 2')
                 }
               } else {
                 state.app.isLoaded = true
+                if (hasWebsites) {
+                  // Ok open left menu we got websites..
+                  state.app.sidebarglobal.opened = true
+                  state.app.sidebarglobal.hidden = false
+
+                  state.app.sidebar.opened = false
+                  state.app.sidebar.hidden = true
+                } else {
+                  state.app.sidebarglobal.opened = false
+                  state.app.sidebarglobal.hidden = true
+                }
               }
               if (callback) {
                 callback()
               }
+              /*
+              // bad left sidebar... lets reload page instead
+              if (state.app.websiteId) {
+                if (window.vm._route.path === '/templates') {
+                  window.vm._router.push({ 'path': '/' })
+                }
+              }
+              */
             }).catch((error) => {
               var msg = ''
               if (error.response && error.response.data) {
@@ -171,7 +206,6 @@ export const refreshUser = ({ commit }, obj) => {
                 callback()
               } else {
               }
-              console.error('gry loaded 4?')
               refreshConfig(state)
               // state.app.isLoaded = true
             })
@@ -182,18 +216,14 @@ export const refreshUser = ({ commit }, obj) => {
               callback()
             } else {
             }
-            console.error('gry loaded 7?')
             state.app.isLoaded = true
           }
         } else {
           window.localStorage.removeItem('selectedWebsite')
           window.localStorage.removeItem('selectedProject')
-
           if (callback) {
             callback()
           }
-
-          console.error('gry loaded 8?')
           // refreshConfig(state)
           state.app.isLoaded = true
         }
@@ -219,7 +249,6 @@ export const refreshUser = ({ commit }, obj) => {
         if (callback) {
           callback()
         }
-        console.error('gry loaded 9a?')
         state.app.isLoaded = true
       })
     }

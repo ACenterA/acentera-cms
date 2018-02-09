@@ -2,13 +2,13 @@
   <transition enter-active-class="animated fadeIn custom-classes-transition"
               leave-active-class="animated fadeOut custom-classes-transition">
     <div class="plekan-modal"
-         v-show="layoutShow">
+         v-show="layoutShow" :class="{ fullScreen: multiModal }">
       <transition enter-active-class="animated fadeIn custom-classes-transition-child"
                   leave-active-class="animated  fadeOut custom-classes-transition-child">
         <div v-show="bodyShow"
-             class="plekan-modal-arena-layout">
+             class="plekan-modal-arena-layout" :class="{ 'big': big }">
           <div class="plekan-modal-arena">
-            <a class="plekan-modal-close"
+            <a class="plekan-modal-close" v-if="!multiModal"
                @click="makeBroadcast()"></a>
             <slot name="header"></slot>
             <slot name="body">
@@ -23,7 +23,7 @@
 
 <script>
 export default {
-  props: ['show'],
+  props: ['show', 'multiModal', 'big'],
   data () {
     return {
       bodyShow: false,
@@ -55,9 +55,18 @@ export default {
   },
   methods: {
     makeBroadcast () {
-      this.$bus.$emit(this.event.type, this.event)
-      // 'staticHtmlSelected', d)
-      document.dispatchEvent(this.event)
+      if (this.multiModal) {
+        // if in gallery mode, and adding new image
+        // we had to hide it to show the fileUpload modal
+        // in front this is bad and should be changed ...
+        if (this.multiModal === 'TOGGLE_FILEUPLOAD_CLOSE') {
+          this.$bus.$emit('TOGGLE_FILESELECT_RESTORE')
+        }
+        this.$bus.$emit(this.multiModal) // 'TOGGLE_FILESELECT_CLOSE')
+      } else {
+        this.$bus.$emit(this.event.type, this.event)
+        document.dispatchEvent(this.event)
+      }
     },
     setShownVariable () {
       this.layoutShow = this.show

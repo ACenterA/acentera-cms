@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="col-md-12">
-
+        <!-- modals/GitHub -->
         <div v-if="isLogIn()">
         <p><strong>Logged in as </strong> {{ username }} <em><br/>(hey there, have fun!)</em></p>
         <br/><br/>
@@ -233,7 +233,7 @@
           this.$notify({
             title: 'Cannot login',
             message: 'Do you have internet access?',
-            type: 'danger '
+            type: 'danger'
           })
         } else {
           if (e.response && e.response.status === 401) {

@@ -14,19 +14,26 @@
           </button>
         </li>
       </editor-list>
+      <editor-list cname="stable-editor"
+                  :list="editorButtons.stable"
+                  :custom="stableCustomButtons"></editor-list>
     </div>
     <button type="button"
             class="plekan-editable-elements-button"
             @click="openEditElement">Edit</button>
+
+
     <editelement :element="editableModalElement"
                  :shown="editableModal"></editelement>
 
     <color-modal :shown="showColorModal"
                  :close="toogleColorModal"></color-modal>
-    <file-upload-modal v-if="$plekanEvent.onFileUpload"
-                       :shown="showFileUploadModal"
+    <file-upload-modal :shown="showFileUploadModal" :multiModal="multiModal"
                        :close="toggleFileUploadModal">
     </file-upload-modal>
+    <file-select-modal :shown="showFileSelectModal" :multiModal="multiModal"
+                       :close="toggleSelectModal">
+    </file-select-modal>
   </section>
 </template>
 
@@ -45,6 +52,7 @@ import editelement from 'components/plekan/editelement'
 import editorButtons from '../../plekan/core/constant/editor-buttons.json'
 import editorList from 'components/plekan/editorList'
 import colorModal from 'components/plekan/colorModal'
+import fileSelectModal from 'components/plekan/fileSelectModal'
 import fileUploadModal from 'components/plekan/fileUploadModal'
 import { hasParent, exec } from '../../plekan/src/helper'
 import store from '../../store'
@@ -56,6 +64,8 @@ export default {
       editableModal: false,
       showColorModal: false,
       showFileUploadModal: false,
+      showFileSelectModal: false,
+      multiModal: false,
 
       editableModalElement: null,
       linktext: '',
@@ -69,7 +79,8 @@ export default {
     editelement,
     editorList,
     colorModal,
-    fileUploadModal
+    fileUploadModal,
+    fileSelectModal
   },
   computed: {
     stableCustomButtons () {
@@ -78,6 +89,13 @@ export default {
     stickyCustomButtons () {
       return this.$customEditorButtons.filter(b => b.type === 'sticky')
     }
+  },
+  destroyed: function () {
+    this.$bus.$off('TOGGLE_FILESELECT')
+    this.$bus.$off('TOGGLE_FILESELECT_CLOSE')
+    this.$bus.$off('TOGGLE_FILEUPLOAD')
+    this.$bus.$off('TOGGLE_FILEUPLOAD_CLOSE')
+    this.$bus.$off('TOGGLE_EDITABLE_ELEMENT')
   },
   mounted () {
     /** @type {Array} Düzenlenebilir DOM elementleri */
@@ -107,25 +125,40 @@ export default {
       editorIsVisible =
         window.editorElementDynamic.className.indexOf('active') !== -1
 
+      // console.error('mouse over a')
       if (editorIsVisible) return
 
       target = e.target
       tagname = target.tagName
+      // console.error('mouse over b')
       calc = target.getBoundingClientRect()
 
 
+      // console.error('mouse over c')
       if (true || editableTag.indexOf(tagname) !== -1) {
+        // console.error('mouse over d')
         parents = hasParent(e.target, 'plekan-row-item')
         if (parents) {
           const st = target.scrollTop
-
+          // console.error('mouse over e')
+          var parentElements = []
           if (! target.attributes.hasOwnProperty('parameditable')) {
-            editButton.style.display = 'none'
-            editButton.classList.remove('is-visible')
-            editButton.classList.remove('active')
-            return
+            parentElements = $(target).parent('[parameditable]')
+            if (parentElements.length <= 0) {
+              editButton.style.display = 'none'
+              editButton.classList.remove('is-visible')
+              editButton.classList.remove('active')
+              return
+            }
           }
+          // console.error('mouse over g')
           self.editableModalElement = target
+
+          // In case se set the param editable element to the parent object...
+          if (parentElements.length >= 1) {
+            self.editableModalElement = parentElements[0]
+          }
+
           editButton.style.display = 'block'
           editButton.classList.add('is-visible')
           editButton.style.visibility = 'visible'
@@ -145,7 +178,12 @@ export default {
 
           window.editorElementDynamic.attributes['top'] = `${calc.height / 2 + st + calc.top - editButtonHeight / 2 + window.pageYOffset}`
           window.editorElementDynamic.attributes['scrolltop'] = $(d).scrollTop()
+
           var left = $(oldIframe).offset().left + $(oldTarget).offset().left - $(d).scrollLeft()
+
+          // TODO Fix hardcoded left / top margin ?
+          // window.editorElementStable.attributes['top'] = 100 + window.pageYOffset
+          // window.editorElementStable.attributes['top'] = 100 + left
 
           // This was used when using position: fixed ....
             // var top = $(oldIframe).offset().top + $(oldTarget).offset().top - $(d).scrollTop()
@@ -159,8 +197,27 @@ export default {
         editButton.classList.remove('is-visible')
       }
 
+
     })
 
+    this.$bus.$on('TOGGLE_FILESELECT', function () {
+      self.toggleFileSelectModal('TOGGLE_FILESELECT_CLOSE')
+    })
+    this.$bus.$on('TOGGLE_FILESELECT_CLOSE', function () {
+      self.toggleFileSelectModal(false)
+    })
+
+    this.$bus.$on('TOGGLE_EDITABLE_ELEMENT', function (editableTarget) {
+      self.editableModalElement = editableTarget
+      self.editableModal = true
+    })
+
+    this.$bus.$on('TOGGLE_FILEUPLOAD', function () {
+      self.toggleFileUploadModal('TOGGLE_FILEUPLOAD_CLOSE')
+    })
+    this.$bus.$on('TOGGLE_FILEUPLOAD_CLOSE', function () {
+      self.toggleFileUploadModalClose(false)
+    })
 
 
     // window.scroll = null; // unbind the event before scrolling
@@ -229,7 +286,7 @@ export default {
             self.toggleFileUploadModal()
             break
           case 'formatBlock':
-            exec('formatBlock', e.target.dataset.value)
+            exec('formatBlock', item.target.dataset.value)
             break
           default:
             exec(cmd)
@@ -276,8 +333,29 @@ export default {
       this.showColorModal = !this.showColorModal
     },
     /** Dosya modal'ini açar/kapar */
-    toggleFileUploadModal () {
+    toggleFileUploadModal (isMulti) {
+      if (isMulti) {
+        this.multiModal = isMulti
+      } else {
+        this.multiModal = null
+      }
       this.showFileUploadModal = !this.showFileUploadModal
+    },
+    toggleFileUploadModalClose (isMulti) {
+      // this.multiModal = null <-- do not modify this, it reset the multiModal
+      // and gallery picture selection doesn't behave properly ...
+
+      // we revert it to its original value ... need to find a better multi-modal strategy
+      this.multiModal = 'TOGGLE_FILESELECT_CLOSE' // revert to the FILESELECT_CLOSE
+      this.showFileUploadModal = false
+    },
+    toggleFileSelectModal (isMulti) {
+      if (isMulti) {
+        this.multiModal = isMulti
+      } else {
+        this.multiModal = null
+      }
+      this.showFileSelectModal = !this.showFileSelectModal
     },
     /**
      * Editelement butonuna tıklandığında çalışır

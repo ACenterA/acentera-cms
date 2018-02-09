@@ -2,6 +2,8 @@
   <div class="app-inner-content">
     <div v-if="loaded" class="fullheight">
       <plekan></plekan>
+      <div v-if="selectedPost !== null" class="rightSide">
+      </div>
     </div>
   </div>
 </template>
@@ -11,7 +13,7 @@ import Tooltip from 'vue-bulma-tooltip'
 import TreeView from 'components/TreeView'
 import { Sidebartwo } from 'components/layout/'
 import Modal from './modals/InfoModalWidget'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 // import Vue from 'vue'
 import plekan from 'components/plekan/plekan.vue'
@@ -60,9 +62,27 @@ export default {
       self.selectedPage = window.apiHost + '/widgetedit/' + data.original.Path + self.extra + '&widget=' + data.original.Path
     })
 
+    this.$bus.$on('SAVE_CMD', function (data) {
+      self.saveNewSettings()
+    })
+
+    this.$bus.$on('LANGUAGE_CHANGE_EVENT', function (data) {
+      // TODO: Validate no pending changes ?
+      var languageId = data.languagename
+      var prefix = '/' + data.id
+      if (window.vm.$store.state.app.language === languageId) {
+        prefix = '' // no prefix, this is the default site...
+      }
+      var currentUrl = window.goHostUrl + prefix + '/'
+      currentUrl = currentUrl.replace('localhost:1313/', 'localhost:8081/') // in case of local development
+      this.$bus.$emit('updateEditFrame', currentUrl.replace('localhost:1313/', 'localhost:8081/'))
+    })
     this.refreshData()
   },
-
+  destroyed: function () {
+    this.$bus.$off('LANGUAGE_CHANGE_EVENT')
+    this.$bus.$off('SAVE_CMD')
+  },
   computed: {
     ...mapGetters({
       session: 'session',
@@ -84,6 +104,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'saveNewSettings'
+    ]),
     refreshWidgets () {
       var self = this
       if (!this.$store.state.app.isLoaded) {
@@ -113,16 +136,21 @@ export default {
       // goHostUrl => https://.....workspace in hosted version
       // goHostUrl => //localhost:XXXX in local version
       // TODO: We should parameterizse this.. (ie: /pageX, /, /...)
-      var currentUrl = window.goHostUrl + '/'
-      this.$bus.$emit('updateEditFrame', currentUrl.replace('localhost:1313/', 'localhost:8081/'))
 
-      /*
-      if (obj.item.link.indexOf('localhost:') >= 0 && obj.item.link.indexOf('localhost:') <= 8) {
-        obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/'))
-      } else {
-        obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + obj.item.link)
+      var selectedLangItem = this.$store.state.app.languages.languagesHash[this.$store.state.app.languageSelected]
+
+      if (!selectedLangItem) { // weird ? site not yet loaded?
+        selectedLangItem = {
+          id: 'en'
+        }
       }
-      */
+      var prefix = '/' + selectedLangItem.id
+      if (this.$store.state.app.language === this.$store.state.app.languageSelected) {
+        prefix = '' // no prefix, this is the default site...
+      }
+      var currentUrl = window.goHostUrl + prefix + '/'
+      currentUrl = currentUrl.replace('localhost:1313/', 'localhost:8081/') // in case of local development
+      this.$bus.$emit('updateEditFrame', currentUrl.replace('localhost:1313/', 'localhost:8081/'))
     },
     close () {
       this.showModal = false
@@ -298,6 +326,7 @@ export default {
 
 .rightSide.active {
   right: 0px;
+  z-index: 800;
 }
 
 .rightSide {

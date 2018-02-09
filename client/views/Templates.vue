@@ -126,6 +126,7 @@
 
       Your site is being created....
       <br/>
+      A new repository and a new deploy key as been added to your Git repository.
       <br/>
       Please standby...
       <br/>
@@ -270,6 +271,8 @@ export default {
     nextStep (nextStepData) {
       // Theme => nextStepData.Name
       // next route => '/templates/' + nextStepData.Name + '/edit'
+      this.selectedItem = nextStepData
+
       this.selectedIndex = -1
       this.showLoginModal = false
       this.showCreateModal = true
@@ -282,6 +285,7 @@ export default {
       this.showCreateModal = false
 
       this.showSiteBeingCreated = true
+      self.$store.state.app.websiteInCreationMode = true // To prevent Navbar messages...
 
       var websiteId = nextStepData.websiteId // '12c47ce0-ccc5-11e7-b808-bd4f405609c4'
       this.$notify({
@@ -318,9 +322,11 @@ export default {
           }
           window.vm.$store.commit('SELECT_WEBSITE', initSite)
           setTimeout(function () {
-            self.$router.push({ 'path': '/sites/' + websiteId + '/edit' })
+            self.$store.state.app.websiteInCreationMode = false
+            self.$router.push({ 'path': '/' }) // sites/' + websiteId + '/edit' }) // this route is bad.. it should be going to /
           }, 1000)
         }, function (errr) {
+          self.$store.state.app.websiteInCreationMode = false // To prevent Navbar messages...
           self.$notify({
             title: 'Website ready.',
             message: 'We could not update your website state :(.  Please contact us.',
@@ -361,6 +367,7 @@ export default {
                   })
 
                   setTimeout(function () {
+                    self.$store.state.app.websiteInCreationMode = false // To prevent Navbar messages...
                     self.$router.push({ 'path': '/' })
                   }, 5000)
                 }
@@ -373,6 +380,7 @@ export default {
                 }, 5000)
               } else {
                 setTimeout(function () {
+                  self.$store.state.app.websiteInCreationMode = false // To prevent Navbar messages...
                   self.$router.push({ 'path': '/' })
                 }, 5000)
               }

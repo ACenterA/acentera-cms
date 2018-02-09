@@ -5,7 +5,7 @@
     <div class="list">
       <ul>
         <li>
-          <span>Create new Post
+          <span @click="createNewPost()">Create new Post
           <br/>
           </span>
         </li>
@@ -65,6 +65,10 @@ export default {
       'selectPost'
     ]),
 
+    createNewPost: function () {
+      this.$store.state.app.createItem = true
+      this.selectPost({ vue: this, item: { link: '/blogs/this_does_not_exists' } })
+    },
     isExpanded (item) {
       return item.meta.expanded
     },
@@ -248,6 +252,10 @@ export default {
   }
 
 
+}
+
+.list span {
+  min-height: 80px;
 }
 
 .app-sidebartwo-fixed {
