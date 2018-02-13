@@ -9,8 +9,8 @@
               <p class="control" style="right:50px; right;position:absolute;">
                 <a v-if="isBitBucket" class="button is-warning leftfloat" title="Sign out from BitBucket"
                   @click="closeAndLogout()">
-                  <span>Logout from BitBucket</span>
-                </a>
+                    <span>Logout from BitBucket</span>
+                  </a>
                 <a v-if="isGithub" class="button is-warning leftfloat" title="Sign out from GitHub"
                   @click="closeAndLogout()">
                   <span>Logout from Github</span>
@@ -107,18 +107,22 @@ export default {
   computed: {
     ...mapGetters({
       session: 'session',
-      repoState: 'repoState'
+      repoState: 'repoState',
+      github: 'github'
     }),
     isBitBucket () {
       try {
-        return (this.$store.state.github.logininfo.type === 'BitBucket')
+        var gitInfo = this.github
+        return (gitInfo.logininfo.type === 'BitBucket')
       } catch (e) {
       }
       return false
     },
     isGithub () {
       try {
-        return (this.$store.state.github.logininfo.type !== 'BitBucket')
+        var gitInfo = this.github
+        return (!(gitInfo.logininfo.type === 'BitBucket')) // TODO Should check for GitHub
+        // return (this.$store.state.github.logininfo.type !== 'BitBucket')
       } catch (e) {
       }
       return false
@@ -198,14 +202,16 @@ export default {
       this.processing = true
       var userPostPath = 'user/repos'
       var $gitobj = this.$github
+
+      var gitInfo = this.github
       var repoReqObj = {
         'name': self.repositoryNameValidator(),
         'description': self.websiteProjectName || 'Website generated from ACenterA CMS (https://ACenterA.com)'
       }
 
-      if (this.$store.state.github.logininfo.type === 'BitBucket') {
+      if (gitInfo.logininfo.type === 'BitBucket') {
         $gitobj = this.$bitbucket
-        userPostPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + self.repositoryNameValidator()
+        userPostPath = '2.0/repositories/' + gitInfo.logininfo.username + '/' + self.repositoryNameValidator()
         repoReqObj = {
           scm: 'git',
           fork_policy: 'no_public_forks',
@@ -213,7 +219,13 @@ export default {
           is_private: true
         }
       }
-      $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+
+      if (window.vueAuth.getToken()) {
+        // validate if window.vueAuth.getToken() is same as this.$store.state.github.logininfo.token ??
+        $gitobj.setToken(window.vueAuth.getToken())
+      } else {
+        $gitobj.setUserPass(gitInfo.logininfo.username, gitInfo.logininfo.pass)
+      }
 
       $gitobj.post(userPostPath, repoReqObj, function (response) {
         var next = response.data
@@ -228,7 +240,7 @@ export default {
          "name": "my-first-blog-of-theace",
          "links": {"watchers": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/watchers"}, "branches": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/refs/branches"}, "tags": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/refs/tags"}, "commits": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/commits"},
          "clone": [{"href": "https://Gizmodo1@bitbucket.org/Gizmodo1/my-first-blog-of-theace.git", "name": "https"}, {"href": "git@bitbucket.org:Gizmodo1/my-first-blog-of-theace.git", "name": "ssh"}],
-          "self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace"}, "source": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/src"}, "html": {"href": "https://bitbucket.org/Gizmodo1/my-first-blog-of-theace"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/my-first-blog-of-theace/avatar/32/"}, "hooks": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/hooks"}, "forks": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/forks"}, "downloads": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/downloads"}, "pullrequests": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/pullrequests"}}, "fork_policy": "no_public_forks", "uuid": "{5e3ed638-c3ec-4f7f-82eb-7746c6a60585}", "language": "", "created_on": "2017-11-17T02:22:33.165666+00:00", "mainbranch": null, "full_name": "Gizmodo1/my-first-blog-of-theace", "has_issues": false, "owner": {"username": "Gizmodo1", "display_name": "francis Lavalliere", "type": "user", "uuid": "{d1f483aa-fb4b-4a10-b7df-e58bd6a7500f}", "links": {"self": {"href": "https://api.bitbucket.org/2.0/users/Gizmodo1"}, "html": {"href": "https://bitbucket.org/Gizmodo1/"}, "avatar": {"href": "https://bitbucket.org/account/Gizmodo1/avatar/32/"}}}, "updated_on": "2017-11-17T02:22:33.218317+00:00", "size": 0, "type": "repository", "slug": "my-first-blog-of-theace", "is_private": true, "description": "Static website created from ServerlessCMS.com"}
+          "self": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace"}, "source": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/src"}, "html": {"href": "https://bitbucket.org/Gizmodo1/my-first-blog-of-theace"}, "avatar": {"href": "https://bitbucket.org/Gizmodo1/my-first-blog-of-theace/avatar/32/"}, "hooks": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/hooks"}, "forks": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/forks"}, "downloads": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/downloads"}, "pullrequests": {"href": "https://api.bitbucket.org/2.0/repositories/Gizmodo1/my-first-blog-of-theace/pullrequests"}}, "fork_policy": "no_public_forks", "uuid": "{5e3ed638-c3ec-4f7f-82eb-7746c6a60585}", "language": "", "created_on": "2017-11-17T02:22:33.165666+00:00", "mainbranch": null, "full_name": "Gizmodo1/my-first-blog-of-theace", "has_issues": false, "owner": {"username": "Gizmodo1", "display_name": "francis Lavalliere", "type": "user", "uuid": "{d1f483aa-fb4b-4a10-b7df-e58bd6a7500f}", "links": {"self": {"href": "https://api.bitbucket.org/2.0/users/Gizmodo1"}, "html": {"href": "https://bitbucket.org/Gizmodo1/"}, "avatar": {"href": "https://bitbucket.org/account/Gizmodo1/avatar/32/"}}}, "updated_on": "2017-11-17T02:22:33.218317+00:00", "size": 0, "type": "repository", "slug": "my-first-blog-of-theace", "is_private": true, "description": "Static website created from ACenterA.com"}
         */
 
         var theRepoId = null
@@ -282,11 +294,13 @@ export default {
           projectId = self.$store.state.app.project.projectId
         }
 
+        // NOTE: Cannot use 'authorization' as its will bypass the header value for authorization ...
         var initSite = {
           'projectId': projectId,
           'repository': repositoryUrl,
           'ssh_repository': sshUrl,
           'auth': $gitobj.getBasicAuth(),
+          'token': window.vueAuth.getToken(),
           'http_repository': httpUrl,
           'branch': 'master',
           'title': self.websiteTitle,
@@ -298,31 +312,43 @@ export default {
 
         var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create'
 
-        var h = { 'authorization': 'Bearer ' + self.$store.state.session.token }
-        self.$http.post(initSiteRepoCall, initSite, {
-          headers: h
-        }).then((response) => {
-          self.$store.commit('setProjectIdForCreation', response.data.projectId)
-          self.$store.commit('setWebsiteIdForCreation', response.data.websiteId)
-          self.processing = false
-          self.$emit('changePage', response.data)
-        }, function (errr) {
+        self.toggleRepoState(0) // Reset state for creating, to disable any messages... until it got created.
+        self.$store.state.app.websiteInCreationMode = true // prevent navbar messages
+        var rollback = function (extra) {
+          self.$store.state.app.websiteInCreationMode = false
           self.$notify({
             title: 'Cannot create repository.',
-            message: 'We were unable to create your repository. Contact support.',
+            message: 'We were unable to create your repository. Contact support. ' + extra,
             type: 'danger'
           })
 
-          var userDelPath = 'user/repos'
+          var userDelPath = 'repos/' + gitInfo.logininfo.username + '/' + self.repositoryNameValidator()
 
-          if (self.$store.state.github.logininfo.type === 'BitBucket') {
+          if (gitInfo.logininfo.type === 'BitBucket') {
             $gitobj = self.$bitbucket
-            userDelPath = '2.0/repositories/' + self.$store.state.github.logininfo.username + '/' + self.repositoryNameValidator()
+            userDelPath = '2.0/repositories/' + gitInfo.logininfo.username + '/' + self.repositoryNameValidator()
           }
 
           $gitobj.delete(userDelPath, function (next) {
             self.processing = false
           }, self.gitDeleteRepoError)
+        }
+        // self.$store.state.session might be null if its not the website app but the local version..
+        var h = { 'authorization': 'Bearer ' + self.$store.state.session.token }
+        self.$http.post(initSiteRepoCall, initSite, {
+          headers: h
+        }).then((response) => {
+          if (!(response.data.type.startsWith('error'))) {
+            // do not update state.app.websiteInCreationMode ... the emit changePage will reset this to false ..
+            self.$store.commit('setProjectIdForCreation', response.data.projectId)
+            self.$store.commit('setWebsiteIdForCreation', response.data.websiteId)
+            self.processing = false
+            self.$emit('changePage', response.data)
+          } else {
+            rollback(response.data.type)
+          }
+        }, function (errr) {
+          rollback('Cannot connect to api server')
         })
 
         /*
@@ -445,7 +471,12 @@ export default {
         $gitobj = this.$bitbucket
         userPostPath = '2.0/repositories/' + this.$store.state.github.logininfo.username + '/' + self.repositoryNameValidator()
       }
-      $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+      if (window.vueAuth.getToken()) {
+        // validate if window.vueAuth.getToken() is same as this.$store.state.github.logininfo.token ??
+        $gitobj.setToken(window.vueAuth.getToken())
+      } else {
+        $gitobj.setUserPass(this.$store.state.github.logininfo.username, this.$store.state.github.logininfo.pass)
+      }
 
       $gitobj.delete(userPostPath, function (next) {
         self.processing = false

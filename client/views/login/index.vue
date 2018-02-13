@@ -6,7 +6,7 @@
           <article v-if="isGitHub()"  class="tile is-parent is-5 is-vertical">
             <!-- Login tile -->
             <article class="tile is-child is-marginless is-paddingless">
-              <GitHub></GitHub>
+              <GitHub showGitButtons="false"></GitHub>
             </article>
           </article>
         </div>
@@ -263,7 +263,14 @@ export default {
               userGetPath = '1.0/users/' + self.$store.state.github.logininfo.username + '/ssh-keys'
             }
             var gitInfo = self.github
-            $gitobj.setUserPass(gitInfo.logininfo.user, gitInfo.logininfo.pass)
+
+            if (window.vueAuth.getToken()) {
+              // validate if window.vueAuth.getToken() is same as this.$store.state.github.logininfo.token ??
+              $gitobj.setToken(window.vueAuth.getToken())
+            } else {
+              $gitobj.setUserPass(gitInfo.logininfo.user, gitInfo.logininfo.pass)
+            }
+
             $gitobj.get(userGetPath, {}, function (resp) {
               // If BitBucket ?
               var keyToDelete = null
@@ -347,7 +354,7 @@ export default {
         } else {
           if (self.sshValid) {
             self.sshValid = false
-            if (error.response.status === 500) {
+            if (error.response && error.response.status === 500) {
               self.toggleRepoState(6) // need to setup SSH Key for the user
             } else {
               this.$onError(error)
@@ -373,7 +380,13 @@ export default {
         userGetPath = '1.0/users/' + this.$store.state.github.logininfo.username
         userPostPath = '1.0/users/' + this.$store.state.github.logininfo.username + '/ssh-keys'
       }
-      $gitobj.setUserPass(this.logininfo.username, this.logininfo.pass)
+      if (window.vueAuth.getToken()) {
+        // validate if window.vueAuth.getToken() is same as this.$store.state.github.logininfo.token ??
+        $gitobj.setToken(window.vueAuth.getToken())
+      } else {
+        $gitobj.setUserPass(this.logininfo.username, this.logininfo.pass)
+      }
+
       $gitobj.get(userGetPath, {}, function (next) {
         self.$http.get(window.apiUrl + '/sshkeys?action=create').then((response) => {
           if (response.data !== undefined && response.data !== null) {
@@ -403,7 +416,7 @@ export default {
         })
         .catch((error) => {
           this.creating = false
-          if (error.response.status === 500) {
+          if (error.response && error.response.status === 500) {
             this.sshKeyCreateError = true
           } else {
             this.$onError(error)

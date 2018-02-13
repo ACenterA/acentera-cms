@@ -384,6 +384,10 @@ export default {
       if (!tmpGitHub.logininfo) {
         return true
       }
+      if (tmpGitHub.logininfo.token) {
+        return false
+      }
+
       return (!tmpGitHub.logininfo.pass)
     },
     selectedItemTitle: function () {
@@ -503,8 +507,6 @@ export default {
       if (userPostPath) {
       }
       var $gitobj = this.$github
-      console.error('IS THIS GIT OR BIT?')
-      console.error(gitInfo)
       if (gitInfo.logininfo.type === 'BitBucket') {
         $gitobj = this.$bitbucket
         // userGetPath = '2.0/repositories/' + gitInfo.logininfo.username + '/' + tmpGit;
@@ -517,7 +519,12 @@ export default {
         isGitHub = false
       }
 
-      $gitobj.setUserPass(gitInfo.logininfo.username, gitInfo.logininfo.pass)
+      if (window.vueAuth.getToken()) {
+        // validate if window.vueAuth.getToken() is same as this.$store.state.github.logininfo.token ??
+        $gitobj.setToken(window.vueAuth.getToken())
+      } else {
+        $gitobj.setUserPass(gitInfo.logininfo.username, gitInfo.logininfo.pass)
+      }
 
       $gitobj.get(userPostPath, {}, function (next) {
         if (isGitHub) {
@@ -588,9 +595,13 @@ export default {
     switchTo (obj) {
       // TODO: Switch branch here
       // var self = this
+
       this.$httpApi.post(window.apiUrl + '/git?action=switch_branch',
       obj, {
-
+        headers: {
+          'Authorization': window.vm.$store.getters.getBasicAuth,
+          'Token': window.vueAuth.getToken()
+        }
       })
       .then((response) => {
         this.$message({

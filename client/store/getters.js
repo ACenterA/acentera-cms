@@ -6,16 +6,11 @@ const sidebarglobal = state => state.app.sidebarglobal
 const sidebartwo = state => state.app.sidebartwo
 const sidebarblogData = state => state.app.sidebarblogData
 
+const isAuthenticated = state => {
+  return window.vueAuth.isAuthenticated()
+}
+
 const inBlog = state => {
-  /*
-  console.error('in blog a1 ?')
-  if (state.app.repoState && state.app.repoState.updating >= 3) {
-    console.error('in blog a2 ?')
-    console.error(state.app.repoState)
-    return false
-  }
-  console.error('in blog a3 ?')
-  */
   return state.app.topbar.show === true
 }
 
@@ -39,29 +34,18 @@ const topbar = state => state.app.topbar
 const repoState = state => state.app.repoState
 const github = state => {
   if (state.github && state.github.logininfo !== null) {
-    console.error('OK AAAA')
     var url = null
     if (state.app) {
-      console.error('OK AAAA 33')
       if (state.app.repoState) {
-        console.error('OK AAAA 44')
-        console.error(state.app.isLoaded)
-        console.error(state.app.repoState.url)
         url = state.app.repoState.url
       }
-      console.error('OK AAAA 55')
     } else {
-      console.error('OK AAAA 66')
       if (state.repoState) {
-        console.error('OK AAAA 77')
         url = state.repoState.url
       }
-      console.error('OK AAAA 88')
     }
-    console.error(url + ' test')
     if (url !== null) {
-      console.error(url + ' vs ' + state.github.logininfo.type.toLowerCase())
-      if (url.indexOf(state.github.logininfo.type.toLowerCase()) === -1) {
+      if (state.github && state.github.logininfo && url.indexOf(state.github.logininfo.type.toLowerCase()) === -1) {
         // Wrong account logged in...
         window.vm.$store.commit('clearGit')
         window.vm.$notify({
@@ -72,8 +56,11 @@ const github = state => {
       }
     }
   }
-
-  return state.github
+  if (typeof state.github === 'string') {
+    return JSON.parse(state.github)
+  } else {
+    return state.github
+  }
 }
 
 const websiteAndNotLoggedIn = state => {
@@ -85,6 +72,9 @@ const loaded = state => {
 }
 
 const getBasicAuth = state => {
+  if (window.vm === undefined) {
+    return
+  }
   var gitobj = window.vm.$github
   if (window.vm.$store.state.github === null || window.vm.$store.state.github === undefined) {
     return null
@@ -101,8 +91,12 @@ const getBasicAuth = state => {
     }
   }
   if (window.vm.$store.state.github && window.vm.$store.state.github.logininfo) {
-    gitobj.setUserPass(window.vm.$store.state.github.logininfo.username, window.vm.$store.state.github.logininfo.pass)
-
+    if (window.vueAuth.getToken()) {
+      // validate if window.vueAuth.getToken() is same as this.$store.state.github.logininfo.token ??
+      gitobj.setToken(window.vueAuth.getToken())
+    } else {
+      gitobj.setUserPass(window.vm.$store.state.github.logininfo.username, window.vm.$store.state.github.logininfo.pass)
+    }
     return gitobj.getBasicAuth()
   } else {
     return ''
@@ -113,7 +107,11 @@ const isLoggedIn = state => {
   if (state.app.website) {
     if (window.vm.$store.state.session && window.vm.$store.state.session.display_name !== undefined) {
       if (state.github == null || (!(state.github && state.github.logininfo && state.github.logininfo.pass !== ''))) {
-        return false
+        if (state.github && state.github.logininfo && state.github.logininfo.token) {
+          return true
+        } else {
+          return false
+        }
       }
       return true
     }
@@ -124,6 +122,11 @@ const isLoggedIn = state => {
   if (state.github.logininfo == null) {
     return false
   }
+
+  if (state.github.logininfo.token) { // we have a token, oauth login is valid.
+    return true
+  }
+
   if (state.github.logininfo.username == null) {
     return false
   }
@@ -190,5 +193,6 @@ export {
   topbar,
   inBlog,
   selectedPost,
+  isAuthenticated,
   getBasicAuth
 }

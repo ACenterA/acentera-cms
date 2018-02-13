@@ -89,7 +89,6 @@ export default {
 
         this.store.updateRows(this.index, tmp)
       }
-      console.error('mounted done here 01')
       return true
     })
     */
@@ -493,12 +492,10 @@ export default {
           $(items[i]).off('click');
           $(items[i]).on('click', (e) => {
               e.preventDefault();
-              console.error('override');
           });
           items[i].addEventListener('click', (e) => {
               e.preventDefault();
               console.error('clicked on items;');
-              console.error(e);
           });
           */
         }

@@ -8,17 +8,21 @@
       <div v-if="isParamEditable()">
         <div v-for="e in getElements" class="plekan-editable-element-fields-container">
 
-          <span v-if="e.type !== 'Image'">
           <div class="plekan-editable-element-fields">
              <!-- e.type -->
              <span>{{e.label}}</span>
              <input type="text"
                  v-model="e.value" v-if="e.type !== 'Image'">
-
               <file-upload :clean="shown"
                         types="png|jpg|jpeg|gif"
+                        :preventDrop="true"
+                        :origimage="e.currentImage"
+                        :elementItem="e"
                         :fileChange="fileChange"
                         v-if="e.type === 'Image'"></file-upload>
+              <div v-if="e.file">
+                {{ e.file.name }}
+              </div>
            </div>
          </span>
         </div>
@@ -39,6 +43,7 @@
                      types="png|jpg|jpeg|gif"
                      :fileChange="fileChange"
                      v-if="elementIsImage"></file-upload>
+
        </div>
     </div>
     <footer slot="footer"
@@ -46,6 +51,9 @@
       <button @click.prevent="save()"
               type="button"
               class="plekan-footer-button">Update</button>
+      <button @click.prevent="cancel()"
+              type="button"
+              class="plekan-footer-button">Cancel</button>
       <button @click.prevent="onFileUpload"
               v-show="elementIsImage"
               :disabled="!file"
@@ -130,6 +138,9 @@ export default {
     }
   },
   computed: {
+    getImage: function () {
+      return ''
+    },
     getElements: function () {
       if ($(this.element).attr('editor-data-param') === undefined) {
         return []
@@ -138,7 +149,6 @@ export default {
       var mapArrObj = []
       var self = this
       $.each(editorParamDatas, function (idx, item) {
-        console.error('processingi of ' + item)
         var itemArr = item.split(':')
         var itemInfo = {
           parameter: itemArr[0]
@@ -150,29 +160,22 @@ export default {
           itemInfo['label'] = itemArr[2]
         }
         itemInfo['$el'] = $(self.element)
-        console.error('parameter is : ' + itemArr[0])
-        console.error(self.$store.state.app.settings.params)
-        console.error(window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params))
         itemInfo['value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
         itemInfo['orig_value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
+        if (itemInfo['type'] === 'Image') {
+          itemInfo['currentImage'] = window.goHostUrl + '/' + itemInfo['value']
+        }
         mapArrObj.push(itemInfo)
       })
-      console.error('seff a')
-      // console.error(self.$store.state.app.settings.params)
-      // console.error(editorParamDatas)
-      console.error(mapArrObj)
       return mapArrObj
     }
   },
   methods: {
     isParamEditable () {
-      console.error('test this element..')
       if (!this.element) {
         return false
       }
-      console.error('test this element..A')
-      console.error(this.element)
-      return (this.element.attributes.hasOwnProperty('parameditable'))
+      return (this.element.attributes.hasOwnProperty('parameditable') || this.element.attributes.hasOwnProperty('editor-data-param'))
     },
     /**
      * Bu method file-upload componentine property olarak pass edilir.
@@ -204,35 +207,119 @@ export default {
         })
       })
     },
+    cancel () {
+      this.makeABroadcast()
+    },
     /**
      * Değiştirilen özelliklerin DOM element'ine atanması ve kayıt edilmesi
      * @return {void}
      */
     save () {
-      if (this.isParamEditable()) {
-        console.error('save parameters.... here 01')
-        var self = this
-        $.each(this.getElements, function (idx, item) {
-          console.error('Will update if changed?')
-          console.error(item) // itemInfo['$el']
-          if (item.value !== item.orig_value) {
-            console.error('ITS DIRTY FOR ')
-
-            window.updateEditorProperty(item.parameter, self.$store.state.app.settings.params, item.value)
-            // TODO: Set settings dirty
-
-            item['$el'].html(item.value)
-            console.error(item.value)
+      var updateImageByBgStyle = function (tmpImg, item) {
+        if (tmpImg.style.backgroundImage) {
+          var origBgImage = tmpImg.style.backgroundImage
+          var foundStartIdx = -1
+          if (foundStartIdx === -1) {
+            foundStartIdx = origBgImage.indexOf('http:')
           }
-          // console.error(item['$el'])
+          if (foundStartIdx === -1) {
+            foundStartIdx = origBgImage.indexOf('https:')
+          }
+          if (foundStartIdx === -1) {
+            foundStartIdx = origBgImage.indexOf('//')
+          }
+          if (foundStartIdx !== -1) {
+            var tmpOrigValue = item['orig_value']
+            var foundEnd = origBgImage.indexOf(item['orig_value'])
+            if (foundEnd === -1) {
+              if (item['orig_value'] === undefined || item['orig_value'] === null) {
+                tmpOrigValue = '/'
+                // well .. find last '/'
+                foundEnd = origBgImage.lastIndexOf('/')
+              }
+            }
+            if (foundEnd !== -1) {
+              if (item['src'] === undefined || item['src'] === null) {
+                return false
+              }
+              tmpImg.style.backgroundImage = origBgImage.substring(0, foundStartIdx) + item['src'] + origBgImage.substring(foundEnd + tmpOrigValue.length)
+              return true
+            }
+          }
+        }
+        return false
+      }
+
+      if (this.isParamEditable()) {
+        var self = this
+        var errorCount = 0
+        $.each(this.getElements, function (idx, item) {
+          var hasError = false
+          try {
+            if (item.value !== item.orig_value) {
+              if (item.value === undefined || item.value === null) {
+                item.value = null // overwite to have it sent to API Server.
+              }
+              hasError = true // if it works we have to update this to false
+
+              window.updateEditorProperty(item.parameter, self.$store.state.app.settings.params, item.value)
+
+              // TODO: Set settings dirty ??
+              // TODO: We should implement a editor function to edit elements....
+              // ie: an
+
+              if (item['type'].toLowerCase() === 'text') {
+                item['$el'].html(item.value)
+                hasError = false
+              } else if (item['type'].toLowerCase() === 'image') {
+                // Find where the img is ... matching the orig_value ...
+                var imgs = item['$el'].find('img')
+                if (imgs[0]) {
+                  var isImgUpdated = updateImageByBgStyle(imgs[0], item)
+                  if (isImgUpdated) {
+                    hasError = false
+                  } else if (imgs[0].src) {
+                    imgs[0].src = item['src']
+                    hasError = false
+                  }
+                } else {
+                  if (imgs) {
+                    if (imgs.prevObject) {
+                      var tmpImg = imgs.prevObject[0]
+                      var isImgUpdated1 = updateImageByBgStyle(tmpImg, item)
+                      if (isImgUpdated1) {
+                        hasError = false
+                      } else if (tmpImg.src) {
+                        tmpImg.src = item['src'] // fileDataBase64
+                        hasError = false
+                      }
+                    }
+                  }
+                }
+                // currentSrc
+              }
+            }
+          } catch (e) {
+            hasError = true
+          }
+          if (hasError) {
+            errorCount++
+          }
         })
+        if (errorCount >= 1) {
+          window.reloadOnSave = true
+          self.$notify({
+            title: 'Preview unavailable.',
+            message: 'Use the save button at the top right, to preview your change.',
+            type: 'success'
+          })
+        }
       } else {
         Object.keys(this.elementEditableProperties).map((e) => {
           this.element[e] = this.elementEditableProperties[e]
           return true
         })
       }
-      console.error('save object here')
       this.makeABroadcast()
     },
     /**
@@ -244,12 +331,9 @@ export default {
      *
      */
     makeABroadcast () {
-      console.error('make broadcaks ehre ')
-      // console.error(this.event)
-      console.error('EMEIT  here 01')
-      console.error(this.event)
-      this.$bus.$emit(this.event.type, this.event)
-      // document.dispatchEvent(this.event)
+      if (this.event) {
+        this.$bus.$emit(this.event.type, this.event)
+      }
     }
   }
 }

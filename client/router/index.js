@@ -4,7 +4,8 @@ import menuModule from 'vuex-store/modules/menu'
 Vue.use(Router)
 
 export default new Router({
-  mode: 'hash', // Demo is living in GitHub.io, so required!
+  // mode: 'hash', // Demo is living in GitHub.io, so required!
+  mode: 'history',
   linkActiveClass: 'is-active',
   scrollBehavior: () => ({ y: 0 }),
   routes: [
@@ -27,6 +28,11 @@ export default new Router({
       name: 'TemplatesEdit',
       path: '/templates/:id/edit',
       component: require('../views/TemplatesEdit')
+    },
+    {
+      name: 'OAuth',
+      path: '/oauth/:provider/authorize',
+      component: require('../views/oauth/Authorize')
     },
     ...generateRoutesFromMenu(menuModule.state.items),
     {

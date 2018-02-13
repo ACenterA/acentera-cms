@@ -2,22 +2,27 @@
   <div class="row">
     <div class="col-md-12">
         <div v-if="isLogIn">
-        <p><strong>Logged in as </strong> {{ username }} <em><br/>(hey there, have fun!)</em></p>
+        <p><strong>Logged in as </strong> {{ username }} <br/>[ {{ loginuser }} ]<em><br/>(hey there, have fun!)</em></p>
         <br/><br/>
         <br/>
         &nbsp;
         <p class="control">
-        <a class="button rightfloat is-primary"
+        <a class="button rightfloat is-warning"
         @click="logoutGithub()">
         <span>Logout</span>
         </a>
         </p>
         </div>
+        <p class="hidden">components/GitHub</p>
+
         <div v-if="!isLogIn">
-            <!--
+              <h2>Select the button above to login with your GIT provider.</h2>
+              <i>If you do not have an account, no worries simply create one its free..</i>
+              <br/>
+              <br/>
               <p>
-                <article class="tile">
-                <div v-if="repoState.Provider === null || repoState.Provider === 'Github'">
+                <article class="tile" v-if="isShowGitButton">
+                <div v-if="repoState.Provider === undefined || repoState.Provider === null || repoState.Provider === 'Github'">
                     <p class="control">
                       <a class="button leftfloat is-primary"
                         @click="selectGitHub()" :disabled="!loaded">
@@ -25,7 +30,7 @@
                       </a>
                     </p>
                   </div>
-                  <div v-if="repoState.Provider === null || repoState.Provider === 'BitBucket'">
+                  <div v-if="repoState.Provider === undefined || repoState.Provider === null || repoState.Provider === 'BitBucket'">
                     <p class="control">
                       <a class="button leftfloat is-primary" style="margin-left:30px"
                         @click="selectBitBucket()" :disabled="!loaded">
@@ -36,11 +41,10 @@
 
                 </article>
               </p>
-            -->
 
               </article>
               <br/><br/>
-
+              <!--
                   <article class="tile is-child box">
                       <label class="label">User</label>
                       <div class="field has-addons">
@@ -88,7 +92,7 @@
                       </div>
 
                   </article>
-
+                -->
             </p>
           </div>
     </div>
@@ -122,16 +126,25 @@
     },
 
     props: {
+      showGitButtons: Boolean
     },
 
     computed: {
       ...mapGetters({
         loaded: 'loaded'
       }),
+      isShowGitButton: function () {
+        // return ('' + this.showGitButtons === 'true') // weird ???
+        return true
+      },
       isLogIn: function () {
         this.parallelData = this.github()
         if (this.parallelData.logininfo) {
           if (this.parallelData.logininfo.pass && this.parallelData.logininfo.pass !== '') {
+            return true
+          }
+          // if using gitAuth
+          if (this.parallelData.logininfo.token && this.parallelData.logininfo.token !== '') {
             return true
           }
         }
@@ -142,6 +155,20 @@
           return this.$store.state.github || {}
         }
         return {}
+      },
+      loginuser: function () {
+        let tmpGithub = this.github()
+        if (tmpGithub.user) {
+          // if (tmpGithub.logininfo.type === 'BitBucket') {
+          if (tmpGithub.logininfo) {
+            return tmpGithub.logininfo.username
+          } else {
+            return ''
+          }
+          // }
+        } else {
+          return ''
+        }
       },
       username: function () {
         let tmpGithub = this.github()
@@ -159,25 +186,40 @@
         return null
       }
     },
-    username: function () {
-      if (this.$store.state.github !== null) {
-        if (this.$store.state.github.user !== null) {
-          // Ok great we have usernames, lets check for the ssh keys... ??
-          if (this.$store.state.github && this.$store.state.github.user) {
-            return this.$store.state.github.user.name || this.$store.state.github.user.login || this.$store.state.github.user.username
-          }
-        }
-      }
-      return null
-    },
     mounted: function () {
     },
     methods: {
+      login: function () {
+        var self = this
+        this.$auth.authenticate('github').then(function () {
+          // Execute application logic after successful social authentication
+          var gotToken = window.vueAuth.getToken()
+          if (gotToken) {
+            const $gitobj = self.$github
+            $gitobj.setToken(gotToken)
+            $gitobj.get('user', {}, self.updateGituser, self.gitError)
+          }
+        })
+      },
+      register: function () {
+        var self = this
+        this.$auth.login({ username: self.tmpUsername, password: self.password }).then(function () {
+          // Execute application logic after successful registration
+        })
+      },
       updateGituser: function (param) {
+        var gotToken = window.vueAuth.getToken()
+        var pwd = this.password
+        if (!pwd) {
+          if (this.$store.state.github && this.$store.state.github.logininfo) {
+            pwd = this.$store.state.github.logininfo.pass
+          }
+        }
         var loginfo = {
-          user: this.tmpUsername,
-          username: this.tmpUsername,
-          pass: this.password || this.$store.state.github.logininfo.pass,
+          user: param.login,
+          username: param.login,  // this.tmpUsername,
+          token: gotToken,
+          pass: pwd,
           type: 'GitHub'
         }
         Vue.set(this.parallelData, 'user', param)
@@ -189,6 +231,15 @@
         window.localStorage.setItem('default_git_provider', 'github')
         this.$store.commit('setDefaultGitProvider', 'github')
         this.password = ''
+
+        if (!this.$store.state.app.website) {
+          this.$store.commit('REFRESH_CONFIG', this.$store.state) // we still want to refresh settings, for offline version...
+        } else {
+          if (this.$store.state.app.websiteId) {
+            // we are in a website.. not in template creating a template..
+            this.$store.commit('REFRESH_CONFIG', this.$store.state) // we still want to refresh settings, for offline version...
+          }
+        }
       },
 
       updateBitbucketuser: function (inputParam) {
@@ -199,10 +250,18 @@
           param = inputParam
         }
 
+        var gotToken = window.vueAuth.getToken()
+        var pwd = this.password
+        if (!pwd) {
+          if (this.$store.state.github && this.$store.state.github.logininfo) {
+            pwd = this.$store.state.github.logininfo.pass
+          }
+        }
         var loginfo = {
-          user: this.tmpUsername,
-          username: param.username,
-          pass: this.password || this.$store.state.github.logininfo.pass,
+          user: param.username, // this.tmpUsername,
+          username: param.username, // param.username,
+          pass: pwd,
+          token: gotToken,
           type: 'BitBucket'
         }
 
@@ -215,6 +274,15 @@
         window.localStorage.setItem('default_git_provider', 'bitbucket')
         this.$store.commit('setDefaultGitProvider', 'bitbucket')
         this.password = ''
+
+        if (!this.$store.state.app.website) {
+          this.$store.commit('REFRESH_CONFIG', this.$store.state) // we still want to refresh settings, for offline version...
+        } else {
+          if (this.$store.state.app.websiteId) {
+            // we are in a website.. not in template creating a template..
+            this.$store.commit('REFRESH_CONFIG', this.$store.state) // we still want to refresh settings, for offline version...
+          }
+        }
       },
 
       isBitBucket: function () {
@@ -232,11 +300,32 @@
       },
       selectBitBucket: function () {
         this.bitbucket = true
+
+        var self = this
+        this.$auth.authenticate('bitbucket').then(function () {
+          var gotToken = window.vueAuth.getToken()
+          if (gotToken) {
+            const $gitobj = self.$bitbucket
+            $gitobj.setToken(gotToken)
+            $gitobj.get('/2.0/user', {}, self.updateBitbucketuser, self.gitError)
+          }
+        })
       },
       selectGitHub: function () {
         this.bitbucket = false
+
+        var self = this
+        this.$auth.authenticate('github').then(function () {
+          var gotToken = window.vueAuth.getToken()
+          if (gotToken) {
+            const $gitobj = self.$github
+            $gitobj.setToken(gotToken)
+            $gitobj.get('user', {}, self.updateGituser, self.gitError)
+          }
+        })
       },
       validateGithubLogin: function () {
+        // IF using username / password instead of oauth token ie: local dev
         this.$github.setUserPass(this.tmpUsername, this.password)
         this.$github.get('user', {}, this.updateGituser, this.gitError)
       },
@@ -246,7 +335,7 @@
       },
       userPlaceHolder: function () {
         if (this.isBitBucket()) {
-          return 'BitBucket Username'
+          return 'BitBucket Usernam se'
         }
         return 'GitHub Username'
       },
@@ -272,7 +361,7 @@
           this.$notify({
             title: 'Cannot login',
             message: 'Do you have internet access?',
-            type: 'danger '
+            type: 'danger'
           })
         } else {
           if (e.response && e.response.status === 401) {
@@ -307,6 +396,9 @@
 
 <style scoped>
 
+.hidden {
+   display: none
+}
 .tmp {
 }
 </style>

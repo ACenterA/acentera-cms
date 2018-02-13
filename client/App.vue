@@ -31,6 +31,9 @@ export default {
     /* eslint-disable */
     this.$bus.$on('updateEditFrame', function (data) {
       var self = window.vm
+      if (!($('body').hasClass('overflow-hidden-y'))) {
+        $('body').addClass('overflow-hidden-y')
+      }
 
       self.$store.commit('deleteAllRows', 0, 1)
 
@@ -40,8 +43,30 @@ export default {
       var currentUrl = data || window.goHostUrl + '/'
 
       self.$httpApi.get(currentUrl, { headers: { edit: 1 } }).then((res) => {
-        var Data = res.data.data.Data
+        if (!res.data.data) {
+          // Uh oh no data... found for the requested page...
 
+          // Are we trying to create a new post ? it may have some delay..
+          if (self.$store.state.app.selectedItem !== undefined && self.$store.state.app.selectedItem.retry) {
+            if (self.$store.state.app.selectedItem.retry >= 0) {
+              self.$store.state.app.selectedItem.retry--
+              return setTimeout(function () {
+                self.selectPost(self.$store.state.app.selectedItem)
+              }, 1000)
+            }
+          }
+          // well no more retries or no data..
+
+          self.$store.state.app.nodata = true
+          if (self.$store.state.app.createItem) {
+            return self.$bus.$emit('NO_DATA_FOUND')
+          } else {
+            return self.$bus.$emit('CREATE_ITEM')
+          }
+        }
+        var Data = res.data.data.Data
+        self.$store.state.app.nodata = false
+        self.$store.state.app.createItem = false
         var headStart = Data.indexOf('<head>') + 6
         if (headStart < 7) {
           headStart = Data.toLowerCase().indexOf('<head>') + 6
@@ -251,7 +276,7 @@ export default {
 
     var self = this
     this.refreshUser({ vue: this,
-      callback: function () {
+      callback: function (gotdata) {
         if (self.project && self.project.websites) {
           // Only if no project is selected..
           // window.vm.$store.state.app.isLoaded
@@ -261,8 +286,10 @@ export default {
           }
         } else {
           // NO PROJECT YET ??
-          self.$store.state.app.sidebarglobal.opened = false
-          self.$store.state.app.sidebarglobal.hidden = true
+          if (!self.$store.state.app.isLoaded) {
+            self.$store.state.app.sidebarglobal.opened = false
+            self.$store.state.app.sidebarglobal.hidden = true
+          }
         }
       }
     })
@@ -281,7 +308,8 @@ export default {
     'toggleDevice',
     'toggleSidebar',
     'toggleSidebartwo',
-    'refreshUser'
+    'refreshUser',
+    'selectPost'
   ])
 }
 </script>
@@ -309,10 +337,10 @@ pre > code {
 html, body {
   height: 100%;
   background-color: whitesmoke;
-  overflow-y: hidden;
+  // overflow-y: hidden;
 }
-.overflow-hidden {
-  overflow: hidden;
+body.overflow-hidden-y {
+  overflow-y: hidden;
 }
 
 body.overflow-hidden {

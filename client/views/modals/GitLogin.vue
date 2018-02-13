@@ -17,7 +17,7 @@
 
               <!-- Login tile -->
               <article class="tile is-child is-marginless is-paddingless">
-                <GitHub></GitHub>
+                <GitHub showGitButtons="true"></GitHub>
               </article>
             </article>
           </div>
@@ -49,7 +49,7 @@
                    <br/>
                    <article class="tile is-child">
                       <div>
-                        <span>Great Job! Lets continue..</span>
+                        <span>Great Job! Lets continue...</span>
                         <br/>
                         <br/>
 
@@ -113,7 +113,8 @@ export default {
   computed: {
     ...mapGetters({
       session: 'session',
-      repoState: 'repoState'
+      repoState: 'repoState',
+      github: 'github'
     }),
     healthKeys: function () {
       return Object.keys(this.healthData)
@@ -133,11 +134,15 @@ export default {
       return null
     },
     username: function () {
-      if (this.$store.state.github !== null) {
-        if (this.$store.state.github.user !== null) {
+      var githubInfo = this.github
+      if (githubInfo !== null) {
+        if (githubInfo.user !== null) {
           // Ok great we have usernames, lets check for the ssh keys... ??
-          if (this.$store.state.github && this.$store.state.github.user) {
-            return this.$store.state.github.user.name || this.$store.state.github.user.login || this.$store.state.github.user.username
+          if (githubInfo && githubInfo.user) {
+            if (githubInfo.user.name === '') {
+              return githubInfo.user.username
+            }
+            return githubInfo.user.name || githubInfo.user.login || githubInfo.user.username
           }
         }
       }

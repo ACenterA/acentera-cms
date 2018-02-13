@@ -1,7 +1,7 @@
 <template>
   <nav class="topbar app-topbar" :class="{ hidden: !show }">
     <div class="level-left">
-      <div class="level-item">
+      <div class="level-item" v-if="loaded">
         <h3 v-if="selectedPost !== null" class="subtitle is-5">
           <span v-if="selectedPost.title">
             Editing : {{ selectedPost.title }}
@@ -11,7 +11,7 @@
           </span>
         </h3>
       </div>
-      <div class="level-item" v-if="!!codelink">
+      <div class="level-item" v-if="loaded && !!codelink">
         <tooltip label="View code" placement="right" size="small" :rounded="true">
           <span class="icon">
             <a  :href="codelink">
@@ -22,7 +22,19 @@
       </div>
     </div>
 
-    <div v-if="selectedPost !== null" class="level-right is-hidden-mobile">
+    <div v-if="loaded && selectedPost !== null" class="level-right is-hidden-mobile">
+
+      <div class="topbar-settings">
+        <div class="control has-icons-right">
+          <span class="select">
+            <select v-model="selectedLang" @change="loadLanguageDetails(selectedLang)">
+              <option v-for="lang in availableLanguages">
+                {{lang.languagename}}
+              </option>
+            </select>
+          </span>
+        </div>
+      </div>
      <div class="topbar-settings">
       <tooltip label="Settings" placement="left" size="small" :rounded="true">
         <span class="icon">
@@ -31,7 +43,7 @@
           </span>
         </span>
       </tooltip>
-    </div>
+     </div>
     </div>
   </nav>
 </template>
@@ -47,7 +59,8 @@ export default {
 
   data () {
     return {
-      list: null
+      list: null,
+      selectedLang: null
     }
   },
 
@@ -61,8 +74,12 @@ export default {
 
   computed: {
     ...mapGetters({
-      selectedPost: 'selectedPost'
+      selectedPost: 'selectedPost',
+      loaded: 'loaded'
     }),
+    availableLanguages () {
+      return this.$store.state.app.languages.languages
+    },
     codelink () {
       if (this.$route.meta && this.$route.meta.link) {
         return 'https://github.com/vue-bulma/vue-admin/blob/master/client/views/' + this.$route.meta.link
@@ -74,8 +91,38 @@ export default {
       return this.$route.name
     }
   },
-
+  mounted: function () {
+    this.loadLanguageDetails()
+  },
   methods: {
+    loadLanguageDetails (lang) {
+      if (!this.$store.state.app.isLoaded) { // } || (this.$store.state.app.languages.languages.length <= 0)) {
+        var self = this
+        return setTimeout(function () {
+          self.loadLanguageDetails(lang)
+        }, 300)
+      }
+      if (!lang) {
+        lang = window.vm.$store.state.app.languageSelected
+      }
+      if (lang !== undefined) {
+        if (this.$store.state.app.languages !== undefined) {
+          // Get current language, if none defined then lets define to ourself
+          // browser loaded the page properly
+          var orig = this.$store.state.app.languageSelected // get current selected language ( or default one )
+          if (!this.selectedLang) {
+            orig = lang
+          }
+          this.selectedLang = lang
+          this.selectedLangItem = this.$store.state.app.languages.languagesHash[lang]
+          if (orig !== this.selectedLang) {
+            // Ok we got a language change, we should $emit a change language occured event
+            this.$store.commit('SITE_SELECT_LANG', this.selectedLang)
+            this.$bus.$emit('LANGUAGE_CHANGE_EVENT', this.selectedLangItem)
+          }
+        }
+      }
+    },
     topbarClick () {
       if ($('.rightSide').hasClass('active')) {
         $('.rightSide').removeClass('active')
