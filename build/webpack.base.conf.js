@@ -22,6 +22,7 @@ module.exports = {
     new webpack.ProvidePlugin({
       $: 'jquery',
       jquery: 'jquery',
+      Turndown: ['turndown', 'default'],
       'window.jQuery': 'jquery',
       jQuery: 'jquery',
       'window.jQuery': 'jquery',
