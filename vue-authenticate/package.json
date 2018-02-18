@@ -1,0 +1,96 @@
+{
+  "author": {
+    "name": "Davor Grubelic",
+    "email": "davor.grubelic@gmail.com",
+    "url": "https://dgrubelic.me"
+  },
+  "bugs": {
+    "url": "https://github.com/dgrubelic/vue-authenticate/issues"
+  },
+  "dependencies": {
+    "vue": "^2.5.2",
+    "vue-axios": "^2.0.2"
+  },
+  "description": "Authentication library for Vue.js",
+  "devDependencies": {
+    "axios": "^0.15.3",
+    "babel-core": "^6.24.0",
+    "babel-loader": "^6.4.1",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "body-parser": "^1.17.1",
+    "connect-history-api-fallback": "^1.3.0",
+    "cors": "^2.8.1",
+    "express": "^4.15.2",
+    "gulp": "^3.9.1",
+    "gulp-connect": "^5.0.0",
+    "gulp-webpack": "^1.5.0",
+    "node-dev": "^3.1.3",
+    "oauth": "^0.9.15",
+    "oauth-signature": "^1.3.1",
+    "parallelshell": "^2.0.0",
+    "request": "^2.81.0",
+    "rollup": "^0.41.6",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-buble": "^0.15.0",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-uglify": "^1.0.1",
+    "rollup-stream": "^1.19.0",
+    "uglify-js": "^2.8.22",
+    "unix-timestamp": "^0.2.0",
+    "vinyl-source-stream": "^1.1.0",
+    "vue-axios": "^2.0.1",
+    "vue-router": "^2.3.0",
+    "vuex": "^2.2.1",
+    "webpack": "^2.3.2",
+    "webpack-dev-server": "^2.4.2"
+  },
+  "directories": {},
+  "homepage": "https://github.com/dgrubelic/vue-authenticate#readme",
+  "keywords": [
+    "vue",
+    "vuejs",
+    "auth"
+  ],
+  "license": "MIT",
+  "main": "dist/vue-authenticate.js",
+  "maintainers": [
+    {
+      "name": "dgrubelic",
+      "email": "davor.grubelic@gmail.com"
+    }
+  ],
+  "module": "dist/vue-authenticate.es2015.js",
+  "name": "vue-authenticate",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dgrubelic/vue-authenticate.git"
+  },
+  "scripts": {
+    "build": "node build/build.js && cp ./dist/vue-authenticate.js ./example/",
+    "dev": "parallelshell \"node-dev ./example/server.js\" \"gulp dev\""
+  },
+  "tags": [
+    "auth",
+    "authentication",
+    "login",
+    "registration",
+    "jwt",
+    "token",
+    "vuejs",
+    "vue.js",
+    "github",
+    "facebook",
+    "google",
+    "twitter",
+    "oauth",
+    "oauth 1.0",
+    "oauth 2.0"
+  ],
+  "unpkg": "dist/vue-authenticate.js",
+  "version": "1.3.6"
+}
