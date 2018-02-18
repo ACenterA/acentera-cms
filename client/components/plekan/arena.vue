@@ -252,6 +252,7 @@ export default {
   methods: {
     changeImageMenu: function () {
       this.$bus.$emit('TOGGLE_EDITABLE_ELEMENT', this.viewMenuType.el) // set the target
+      this.closeMenu()
     },
     setMenu: function (top, left) {
       var largestHeight = window.innerHeight - this.$$.right.offsetHeight - 25

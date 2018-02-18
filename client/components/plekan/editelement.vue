@@ -149,6 +149,8 @@ export default {
       var mapArrObj = []
       var self = this
       $.each(editorParamDatas, function (idx, item) {
+        console.error('get element of')
+        console.error(item)
         var itemArr = item.split(':')
         var itemInfo = {
           parameter: itemArr[0]
@@ -164,6 +166,14 @@ export default {
         itemInfo['orig_value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
         if (itemInfo['type'] === 'Image') {
           itemInfo['currentImage'] = window.goHostUrl + '/' + itemInfo['value']
+        }
+        console.error('PUSH OF')
+        console.error(itemInfo)
+        if (typeof itemInfo['value'] === 'undefined') {
+          if (item.startsWith('i18n.')) {
+            itemInfo['value'] = itemInfo['$el'].text()
+            itemInfo['orig_value'] = itemInfo['$el'].text()
+          }
         }
         mapArrObj.push(itemInfo)
       })
@@ -228,6 +238,30 @@ export default {
           if (foundStartIdx === -1) {
             foundStartIdx = origBgImage.indexOf('//')
           }
+
+          if (foundStartIdx === -1) {
+            foundStartIdx = origBgImage.indexOf('url("')
+            if (foundStartIdx !== -1) {
+              foundStartIdx += 5
+            }
+          }
+
+          if (foundStartIdx === -1) {
+            /* eslint-disable */
+            foundStartIdx = origBgImage.indexOf("url('")
+            /* eslint-enable */
+            if (foundStartIdx !== -1) {
+              foundStartIdx += 5
+            }
+          }
+
+          if (foundStartIdx === -1) {
+            foundStartIdx = origBgImage.indexOf('url(')
+            if (foundStartIdx !== -1) {
+              foundStartIdx += 4
+            }
+          }
+
           if (foundStartIdx !== -1) {
             var tmpOrigValue = item['orig_value']
             var foundEnd = origBgImage.indexOf(item['orig_value'])
@@ -242,7 +276,11 @@ export default {
               if (item['src'] === undefined || item['src'] === null) {
                 return false
               }
-              tmpImg.style.backgroundImage = origBgImage.substring(0, foundStartIdx) + item['src'] + origBgImage.substring(foundEnd + tmpOrigValue.length)
+              if (item['src'].indexOf(window.goHostUrl) === -1) {
+                tmpImg.style.backgroundImage = origBgImage.substring(0, foundStartIdx) + window.goHostUrl + item['src'] + origBgImage.substring(foundEnd + tmpOrigValue.length)
+              } else {
+                tmpImg.style.backgroundImage = origBgImage.substring(0, foundStartIdx) + item['src'] + origBgImage.substring(foundEnd + tmpOrigValue.length)
+              }
               return true
             }
           }
@@ -263,18 +301,35 @@ export default {
               hasError = true // if it works we have to update this to false
 
               window.updateEditorProperty(item.parameter, self.$store.state.app.settings.params, item.value)
-
+              console.error('updating a')
               // TODO: Set settings dirty ??
               // TODO: We should implement a editor function to edit elements....
               // ie: an
-
+              console.error('updated test ?')
               if (item['type'].toLowerCase() === 'text') {
                 item['$el'].html(item.value)
+                console.error('updated test  tt')
+                if (item.parameter.startsWith('i18n.')) {
+                  // TODO: Set i18n
+                  console.error('updated test  yes')
+                  var tmpParma = item.parameter
+                  if (tmpParma.startsWith('i18n.')) {
+                    tmpParma = tmpParma.substring(5)
+                  }
+                  self.$store.state.app.i18nUpdated[tmpParma] = {
+                    value: item.value,
+                    action: item.value ? 'upsert' : 'delete'
+                  }
+                }
                 hasError = false
               } else if (item['type'].toLowerCase() === 'image') {
+                console.error('updating b')
                 // Find where the img is ... matching the orig_value ...
                 var imgs = item['$el'].find('img')
+                console.error('updating c')
+                console.error(imgs)
                 if (imgs[0]) {
+                  console.error('updating d')
                   var isImgUpdated = updateImageByBgStyle(imgs[0], item)
                   if (isImgUpdated) {
                     hasError = false
@@ -283,8 +338,11 @@ export default {
                     hasError = false
                   }
                 } else {
+                  console.error('updating e')
                   if (imgs) {
+                    console.error('updating f')
                     if (imgs.prevObject) {
+                      console.error('updating g')
                       var tmpImg = imgs.prevObject[0]
                       var isImgUpdated1 = updateImageByBgStyle(tmpImg, item)
                       if (isImgUpdated1) {

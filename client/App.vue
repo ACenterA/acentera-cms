@@ -343,6 +343,10 @@ body.overflow-hidden-y {
   overflow-y: hidden;
 }
 
+.notifications {
+   margin-top: 80px !important;
+}
+
 body.overflow-hidden {
   -ms-overflow-style: none;  // IE 10+
   overflow: -moz-scrollbars-none;  // Firefox

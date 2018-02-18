@@ -422,6 +422,7 @@ if (!isGitHook) {
       }
       if (!(store.getters.app.websiteId)) {
         if (!(route.path.indexOf('template') >= 0 || route.path === '/')) {
+          console.error('TEST templaet aararara')
           if (store.getters.app.isLoaded) {
             // THIS IS BAD I KNOW...
             // This is hack, ie end-user click on change site, then hit the back button ...
@@ -433,15 +434,16 @@ if (!isGitHook) {
             store.getters.app.sidebarglobal.hidden = false
             store.getters.app.sidebarglobal.opened = true
             store.getters.app.repoState.isLoaded = false
+            window.location.href = '/' // force go back..
+            return
           }
-          window.location.href = '/' // force go back..
-          return
         }
 
         if (route.path === '/') {
           // THIS IS BAD I KNOW...
           // This is hack, ie end-user click on add new template..then hit the back button  or (navigator history which is the most pain)...
           // the left menu stay hidden, I have not investigated...
+          // ??? if (store.getters.app.isLoaded) {
           if (store.getters.app.project) {
             if (store.getters.app.sidebarglobal.opened === false) {
               var l = Object.keys(store.getters.app.project.websites).length

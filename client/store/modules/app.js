@@ -15,6 +15,8 @@ const state = {
     top: 0,
     left: 0
   },
+  i18nUpdated: {
+  },
   device: {
     isMobile: false,
     isTablet: false
@@ -295,35 +297,23 @@ const mutations = {
     var self = window.vm
     var pendingReload = window.reloadOnSave
     window.reloadOnSave = false
-    self.$httpApi.post(window.apiUrl + '/settings', state.settings, {}).then((response) => {
-      // TODO: Set selecte theme in the state...
-      // In case they modified theme ?
-      if (!state.repoState.pending) {
-        // validate if somehting changed, unless we are already in pending mode...
-        window.vm.$store.commit('REFRESH_CONFIG', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
-      } else {
-        // Optional ??
-        window.vm.$store.commit('REFRESH_SETTINGS', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
-      }
 
-      // Small Hack to only show it once...
-      if (!pendingReload) {
-        var uniqueMsg = 'Saved'
-        if (!($('.notifications').find('.title.is-5').text() === uniqueMsg)) {
-          // only show it once..
-          self.$notify({
-            title: 'Saved',
-            message: 'Changes has been saved locally.',
-            type: 'success'
-          })
+    // Will be called after the i18n updates.
+    // This function will also display the Save Success balloon.
+    var performSettingUpdate = function () {
+      self.$httpApi.post(window.apiUrl + '/settings', state.settings, {}).then((response) => {
+        // TODO: Set selecte theme in the state...
+        // In case they modified theme ?
+        if (!state.repoState.pending) {
+          // validate if somehting changed, unless we are already in pending mode...
+          window.vm.$store.commit('REFRESH_CONFIG', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
+        } else {
+          // Optional ??
+          window.vm.$store.commit('REFRESH_SETTINGS', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
         }
-      } else {
-        var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
-        // force refresh
-        // hack to leave enough time for backend to process the change
-        setTimeout(function () {
-          self.$bus.$emit('LANGUAGE_CHANGE_EVENT', selectedLangItem)
 
+        // Small Hack to only show it once...
+        if (!pendingReload) {
           var uniqueMsg = 'Saved'
           if (!($('.notifications').find('.title.is-5').text() === uniqueMsg)) {
             // only show it once..
@@ -333,12 +323,49 @@ const mutations = {
               type: 'success'
             })
           }
-        }, 700)
-      }
-    })
-    .catch((error) => {
-      self.$onError(error)
-    })
+        } else {
+          var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
+          // force refresh
+          // hack to leave enough time for backend to process the change :)
+          setTimeout(function () {
+            self.$bus.$emit('LANGUAGE_CHANGE_EVENT', selectedLangItem)
+
+            var uniqueMsg = 'Saved'
+            if (!($('.notifications').find('.title.is-5').text() === uniqueMsg)) {
+              // only show it once..
+              self.$notify({
+                title: 'Saved',
+                message: 'Changes has been saved locally.',
+                type: 'success'
+              })
+            }
+          }, 700)
+        }
+      })
+      .catch((error) => {
+        self.$onError(error)
+      })
+    }
+
+    var tmpObject = self.$store.state.app.i18nUpdated
+    self.$store.state.app.i18nUpdated = {}
+    var updatedI81nKeys = Object.keys(tmpObject)
+    if (updatedI81nKeys && updatedI81nKeys[0]) {
+      // Ok we have i18N Updates...
+
+      // LanguageCode match the i18n/{languageCodde}.yml file
+      var languageCode = self.$store.state.app.languages.languagesHash[self.$store.state.app.languageSelected].id
+
+      self.$httpApi.post(window.apiUrl + '/i18n/' + languageCode, tmpObject, {}).then((response) => {
+        // TODO: Validate response
+        performSettingUpdate()
+      })
+      .catch((error) => {
+        self.$onError(error)
+      })
+    } else {
+      performSettingUpdate()
+    }
   },
   [types.SITE_LANG_DEFAULT] (state, update) {
     state.language = update

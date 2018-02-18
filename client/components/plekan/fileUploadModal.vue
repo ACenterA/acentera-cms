@@ -65,20 +65,18 @@ export default {
       return res
     },
     filenamePlaceHolder () {
-      try {
+      if (this.file && this.file.data && this.file.data.name) {
         var result = (this.file.data.name.replace('.' + this.ext, '')).replace(/[^a-zA-Z0-9\-\s]/g, '') // Remove non alphanum except whitespace and also the extension
                .replace(/--+/, '-')
                .replace(/^\s+|\s+$/, ' ')      // Remove leading and trailing whitespace
                .replace(/\s+/g, '-')          // Replace (multiple) whitespaces with a dash
                .toLowerCase()
         return result
-      } catch (ff) {
-        console.error(ff.stack)
       }
       return 'Click the image'
     },
     fileNameValidator () {
-      try {
+      if (this.fileName) {
         var result = this.fileName.replace(/[^a-zA-Z0-9\-\s]/g, '') // Remove non alphanum except whitespace and also the extension
                .replace(/--+/, '-')
                .replace(/^\s+|\s+$/, ' ')      // Remove leading and trailing whitespace
@@ -86,8 +84,6 @@ export default {
                .toLowerCase()
         this.fileName = result
         return result
-      } catch (ff) {
-        console.error(ff.stack)
       }
       return null
     }

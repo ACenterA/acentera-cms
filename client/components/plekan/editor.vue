@@ -32,7 +32,7 @@
                        :close="toggleFileUploadModal">
     </file-upload-modal>
     <file-select-modal :shown="showFileSelectModal" :multiModal="multiModal"
-                       :close="toggleSelectModal">
+                       :close="toggleFileSelectModalClose">
     </file-select-modal>
   </section>
 </template>
@@ -201,6 +201,7 @@ export default {
     })
 
     this.$bus.$on('TOGGLE_FILESELECT', function () {
+      console.error('selected here a')
       self.toggleFileSelectModal('TOGGLE_FILESELECT_CLOSE')
     })
     this.$bus.$on('TOGGLE_FILESELECT_CLOSE', function () {
@@ -349,12 +350,19 @@ export default {
       this.multiModal = 'TOGGLE_FILESELECT_CLOSE' // revert to the FILESELECT_CLOSE
       this.showFileUploadModal = false
     },
+    toggleFileSelectModalClose () {
+      console.error('received close?')
+      this.showFileSelectModal = false
+    },
     toggleFileSelectModal (isMulti) {
+      console.error('select modal a3')
       if (isMulti) {
         this.multiModal = isMulti
       } else {
         this.multiModal = null
       }
+      console.error('tt : ' + this.showFileSelectModal)
+      console.error('tt 1: ' + !this.showFileSelectModal)
       this.showFileSelectModal = !this.showFileSelectModal
     },
     /**
@@ -363,7 +371,11 @@ export default {
      * @return {void}
      */
     openEditElement () {
-      this.editableModal = true
+      if ($(this.editableModalElement).attr('parameditable') === 'sidebar') {
+        this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
+      } else {
+        this.editableModal = true
+      }
     },
     /**
      * Editor içinde bulunan link butonuna tıklandığında

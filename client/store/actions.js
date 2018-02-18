@@ -33,6 +33,13 @@ const refreshConfig = (state) => {
 export const selectPost = ({ commit }, obj) => {
   if (obj.item) {
     obj.item.selected = true
+
+    window.vm.$store.state.app.selectedItem = null
+    if ($('.rightSide').length >= 1) {
+      if ($('.rightSide').hasClass('active')) {
+        window.vm.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
+      }
+    }
     commit(types.SELECT_POST, obj.item)
     // TOOD: What about :1313/ replacement variables ???
     window.vm.$store.state.app.selectedItem = obj

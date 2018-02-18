@@ -2,7 +2,7 @@
   <div class="app-inner-content">
     <div v-if="loaded" class="fullheight">
       <plekan></plekan>
-      <div v-if="selectedPost !== null" class="rightSide">
+      <div class="rightSide">
       </div>
     </div>
   </div>

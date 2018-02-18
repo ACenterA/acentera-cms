@@ -43,8 +43,44 @@
           </article>
 
           <plekan :class="{ hidden: inPostCreate || !isPostSelected || postDoesNotExists }"></plekan>
-          <div v-if="selectedPost !== null" class="rightSide">
+          <div class="rightSide" :class="{ active: showRightSideBar}">
+            <button class="button is-info float-right" @click="hideRightBar">Close</button>
 
+            <article class="tile is-child box">
+                <label class="label">Title</label>
+                <div class="field has-addons">
+                  <p class="control is-expanded">
+                    <input class="input" type="text"
+                           v-model="selectedPost.title"/>
+                  </p>
+                </div>
+                <br/>
+                <label class="label">Post Date</label>
+                <div class="field has-addons">
+                  <p class="control is-expanded">
+                    <input class="input" type="text"
+                           v-model="selectedPost.pubDate"/>
+                  </p>
+                </div>
+
+                <br/>
+                <label class="label">Cover Image</label>
+                <div class="field has-addons">
+                  <p class="control is-expanded">
+
+                  <file-upload :clean="shown"
+                            types="png|jpg|jpeg|gif"
+                            :preventDrop="true"
+                            :origimage="currentImage"
+                            :elementItem="e"
+                            :fileChange="fileChange">
+                  </file-upload>
+                  </p>
+                </div>
+
+                <br/>
+
+            </article>
           </div>
       </div>
     </div>
@@ -87,6 +123,7 @@ export default {
       selectedPage: null,
       actionPending: false,
       cipher: '',
+      showRightSideBar: false,
       userTransitKey: '',
       extra: '?editMode=widget&apiPort=8081&jsPort=8091',
       editing: false,
@@ -94,14 +131,27 @@ export default {
       ]
     }
   },
-
   mounted: function () {
     var self = this
     this.$store.state.app.topbar.show = true
     this.$store.commit('deleteAllRows', 0, 1)
+    this.$bus.$on('TOGGLE_ADVANCED_SETTINGS', function (data) {
+      if ((self.selectedPost && !self.inPostCreate && !self.postDoesNotExists) && ((self.isPostSelected && !self.postDoesNotExists))) {
+        self.showRightSideBar = !self.showRightSideBar
+      }
+    })
+
     this.$bus.$on('staticHtmlSelected', function (data) {
       self.selectedObject = data
       self.showModal = true
+    })
+
+    this.$bus.$on('UNDRAFT', function (data) {
+      console.error('Received undraft for post ')
+      //  SAVE
+      data.draft = false
+      this.$bus.$emit('SAVE_CMD', data)
+      // self.selectPost({ vue: this, item: data, retry: 5 })
     })
 
     this.$bus.$on('staticHtmlEdit', function (data) {
@@ -137,7 +187,7 @@ export default {
         type: 'blogs',
         id: tmpLink,
         title: item.title,
-        draft: item.draft,
+        draft: (item.draft === 'true'),
         date: item.pubDate,
         lang: selectedLangItem.id,
         content: markDownValue
@@ -148,13 +198,21 @@ export default {
         // headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {
+        console.error('selecte save test?')
+
+        // TODO: Find a better way ie: ajax polling.. check for E-Tag change up to X times?
+        // well we actually did a force rebuild in hugo
+        // setTimeout(function () {
+        self.selectPost(window.vm.$store.state.app.selectedItem)
         self.$notify({
           title: 'Saved.',
           message: 'Successfully saved your new awesome content.',
           type: 'success'
         })
+        // }, 1000)
       })
       .catch((error) => {
+        console.error(error.stack)
         // self.actionPending = false
         self.$onError(error)
       })
@@ -171,8 +229,10 @@ export default {
   destroyed: function () {
     this.$bus.$off('LANGUAGE_CHANGE_EVENT')
     // this.$bus.$off('SITE_PAGE_CHANGE_EVENT')
+    this.$bus.$off('TOGGLE_ADVANCED_SETTINGS')
     this.$bus.$off('NO_DATA_FOUND')
     this.$bus.$off('SAVE_CMD')
+    this.$bus.$off('UNDRAFT')
   },
   computed: {
     ...mapGetters({
@@ -184,6 +244,12 @@ export default {
       repoState: 'repoState',
       selectedPost: 'selectedPost'
     }),
+    currentImage () {
+      if (this.selectedPost && this.selectedPost.image) {
+        return window.goHostUrl + '/' + this.selectedPost.image
+      }
+      return null
+    },
     shortName () {
       var result = (this.newTitle || '').replace(/[^a-zA-Z0-9\-\s]/g, '') // Remove non alphanum except whitespace
              .replace(/--+/, '-')
@@ -227,6 +293,9 @@ export default {
       return 'Enter your post title here.'
     },
     isPostSelected: function () {
+      if (this.$store.state.app.selectedItem === null) {
+        self.showRightSideBar = null
+      }
       return this.$store.state.app.selectedItem !== null
     },
     inPostCreate: function () {
@@ -246,6 +315,9 @@ export default {
     ...mapActions([
       'selectPost'
     ]),
+    hideRightBar: function () {
+      this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
+    },
     fileNameValidator () {
       try {
         var result = (this.fileName || this.shortName).replace(/[^a-zA-Z0-9\-\s]/g, '') // Remove non alphanum except whitespace
@@ -470,23 +542,27 @@ export default {
     color: lightskyblue;
   }
 
-
-  .rightSide.active {
-    right: 0px;
+  .float-right {
+    float: right;
   }
 
   .rightSide {
       position: fixed;
-      width: 200px;
+      width: 50%;
       height: 100%;
       background-color: #f2f2f2;
-      right: -300px;
+      right: -50%;
       padding: 10px;
       top: 105px;
       border-left: 1px solid #ddd;
       transition: all .3s;
       z-index: 12;
       box-shadow: 0px 3px 78px 0px rgba(0, 0, 0, 0.1);
+  }
+
+  .rightSide.active {
+    right: 0px;
+    z-index:333;
   }
 
   .animated {

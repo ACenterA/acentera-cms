@@ -205,6 +205,9 @@ export default {
           type: 'warning'
         })
         this.$store.commit('clearSession')
+        setTimeout(function () {
+          window.location.href = '/?expired=' + new Date()
+        }, 1000)
       } else {
         this.$store.commit('setSession', session)
       }
