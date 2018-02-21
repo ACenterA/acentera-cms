@@ -248,14 +248,19 @@ export const editorStart = (state) => {
   /* eslint-disable */
   bus.$on('contextMenuEvent', (evtInfo) => {
     evtInfo.detail.preventDefault()
+    console.error('received a')
     const el = evtInfo.detail.target // window.selo.selection.focusNode.parentNode
 
     // Well do not show menu
+    console.error('received b')
     var parents = window.tempHelper.getParents($(el))
+    console.error('received c')
     var targetEl = $(el)[0]
     var viewMenuType = null
+    console.error('received d')
     var attrContentEditableIdx = -1 // el.attributes.indexOf('contenteditable')
     for (var i = targetEl.attributes.length - 1; i >= 0; i--) {
+      console.error('received e')
       if (targetEl.attributes[i].name === 'contenteditable') {
         attrContentEditableIdx = i
         break
@@ -265,8 +270,14 @@ export const editorStart = (state) => {
       }
     }
 
+    console.error('received f')
+    console.error(targetEl)
+    console.error($(el))
+    console.error($(el).parents())
+    // $(el).addClass('testaace')
     if (attrContentEditableIdx === -1) {
       // Not found lets find closet parent...
+      console.error('received g')
       var findParentObject = $(el).parents('[show-editor-menu]')
       if (findParentObject.length >= 1) {
         targetEl = findParentObject[0]
@@ -278,12 +289,30 @@ export const editorStart = (state) => {
         }
       }
     }
-
+    console.error('received h')
     if (attrContentEditableIdx !== -1) {
       // //console.error('THIS WAS A VALID CONTEXT MENU')
     } else {
+      console.error('received i')
       // Not a valid contextmenu option
-      return
+
+      console.error('received g')
+      /*
+      var findChildObject = $(el).next('[show-editor-menu]').first()
+      if (findChildObject.length >= 1) {
+        targetEl = findChildObject[0]
+        for (var i = targetEl.attributes.length - 1; i >= 0; i--) {
+          if (targetEl.attributes[i].name === 'show-editor-menu') {
+            attrContentEditableIdx = i
+            break
+          }
+        }
+      }
+      */
+
+      if (attrContentEditableIdx === -1) {
+        return
+      }
     }
 
     viewMenuType = {

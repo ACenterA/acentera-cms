@@ -17,7 +17,7 @@
 
               <!-- Login tile -->
               <article class="tile is-child is-marginless is-paddingless">
-                <GitHub showGitButtons="true"></GitHub>
+                <GitHub showGitButtons=true></GitHub>
               </article>
             </article>
           </div>

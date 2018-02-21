@@ -10,8 +10,13 @@
           </span>
         </li>
         <li v-for="(item, index) in blogData">
-          <div v-if="item.draft" class="draft">draft</div>
-          <span @click="selectPost({ vue: this, item: item })">
+          <!--
+            // Removed we would have to find a logic
+            // to update the sidebar objects for items not in draft
+            // ie: english in draft, but french not in draft
+            <div v-if="item.draft" class="draft">draft</div>
+          -->
+          <span @click="clickSelectPost({ vue: this, item: item })">
             <div class="postTitle">{{item.title}}</div>
             <br/>
             {{item.pubDate}}
@@ -64,7 +69,42 @@ export default {
       'expandMenu',
       'selectPost'
     ]),
+    clickSelectPost (itm) {
+      console.error('recieved click select post here')
+      console.error(this)
+      var link = itm.item.link
+      console.error('curr link')
+      console.error(link)
 
+      var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
+      var langCode = '' + selectedLangItem.id
+      if (window.vm.$store.state.app.language === window.vm.$store.state.app.languageSelected) {
+        langCode = '' // no prefix, this is the default site...
+      }
+
+      if (link.indexOf('localhost:') >= 0 && link.indexOf('localhost:') <= 8) {
+        link = link.replace('localhost:1313/', '')
+      } else {
+        // link = link // link = window.goHostUrl + langPrefix + link
+      }
+      while (link.startsWith('//')) {
+        link = link.substring(1)
+      }
+      console.error('curr link final language ' + langCode)
+      console.error(link)
+      var self = this
+      self.$httpApi.post(window.apiUrl + '/frontmatter', { id: link, lang: langCode }, { }).then((res) => {
+        console.error('successs')
+        console.error(res)
+        self.selectPost(itm)
+      })
+      .catch((error) => {
+        // self.$onError(error)
+        console.error('GOT ERROR')
+        console.error(error)
+        self.selectPost(itm)
+      })
+    },
     createNewPost: function () {
       this.$store.state.app.createItem = true
       this.selectPost({ vue: this, item: { link: '/blogs/this_does_not_exists' } })
@@ -148,6 +188,7 @@ export default {
   padding: 0px 0 0px;
   width: auto;
   min-width: 300px;
+  max-width: 300px;
   float: left;
   max-height: 100%;
   height: calc(100% - 50px);

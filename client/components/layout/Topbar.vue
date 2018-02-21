@@ -23,8 +23,10 @@
     </div>
 
     <div v-if="loaded && selectedPost !== null" class="level-right is-hidden-mobile">
-
-      <div class="topbar-settings">
+      <div v-if="selectedPost.draft" class="level-right">
+        <button class="button is-primary is-outlined topBtnPad" @click="undraft">Undraft</button>
+      </div>
+      <div class="topbar-settings" v-if="hasSettings">
         <div class="control has-icons-right">
           <span class="select">
             <select v-model="selectedLang" @change="loadLanguageDetails(selectedLang)">
@@ -60,7 +62,8 @@ export default {
   data () {
     return {
       list: null,
-      selectedLang: null
+      selectedLang: null,
+      hasSettings: false
     }
   },
 
@@ -93,6 +96,11 @@ export default {
   },
   mounted: function () {
     this.loadLanguageDetails()
+    // if ($('.rightSide').length >= 1) {
+    this.hasSettings = true
+    // } else {
+    // this.hasSettings = false
+    // }
   },
   methods: {
     loadLanguageDetails (lang) {
@@ -123,12 +131,17 @@ export default {
         }
       }
     },
+    undraft () {
+      this.$bus.$emit('UNDRAFT', this.selectedPost)
+    },
     topbarClick () {
-      if ($('.rightSide').hasClass('active')) {
-        $('.rightSide').removeClass('active')
-      } else {
-        $('.rightSide').addClass('active')
-      }
+      // if ($('.rightSide').hasClass('active')) {
+      // $('.rightSide').removeClass('active')
+      this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS', this.selectedPost)
+      // } else {
+      // ('.rightSide').addClass('active')
+      //  this.$bus.$emit('SHOW_ADVANCED_SETTINGS', this.selectedPost)
+      // }
     },
     getList () {
       if ((('' + this.$route.path)).indexOf('/Pages') >= 0) {
@@ -167,5 +180,9 @@ export default {
   padding-right:50px;
   padding-bottom:5px;
   cursor: pointer;
+}
+.topBtnPad {
+  margin-right:10px;
+  margin-top:-5px;
 }
 </style>

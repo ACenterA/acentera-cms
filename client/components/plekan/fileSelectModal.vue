@@ -45,8 +45,6 @@
 <script>
 import modal from 'components/plekan/modal'
 import VueGallery from 'vue-gallery'
-// import fileUpload from 'components/plekan/fileUpload'
-// import { exec } from '../../plekan/src/helper'
 
 export default {
   props: ['multiModal', 'shown', 'close'],
@@ -108,9 +106,7 @@ export default {
     refreshImages () {
       var self = this
       if (!this.$store.state.app.isLoaded) {
-        return setTimeout(function () {
-          self.refreshData()
-        }, 1000)
+        return null
       }
 
       var iterateFolder = function (first, data, acc, cb) {

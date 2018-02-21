@@ -6,7 +6,7 @@
           <article v-if="isGitHub()"  class="tile is-parent is-5 is-vertical">
             <!-- Login tile -->
             <article class="tile is-child is-marginless is-paddingless">
-              <GitHub showGitButtons="false"></GitHub>
+              <GitHub showGitButtons=false></GitHub>
             </article>
           </article>
         </div>

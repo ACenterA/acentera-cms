@@ -103,6 +103,7 @@ export default {
     * The childOf function getting from helpers files in project.
     */
     document.addEventListener('contextmenu', (e) => {
+      console.error('context menu a')
       e.preventDefault()
     })
     document.addEventListener('mousedown', (e) => {

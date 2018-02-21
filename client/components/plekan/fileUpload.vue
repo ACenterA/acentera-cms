@@ -5,13 +5,13 @@
            @drop="drop"
            @dragover="dropAllow"
            :class="{empty : getImage ? false : true}"
-           style="cursor: pointer;""
+           style="zz:zz; cursor: pointer;""
            :style="{ backgroundImage: 'url(' + getImage + ')' }"></label>
 
      <label v-if="preventDrop"
             @click="openFileUploadModal"
             :class="{empty : getImage ? false : true}"
-            style="cursor: pointer;""
+            style="ff:ff; cursor: pointer;""
             :style="{ backgroundImage: 'url(' + getImage + ')' }"></label>
     <div class="plekan-file-information">
 
@@ -54,6 +54,7 @@ export default {
   },
   methods: {
     openFileUploadModal (e) {
+      console.error('emit here aaa')
       this.$bus.$emit('TOGGLE_FILESELECT')
       var self = this
       this.$bus.$on('TOGGLE_FILESELECT_SELECTED', function (data) {
