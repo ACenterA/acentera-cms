@@ -12,6 +12,7 @@
             <article class="message" v-bind:class="'is-primary'">
               <div class="message-header">
                 <p>{{json.Title}}</p>
+                <button v-on:click="updateTheme(json)">Update</button>
               </div>
               <div class="message-body">
                 {{json.ShortDesc}}
@@ -43,6 +44,7 @@
 
 <script>
 var TabNames = ['configuration', 'metadata', 'approle']
+import { mapGetters } from 'vuex'
 
 export default {
 
@@ -102,7 +104,9 @@ export default {
   },
 
   computed: {
-
+    ...mapGetters({
+      getBasicAuth: 'getBasicAuth'
+    })
   },
 
   filters: {
@@ -185,9 +189,79 @@ export default {
         this.$onError(error)
       })
     },
+    changeTheme (json) {
+      var self = this
+      this.$httpApi.post(window.apiUrl + '/settings', this.allSettings, {}).then((response) => {
+        if (json !== undefined) {
+          self.theme = json.Name
+        }
+      })
+      .catch((error) => {
+        this.$onError(error)
+      })
+    },
     selectTheme (json) {
-      this.allSettings.theme = json.Name
-      this.save(json)
+      var self = this
+      if (this.$store.state.app.repoState.updating >= 5) {
+        self.$notify({
+          title: 'Not logged in.',
+          message: 'You must login using your GIT account. (see left login menu)',
+          type: 'warning'
+        })
+        return
+      }
+
+      console.error('baci auth: ' + self.getBasicAuth)
+      console.error(json)
+      this.$httpApi.post(window.apiUrl + '/themes/update', { Name: json.Name, Repository: json.Repository }, {
+        headers: {
+          'Authorization': self.getBasicAuth,
+          'Token': window.vueAuth.getToken()
+        }
+      }).then((response) => {
+        self.allSettings.theme = json.Name
+        self.changeTheme(json)
+
+        self.$notify({
+          title: 'Theme updated.',
+          message: 'The operation has been successfully completed. Please validate your website before publishing your updated site.',
+          type: 'success'
+        })
+      })
+      .catch((error) => {
+        console.error('ok err')
+        console.error(error.stack)
+        this.$onError(error)
+      })
+    },
+    updateTheme (json) {
+      var self = this
+      if (this.$store.state.app.repoState.updating >= 5) {
+        self.$notify({
+          title: 'Not logged in.',
+          message: 'You must login using your GIT account. (see left login menu)',
+          type: 'warning'
+        })
+        return
+      }
+      console.error('baci auth: ' + self.getBasicAuth)
+      this.$httpApi.post(window.apiUrl + '/themes/refresh', { Name: json.Name }, {
+        headers: {
+          'Authorization': self.getBasicAuth,
+          'Token': window.vueAuth.getToken()
+        }
+      }).then((response) => {
+        self.$notify({
+          title: 'Theme updated.',
+          message: 'The operation has been successfully completed. Please validate your website before publishing your updated site.',
+          type: 'success'
+        })
+      })
+      .catch((error) => {
+        console.error('ok err')
+        console.error(error.stack)
+        this.$onError(error)
+      })
     }
   }
 
