@@ -43,19 +43,23 @@ export default {
     this.event = new CustomEvent('requestHiddenModal') // eslint-disable-line
     document.onkeydown = (e) => {
       if (e.key === 'Escape') {
+        console.error('ignore broadcast a')
         this.makeBroadcast()
       }
     }
 
     this.$el.onclick = (e) => {
       if (e.target.className.indexOf('plekan-modal') !== -1) {
+        console.error('ignore broadcast b')
         this.makeBroadcast()
       }
     }
   },
   methods: {
     makeBroadcast () {
+      console.error('broadcast c')
       if (this.multiModal) {
+        console.error('broadcast c 1')
         // if in gallery mode, and adding new image
         // we had to hide it to show the fileUpload modal
         // in front this is bad and should be changed ...
@@ -64,6 +68,7 @@ export default {
         }
         this.$bus.$emit(this.multiModal) // 'TOGGLE_FILESELECT_CLOSE')
       } else {
+        console.error('broadcast c 2')
         this.$bus.$emit(this.event.type, this.event)
         document.dispatchEvent(this.event)
       }

@@ -30,6 +30,27 @@
 
             <!-- Tokens tab -->
             <div v-if="tabName === 'configuration'" class="tile is-parent table-responsive is-vertical">
+
+                <div class="field">
+                    <p class="field">
+                      Google Analytics Code:
+                    </p>
+                    <p class="control">
+                      <input class="input" type="input"
+                      v-model="store.state.app.settings.googleanalytics">
+                    </p>
+                </div>
+
+                <div class="field">
+                    <p class="field">
+                      Enabled:
+                    </p>
+                    <p class="control">
+                      <input :disabled="selectedLangItem.locked" class="checkbox" type="checkbox"
+                      v-model="selectedLangItem.enable" @click="langToggle">
+                    </p>
+                </div>
+
                 Title:
 
                 <div class="field">
@@ -42,7 +63,7 @@
 
 
                 <p class="control">
-                  <a class="button is-success" @click="save">
+                  <a class="button is-success" @click="saveNewSettings">
                     Save
                   </a>
                 </p>
@@ -63,7 +84,9 @@
 </template>
 
 <script>
+
 // var TabNames = ['configuration', 'metadata', 'approle']
+import { mapActions } from 'vuex'
 var TabNames = ['configuration']
 
 export default {
@@ -75,9 +98,11 @@ export default {
     return {
       csrf: '',
       tabName: 'token',
+      store: this.$store,
       tableData: [],
       selectedLang: null,
       selectedLangItem: null,
+      selectedLangObject: null,
       allSettings: null,
       availableLanguages: [],
       availableLanguagesHash: {},
@@ -114,16 +139,39 @@ export default {
   },
 
   computed: {
-
   },
-
   filters: {
     capitalize: function (str) {
       return str.charAt(0).toUpperCase() + str.slice(1)
     }
   },
-
   methods: {
+    ...mapActions([
+      'saveNewSettings'
+    ]),
+    langToggle: function () {
+      var tmpNewLang = []
+      var self = this
+      var selectedLangId = this.selectedLangItem.id
+      var currDisabledLanguages = (this.$store.state.app.settings.disablelanguages || '').split(' ')
+      $.each(currDisabledLanguages, function (idx, langId) {
+        if (langId === selectedLangId) {
+            // Skip this language
+            // we do the logic outside of the loop
+        } else {
+          tmpNewLang.push(langId)
+        }
+      })
+      if (!self.selectedLangItem.enable) {
+        tmpNewLang.push(selectedLangId) // disable the language..
+      }
+      this.$store.state.app.settings.disablelanguages = tmpNewLang.join(' ')
+      if (this.$store.state.app.settings.disablelanguages.startsWith(' ')) {
+        this.$store.state.app.settings.disablelanguages = this.$store.state.app.settings.disablelanguages.substring(1)
+      }
+      console.error('NEW LANGUAGES ARE')
+      console.error(this.$store.state.app.settings.disablelanguages)
+    },
     switchTab: function (index) {
       this.tabName = TabNames[index]
       var self = this
@@ -140,12 +188,21 @@ export default {
       this.$httpApi.get(window.apiUrl + '/settings').then((response) => {
         let result = response.data
 
+        var disabledLanguagesStr = '' + result.disablelanguages || ''
+        var disabledLanguagesHash = {}
+        var disabledLanguagesArr = disabledLanguagesStr.split(' ')
+
+        for (var z = 0; z < disabledLanguagesArr.length; z++) {
+          disabledLanguagesHash[disabledLanguagesArr[z]] = true
+        }
+
         if (result.hasOwnProperty('languages')) {
           var TempAvailablelanguages = []
           var TempAvailablelanguageshash = {}
 
           let langkeys = Object.keys(result.languages)
-          self.allSettings = result
+          // self.allSettings = result
+          self.$store.state.app.settings = result
           for (var i = 0; i < langkeys.length; i++) {
             var tmpLang = result.languages[langkeys[i]]
             tmpLang.id = langkeys[i]
@@ -155,6 +212,18 @@ export default {
             if (self.selectedLang === undefined) {
               self.selectedLang = langkeys[i].languagename
             }
+
+            if (disabledLanguagesHash.hasOwnProperty(langkeys[i])) {
+              result.languages[langkeys[i]]['enable'] = false
+            } else {
+              result.languages[langkeys[i]]['enable'] = true
+            }
+
+            if (langkeys[i] === result.defaultcontentlanguage) {
+              result.languages[langkeys[i]]['enable'] = true // default language cannot be disabled...
+              result.languages[langkeys[i]]['locked'] = true // default language cannot be disabled...
+            }
+
             TempAvailablelanguages.push(tmpLang)
           }
           self.availableLanguages = TempAvailablelanguages
@@ -162,12 +231,14 @@ export default {
         }
       })
       .catch((error) => {
+        console.error(error.stack)
         this.$onError(error)
       })
     },
     loadLanguageDetails (lang) {
       if (lang !== undefined) {
         this.selectedLangItem = this.availableLanguagesHash[lang]
+        // console.error('test a ' + this.$store.state.app.languages
       }
     },
     openModalBasic (index) {
@@ -185,14 +256,6 @@ export default {
     closeDeleteModal () {
       // this.selectedIndex = -1
       // this.showDeleteModal = false
-    },
-    save () {
-      this.$httpApi.post(window.apiUrl + '/settings', this.allSettings, {}).then((response) => {
-        // TODO: Return this.$notify scucess message.. feedback.
-      })
-      .catch((error) => {
-        this.$onError(error)
-      })
     }
   }
 
@@ -214,5 +277,10 @@ export default {
 
   .fa-info {
     color: lightskyblue;
+  }
+
+  p.field {
+    float: left;
+    padding-right: 30px;
   }
 </style>

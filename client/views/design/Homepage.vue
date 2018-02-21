@@ -2,7 +2,62 @@
   <div class="app-inner-content">
     <div v-if="loaded" class="fullheight">
       <plekan></plekan>
-      <div class="rightSide">
+      <div class="rightSide" :class="{ active: showRightSideBar}">
+        <button class="button is-info float-right" @click="hideRightBar">Close</button>
+        <article class="tile is-child box scrollable">
+            <br/>
+            <br/>
+            <br/>
+            <article class="tile is-child box scrollable">
+              <div v-if="facebookSocial">
+                <label class="label">Facebook Link</label>
+                <div class="field has-addons">
+                  <p class="control is-expanded">
+                    <input class="input" type="text"
+                           placeholder="https://www.facebook.com/"
+                           v-model="facebookSocial.link"/>
+                  </p>
+                </div>
+                <label for="facebook_checkbox">Visible</label>
+                <input type="checkbox" id="facebook_checkbox" v-model="facebookSocial.enable">
+              </div>
+            </article>
+            <br/>
+            <article class="tile is-child box scrollable">
+              <div v-if="linkinSocial">
+                <label class="label">LinkedIn Link</label>
+                <div class="field has-addons">
+                  <p class="control is-expanded">
+                    <input class="input" type="text"
+                           placeholder="https://www.linkedin.com/company/acentera-inc-/"
+                           v-model="linkinSocial.link"/>
+                  </p>
+                </div>
+                <label for="linkedin_checkbox">Visible</label>
+                <input type="checkbox" id="linkedin_checkbox" v-model="linkinSocial.enable">
+              </div>
+            </article>
+            <br/>
+            <article class="tile is-child box scrollable">
+              <div v-if="twitterSocial">
+                <label class="label">Twitter Link</label>
+                <div class="field has-addons">
+                  <p class="control is-expanded">
+                    <input class="input" type="text"
+                           placeholder="https://www.twitter.com/ACenterA/"
+                           v-model="twitterSocial.link"/>
+                  </p>
+                </div>
+                <label for="twitter_checkbox">Visible</label>
+                <input type="checkbox" id="twitter_checkbox" v-model="twitterSocial.enable">
+              </div>
+            </article>
+
+            <br/>
+            <button :disabled="isSaving" class="button is-info float-right" @click="updatePage()">Update</button>
+            <br/>
+            <br/>
+        </article>
       </div>
     </div>
   </div>
@@ -38,7 +93,13 @@ export default {
       csrf: '',
       showModal: false,
       plaintext: '',
+      showRightSideBar: false,
       testTitle: '',
+      social: {
+        facebook: {
+          link: '#'
+        }
+      },
       selectedObject: null,
       type: 'Static',
       cipher: '',
@@ -56,6 +117,11 @@ export default {
     this.$bus.$on('staticHtmlSelected', function (data) {
       self.selectedObject = data
       self.showModal = true
+    })
+
+    this.$bus.$on('TOGGLE_ADVANCED_SETTINGS', function (data) {
+      // if ((self.selectedPost && !self.inPostCreate && !self.postDoesNotExists) && ((self.isPostSelected && !self.postDoesNotExists))) {
+      self.showRightSideBar = !self.showRightSideBar
     })
 
     this.$bus.$on('staticHtmlEdit', function (data) {
@@ -82,6 +148,7 @@ export default {
   destroyed: function () {
     this.$bus.$off('LANGUAGE_CHANGE_EVENT')
     this.$bus.$off('SAVE_CMD')
+    this.$bus.$off('TOGGLE_ADVANCED_SETTINGS')
   },
   computed: {
     ...mapGetters({
@@ -92,6 +159,29 @@ export default {
       repoState: 'repoState',
       loaded: 'loaded'
     }),
+    twitterSocial: function () {
+      if (this.$store.state.app.settings && this.$store.state.app.settings.params && this.$store.state.app.settings.params.social && this.$store.state.app.settings.params.social.data) {
+        return this.$store.state.app.settings.params.social.data.twitter
+      } else {
+        return null
+      }
+    },
+    linkinSocial: function () {
+      if (this.$store.state.app.settings && this.$store.state.app.settings.params && this.$store.state.app.settings.params.social && this.$store.state.app.settings.params.social.data) {
+        return this.$store.state.app.settings.params.social.data.linkedin
+      } else {
+        return null
+      }
+    },
+    facebookSocial: function () {
+      console.error('acebook social test')
+      console.error(this.$store.state.app.settings)
+      if (this.$store.state.app.settings && this.$store.state.app.settings.params && this.$store.state.app.settings.params.social && this.$store.state.app.settings.params.social.data) {
+        return this.$store.state.app.settings.params.social.data.facebook
+      } else {
+        return null
+      }
+    },
     selectedPage: function () {
       if (this.$store.state.isLoaded) {
         return ''
@@ -107,6 +197,19 @@ export default {
     ...mapActions([
       'saveNewSettings'
     ]),
+    updatePage: function (imgData) {
+      var self = this
+      this.isSaving = true
+      this.$bus.$emit('SAVE_CMD')
+      setTimeout(function () {
+        this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS') // hide sidebar ...
+        self.isSaving = false
+        self.refreshData()
+      }, 600)
+    },
+    hideRightBar: function () {
+      this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS') // _SOCIAL
+    },
     refreshWidgets () {
       var self = this
       if (!this.$store.state.app.isLoaded) {
@@ -341,6 +444,36 @@ export default {
     transition: all .3s;
     z-index: 12;
     box-shadow: 0px 3px 78px 0px rgba(0, 0, 0, 0.1);
+}
+
+.rightSide {
+    position: fixed;
+    width: 50%;
+    height: 100%;
+    background-color: #f2f2f2;
+    right: -50%;
+    padding: 10px;
+    top: 105px;
+    border-left: 1px solid #ddd;
+    transition: all .3s;
+    z-index: 12;
+    box-shadow: 0px 3px 78px 0px rgba(0, 0, 0, 0.1);
+}
+
+.rightSide.active {
+  right: 0px;
+  // z-index: 2;
+}
+
+.animated {
+    animation-duration: .377s;
+}
+
+.scrollable {
+  // overflow-y: scroll;
+}
+.float-right {
+  float: right;
 }
 
 .animated {

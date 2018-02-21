@@ -30,7 +30,7 @@
         <div class="control has-icons-right">
           <span class="select">
             <select v-model="selectedLang" @change="loadLanguageDetails(selectedLang)">
-              <option v-for="lang in availableLanguages">
+              <option v-for="lang in enabledLanguages">
                 {{lang.languagename}}
               </option>
             </select>
@@ -80,6 +80,15 @@ export default {
       selectedPost: 'selectedPost',
       loaded: 'loaded'
     }),
+    enabledLanguages () {
+      var tmpArr = []
+      $.each(this.$store.state.app.languages.languages, function (idx, lang) {
+        if (lang.enable) {
+          tmpArr.push(lang)
+        }
+      })
+      return tmpArr
+    },
     availableLanguages () {
       return this.$store.state.app.languages.languages
     },

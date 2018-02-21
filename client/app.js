@@ -1,5 +1,6 @@
 import Vue from 'vue'
 // import Turndown from 'Turndown'
+import moment from 'moment'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import VueAuthenticate from 'vue-authenticate'
@@ -20,6 +21,12 @@ import cloneDeep from 'lodash/cloneDeep'
 import GitHubAPI from './GitHubAPI'
 import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
+
+Vue.filter('formatDate', function (value) {
+  if (value) {
+    return moment(String(value)).format('YYYY/MM/DD hh:mm')
+  }
+})
 
 var app = null
 

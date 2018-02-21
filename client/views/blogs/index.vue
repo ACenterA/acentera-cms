@@ -42,11 +42,10 @@
             <button class="button is-info" @click="create('new','blogs')">Create Post</button>
           </article>
 
-          <plekan :class="{ hidden: inPostCreate || !isPostSelected || postDoesNotExists }"></plekan>
           <div class="rightSide" :class="{ active: showRightSideBar}">
             <button class="button is-info float-right" @click="hideRightBar">Close</button>
 
-            <article class="tile is-child box">
+            <article class="tile is-child box scrollable">
                 <label class="label">Title</label>
                 <div class="field has-addons">
                   <p class="control is-expanded">
@@ -55,33 +54,45 @@
                   </p>
                 </div>
                 <br/>
-                <label class="label">Post Date</label>
-                <div class="field has-addons">
+                <label class="label">Description</label>
+                <div v-if="selectedPost.frontMatter" class="field has-addons">
                   <p class="control is-expanded">
                     <input class="input" type="text"
-                           v-model="selectedPost.pubDate"/>
+                           v-model="selectedPost.frontMatter.description"/>
+                  </p>
+                </div>
+                <br/>
+
+                <label class="label">Post Date</label>
+                <div v-if="selectedPost.frontMatter" class="field has-addons">
+                  <p class="control is-expanded">
+                    <input class="input" type="text"
+                           v-model="selectedPost.pubDate" />
                   </p>
                 </div>
 
                 <br/>
                 <label class="label">Cover Image</label>
-                <div class="field has-addons">
-                  <p class="control is-expanded">
-
-                  <file-upload :clean="shown"
+                  <file-upload :clean="true"
                             types="png|jpg|jpeg|gif"
                             :preventDrop="true"
                             :origimage="currentImage"
-                            :elementItem="e"
-                            :fileChange="fileChange">
+                            :elementItem="tmpItem"
+                            :fileChange="fileChange"
+                            >
                   </file-upload>
-                  </p>
-                </div>
-
                 <br/>
-
+                <!-- <button :disabled="isSaving" class="button is-warning float-let" @click="deletePost()">Delete Post</button> -->
+                <button :disabled="isSaving" class="button is-danger float-let" @click="deleteAllLangPost()">Delete Post (All Languages)</button>
+                <button :disabled="isSaving" class="button is-info float-right" @click="updatePage()">Update</button>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
             </article>
           </div>
+
+          <plekan :class="{ hidden: inPostCreate || !isPostSelected || postDoesNotExists }"></plekan>
       </div>
     </div>
 
@@ -91,10 +102,12 @@
 
 <script>
 import Tooltip from 'vue-bulma-tooltip'
+// import moment from 'moment'
 import TreeView from 'components/TreeView'
 import { Sidebarblogs } from 'components/layout/'
 import { mapGetters, mapActions } from 'vuex'
 import plekan from 'components/plekan/plekan.vue'
+import fileUpload from 'components/plekan/fileUpload'
 // import Modal from './modals/InfoModalWidget'
 // import Vue from 'vue'
 
@@ -108,14 +121,17 @@ export default {
     TreeView,
     // Modal,
     Sidebarblogs,
-    plekan
+    plekan,
+    fileUpload
   },
 
   data () {
     return {
       csrf: '',
+      isSaving: false,
       showModal: false,
       plaintext: '',
+      tmpItem: {},
       newTitle: null,
       fileName: null,
       selectedObject: null,
@@ -163,35 +179,52 @@ export default {
     })
 
     this.$bus.$on('SAVE_CMD', function (data) {
+      console.error('RECEIVED SAVE CMD A')
       const d = document.getElementsByTagName('iframe')[0].contentWindow.document
       // TODO: use somehting else than contenteditable ? ie: editor-content ?
-      if ($(d).find('[contenteditable=true]').length <= 1) {
+      console.error($(d).find('[contenteditable=true]'))
+      if ($(d).find('[contenteditable=true]').length !== 1) {
+        console.error('RECEIVED SAVE CMD B1')
         return
       }
-      var markDownValue = window.vm.turndownService.turndown($(d).find('[contenteditable=true]')[2].innerHTML)
+      var markDownValue = window.vm.turndownService.turndown($(d).find('[contenteditable=true]')[0].innerHTML)
       if (!(window.vm.$store.state.app.selectedItem && window.vm.$store.state.app.selectedItem.item)) {
+        console.error('RECEIVED SAVE CMD B2')
         return
       }
       var item = window.vm.$store.state.app.selectedItem.item
       var tmpLink = item.link
       if (item.link.startsWith('//') || item.link.startsWith('http://') || item.link.startsWith('https://')) {
-        tmpLink = item.link.substring(item.link.indexOf('/', 5))
+        console.error(item)
+        console.error('ITM MM LINK WAAAS ' + item.link)
+        tmpLink = item.link.substring(item.link.indexOf('/', 8))
+        console.error('ITM MM LINK NOW ' + item.link)
       }
       if (tmpLink.endsWith('/')) {
         tmpLink = tmpLink.substring(0, tmpLink.lastIndexOf('/'))
       }
-
       var selectedLangItem = self.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
       markDownValue = markDownValue.replace('<br>', '\\n').replace('<br/>', '\\n')
+      console.error('ITEM IS')
+      console.error(item)
       var updateData = {
         type: 'blogs',
         id: tmpLink,
         title: item.title,
+        frontMatter: JSON.parse(JSON.stringify(item.frontMatter)),
         draft: (item.draft === 'true'),
+        delete: (item.delete === 'true'),
         date: item.pubDate,
         lang: selectedLangItem.id,
         content: markDownValue
       }
+      delete updateData.frontMatter.title
+      delete updateData.frontMatter.draft
+      delete updateData.frontMatter.date
+      delete updateData.frontMatter.pubDate
+
+      // TODO: modiy the httpAction to be a .delete instead of a .put if (updateData.delete)
+      // better REST API
 
       var httpApiAction = self.$httpApi.put
       httpApiAction(window.apiUrl + '/content/update', updateData, {
@@ -245,8 +278,8 @@ export default {
       selectedPost: 'selectedPost'
     }),
     currentImage () {
-      if (this.selectedPost && this.selectedPost.image) {
-        return window.goHostUrl + '/' + this.selectedPost.image
+      if (this.selectedPost && this.selectedPost.frontMatter && this.selectedPost.frontMatter.image) {
+        return window.goHostUrl + '/' + this.selectedPost.frontMatter.image
       }
       return null
     },
@@ -315,6 +348,36 @@ export default {
     ...mapActions([
       'selectPost'
     ]),
+    deletePost: function () {
+
+    },
+    deleteAllLangPost: function () {
+      var self = this
+      this.isSaving = true
+      this.selectedPost.delete = 'true'
+      this.$bus.$emit('SAVE_CMD')
+      setTimeout(function () {
+        this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS') // hide sidebar ...
+        self.isSaving = false
+        self.$store.state.app.selectedItem = null
+        self.refreshData()
+      }, 600)
+    },
+    updatePage: function (imgData) {
+      var self = this
+      this.isSaving = true
+      this.$bus.$emit('SAVE_CMD')
+      setTimeout(function () {
+        self.$bus.$emit('TOGGLE_ADVANCED_SETTINGS') // hide sidebar ...
+        self.isSaving = false
+      }, 600)
+    },
+    fileChange: function (imgData) {
+      console.error('FILE SELECTED OF')
+      console.error(this.selectedPost)
+      console.error(this.selectedPost.frontMatter)
+      this.selectedPost.frontMatter['image'] = imgData.data.RelPath
+    },
     hideRightBar: function () {
       this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
     },
@@ -345,7 +408,7 @@ export default {
         var item = window.vm.$store.state.app.selectedItem.item
         var tmpLink = item.link
         if (item.link.startsWith('//') || item.link.startsWith('http://') || item.link.startsWith('https://')) {
-          tmpLink = item.link.substring(item.link.indexOf('/', 5))
+          tmpLink = item.link.substring(item.link.indexOf('/', 8))
         }
         if (tmpLink.endsWith('/')) {
           tmpLink = tmpLink.substring(0, tmpLink.lastIndexOf('/'))
@@ -393,11 +456,6 @@ export default {
           newPost['link'] = postData.id
         }
 
-        if (action === 'new') {
-          // only add the post to the sidebar object if new post not new language
-          self.$store.state.app.sidebarblogData.json.unshift(newPost)
-        }
-
         // Select the post for editing..
         // Lets give 500 milliseconds...
         return setTimeout(function () {
@@ -407,7 +465,45 @@ export default {
             message: 'Creation successful',
             type: 'success'
           })
-          self.selectPost({ vue: this, item: newPost, retry: 5 })
+
+          if (action === 'new') {
+            // only add the post to the sidebar object if new post not new language
+            // refresh latest data..
+            var tmpLink = newPost.link
+            if (tmpLink.startsWith('/blogs/')) {
+              tmpLink = tmpLink.substring(7)
+            }
+            self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: tmpLink, lang: newPost.lang }, { }).then((res) => {
+              console.error('success 1 s')
+              var curItem = {}
+              curItem['link'] = window.goHostUrl + newPost.link
+              curItem['guid'] = window.goHostUrl + newPost.link
+              // curItem['id'] = window.goHostUrl + tmpLink
+              // newPost.link
+              // window.goHostUrl
+              curItem['frontMatter'] = {}
+              for (var p in res.data) {
+                if (res.data.hasOwnProperty(p)) {
+                  if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
+                    curItem[p] = res.data[p]
+                  } else {
+                    curItem['frontMatter'][p] = res.data[p]
+                  }
+                }
+              }
+              console.error('updated item')
+              console.error(curItem)
+              curItem['pubDate'] = curItem['pubDate'] || curItem['date'] // pubDate required for sidebar...
+              self.$store.state.app.sidebarblogData.json.unshift(curItem)
+              self.selectPost({ vue: self, item: curItem, retry: 5 })
+            })
+            .catch((error) => {
+              console.error(error.stack)
+              self.$onError(error)
+            })
+          } else {
+            self.selectPost({ vue: this, item: newPost, retry: 5 })
+          }
         }, 500)
 
         // Returned statement in setTimeout
@@ -418,6 +514,7 @@ export default {
       })
     },
     refreshData () {
+      console.error(' rfreshd ata test ')
       var self = this
       if (!this.$store.state.app.isLoaded) {
         return setTimeout(function () {
@@ -562,11 +659,15 @@ export default {
 
   .rightSide.active {
     right: 0px;
-    z-index:333;
+    // z-index: 2;
   }
 
   .animated {
       animation-duration: .377s;
+  }
+
+  .scrollable {
+    // overflow-y: scroll;
   }
 
   .hideme {

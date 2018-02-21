@@ -361,8 +361,11 @@ export default {
       } else {
         this.multiModal = null
       }
-      console.error('tt : ' + this.showFileSelectModal)
-      console.error('tt 1: ' + !this.showFileSelectModal)
+
+      if (!this.showFileSelectModal) { // will be shown on next line...
+        // trigger force image Refresh...
+        this.$bus.$emit('REFRESH_IMAGES')
+      }
       this.showFileSelectModal = !this.showFileSelectModal
     },
     /**
@@ -372,6 +375,9 @@ export default {
      */
     openEditElement () {
       if ($(this.editableModalElement).attr('parameditable') === 'sidebar') {
+        this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
+      } else if ($(this.editableModalElement).attr('parameditable') === 'sidebar-social') {
+        // this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS_SOCIAL')
         this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
       } else {
         this.editableModal = true

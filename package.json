@@ -45,6 +45,7 @@
     "highlight.js": "^9.12.0",
     "jquery": "latest",
     "mdi": "^1.8.36",
+    "moment": "^2.20.1",
     "octokat": "^0.9.0",
     "polyfill": "^0.1.0",
     "popper.js": "latest",

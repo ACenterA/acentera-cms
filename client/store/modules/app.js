@@ -392,8 +392,16 @@ const mutations = {
         // self.allSettings = result
 
         var selectedLang = window.localStorage.getItem('languageSelected')
+        var selectedLangObj = null
         var setDefaultLang = null
         var firstlang = null
+        var disabledLanguagesStr = '' + self.$store.state.app.settings.disablelanguages || ''
+        var disabledLanguagesHash = {}
+        var disabledLanguagesArr = disabledLanguagesStr.split(' ')
+
+        for (var z = 0; z < disabledLanguagesArr.length; z++) {
+          disabledLanguagesHash[disabledLanguagesArr[z]] = true
+        }
         for (var i = 0; i < langkeys.length; i++) {
           var tmpLang = result.languages[langkeys[i]]
           if (tmpLang) {
@@ -407,14 +415,24 @@ const mutations = {
             if (firstlang === null) {
               firstlang = result.languages[langkeys[i]].languagename
             }
+
+            if (disabledLanguagesHash.hasOwnProperty(langkeys[i])) {
+              result.languages[langkeys[i]]['enable'] = false
+            } else {
+              result.languages[langkeys[i]]['enable'] = true
+            }
+
             if (langkeys[i] === result.defaultcontentlanguage) { // result.languages[langkeys[i]].languagename === 'English') {
               setDefaultLang = result.languages[langkeys[i]].languagename
+              result.languages[langkeys[i]]['enable'] = true // default language cannot be disabled...
+              result.languages[langkeys[i]]['locked'] = true // default language cannot be disabled...
             }
 
             // In case we changed to french language and refresh browser
             // we take the last localStorage language selected
             if (selectedLang === result.languages[langkeys[i]].languagename) {
               selectedLang = result.languages[langkeys[i]].languagename
+              selectedLangObj = result.languages[langkeys[i]].languagename
             }
             TempAvailablelanguages.push(tmpLang)
           }
@@ -422,7 +440,14 @@ const mutations = {
         if (!setDefaultLang) {
           setDefaultLang = firstlang
         }
-
+        console.error('sellected lang test')
+        if (!(selectedLang && selectedLangObj)) {
+          selectedLang = null
+        } else {
+          if (!selectedLangObj.enable) { // this language is not enabled anymore..
+            selectedLang = null
+          }
+        }
         if (!selectedLang) {
           selectedLang = setDefaultLang
         }

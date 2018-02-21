@@ -16,10 +16,10 @@
             // ie: english in draft, but french not in draft
             <div v-if="item.draft" class="draft">draft</div>
           -->
-          <span @click="clickSelectPost({ vue: this, item: item })">
+          <span v-if="!item.delete" @click="clickSelectPost({ vue: this, item: item })">
             <div class="postTitle">{{item.title}}</div>
             <br/>
-            {{item.pubDate}}
+            {{item.pubDate | formatDate}}
           </span>
         </li>
       </ul>
@@ -48,6 +48,9 @@ export default {
       isReady: false
     }
   },
+  // destroyed () {
+  //  this.$bus.$off('REFRESH_LEFTMENU')
+  // },
   mounted () {
     let route = this.$route
     if (route.name) {
@@ -82,6 +85,7 @@ export default {
         langCode = '' // no prefix, this is the default site...
       }
 
+      var type = 'blogs'
       if (link.indexOf('localhost:') >= 0 && link.indexOf('localhost:') <= 8) {
         link = link.replace('localhost:1313/', '')
       } else {
@@ -90,19 +94,36 @@ export default {
       while (link.startsWith('//')) {
         link = link.substring(1)
       }
+      if (link.startsWith('/' + type + '/')) {
+        link = link.substring(('/' + type + '/').length)
+      }
+      while (link.endsWith('/')) {
+        link = link.substring(0, link.length - 1)
+      }
       console.error('curr link final language ' + langCode)
       console.error(link)
       var self = this
-      self.$httpApi.post(window.apiUrl + '/frontmatter', { id: link, lang: langCode }, { }).then((res) => {
-        console.error('successs')
-        console.error(res)
+
+      self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: link, lang: langCode }, { }).then((res) => {
+        console.error('success 1 s')
+        console.error(res.data)
+        console.error(itm.item)
+        itm.item['frontMatter'] = {}
+        for (var p in res.data) {
+          if (res.data.hasOwnProperty(p)) {
+            if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
+              itm.item[p] = res.data[p]
+            } else {
+              itm.item['frontMatter'][p] = res.data[p]
+            }
+          }
+        }
+        console.error('updated item')
+        console.error(itm.item)
         self.selectPost(itm)
       })
       .catch((error) => {
-        // self.$onError(error)
-        console.error('GOT ERROR')
-        console.error(error)
-        self.selectPost(itm)
+        self.$onError(error)
       })
     },
     createNewPost: function () {
@@ -192,7 +213,7 @@ export default {
   float: left;
   max-height: 100%;
   height: calc(100% - 50px);
-  z-index: 1024 - 1;
+  // z-index: 1024 - 1;
   background: #FFF;
   box-shadow: 0 2px 3px rgba(17, 17, 17, 0.1), 0 0 0 1px rgba(17, 17, 17, 0.1);
   overflow-y: auto;

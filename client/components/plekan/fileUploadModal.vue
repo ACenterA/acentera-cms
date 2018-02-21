@@ -112,7 +112,19 @@ export default {
       }
     },
     cancelNewImage () {
-      this.$bus.$emit(this.multiModal)
+      if (this.multiModal) {
+        // if in gallery mode, and adding new image
+        // we had to hide it to show the fileUpload modal
+        // in front this is bad and should be changed ...
+        if (this.multiModal === 'TOGGLE_FILEUPLOAD_CLOSE') {
+          this.$bus.$emit('TOGGLE_FILESELECT_RESTORE')
+        }
+        this.$bus.$emit(this.multiModal) // 'TOGGLE_FILESELECT_CLOSE')
+      } else {
+        console.error('broadcast c 2')
+        this.$bus.$emit(this.event.type, this.event)
+        // document.dispatchEvent(this.event)
+      }
     },
     /**
     * Upload button'nuna tıklandığında bu method çağrılır.

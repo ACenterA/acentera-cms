@@ -67,6 +67,14 @@ export default {
   },
   mounted () {
     // call the computed resource?
+
+    var self = this
+    this.$bus.$on('REFRESH_IMAGES', function (data) {
+      var refImages = self.refreshImages
+      if (refImages !== null) {
+        // ???
+      }
+    })
     var refImages = this.refreshImages
     if (refImages !== null) {
     }
@@ -95,6 +103,7 @@ export default {
   destroyed () {
     this.$bus.$off('TOGGLE_FILESELECT_RESTORE')
     this.$bus.$off('SELECT_NEW_IMAGE')
+    this.$bus.$off('REFRESH_IMAGES')
   },
   computed: {
     noImages () {
@@ -104,6 +113,7 @@ export default {
       return window.goHostUrl
     },
     refreshImages () {
+      console.error('refreshing images ??? a1')
       var self = this
       if (!this.$store.state.app.isLoaded) {
         return null
@@ -126,7 +136,7 @@ export default {
         }
         return acc
       }
-
+      console.error('refreshing images AA ?? using ' + window.apiUrl + '/imagelist')
       this.$httpApi.get(window.apiUrl + '/imagelist').then((response) => {
         this.$data.chart = response.data
         var StaticImages = response.data.StaticImages
@@ -286,7 +296,10 @@ export default {
         }
       } else {
         if (!(clonedImg.Path.startsWith(this.basePath))) {
+          clonedImg.RelPath = '/img/' + clonedImg.Path // must be before .Path
           clonedImg.Path = this.basePath + '/img/' + clonedImg.Path
+        } else {
+          clonedImg.RelPath = clonedImg.Path
         }
       }
       this.$bus.$emit('TOGGLE_FILESELECT_SELECTED', clonedImg)
