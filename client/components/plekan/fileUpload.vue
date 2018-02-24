@@ -1,6 +1,5 @@
 <template>
   <div class="file-upload-area">
-
     <label v-if="!preventDrop" for="upload"
            @drop="drop"
            @dragover="dropAllow"

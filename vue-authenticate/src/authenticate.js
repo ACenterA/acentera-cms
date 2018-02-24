@@ -133,10 +133,11 @@ export default class VueAuthenticate {
       }
       if (!window.vueAuthLastExecute) {
         window.vueAuthLastExecute = new Date() / 1000
+        var self = this
         return providerInstance.refresh({ clientId: providerConfig.clientId, grant_type: 'refresh_token', refresh_token: refresh_token}).then(function (response) {
-            this.setToken(response)
-            if (this.isAuthenticated()) {
-              this.storage.setItem(this.tokenName + '_provider', provider)
+            self.setToken(response)
+            if (self.isAuthenticated()) {
+              self.storage.setItem(self.tokenName + '_provider', provider)
               return resolve(response)
             } else {
               return reject(new Error('Authentication failed'))
@@ -175,7 +176,6 @@ export default class VueAuthenticate {
     if (response.refresh_token) {
       this.storage.setItem(this.tokenName + '_refresh_token', response.refresh_token)
     }
-
     if (!token && response) {
       token = response[this.options.tokenName]
     }

@@ -47,7 +47,7 @@ export default {
           // Uh oh no data... found for the requested page...
 
           // Are we trying to create a new post ? it may have some delay..
-          if (self.$store.state.app.selectedItem !== undefined && self.$store.state.app.selectedItem.retry) {
+          if (self.$store.state.app.selectedItem !== undefined && self.$store.state.app.selectedItem && self.$store.state.app.selectedItem.retry) {
             if (self.$store.state.app.selectedItem.retry >= 0) {
               self.$store.state.app.selectedItem.retry--
               return setTimeout(function () {

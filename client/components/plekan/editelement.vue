@@ -163,19 +163,51 @@ export default {
         }
         itemInfo['$el'] = $(self.element)
         itemInfo['value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
-        itemInfo['orig_value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
-        if (itemInfo['type'] === 'Image') {
-          itemInfo['currentImage'] = window.goHostUrl + '/' + itemInfo['value']
-        }
-        console.error('PUSH OF')
-        console.error(itemInfo)
-        if (typeof itemInfo['value'] === 'undefined') {
-          if (item.startsWith('i18n.')) {
-            itemInfo['value'] = itemInfo['$el'].text()
-            itemInfo['orig_value'] = itemInfo['$el'].text()
+        console.error((typeof itemInfo['value']))
+        if (typeof itemInfo['value'] === 'object') {
+          // we received an object meaning its an array ie: social buttons ???
+          // well we changed this logic here.. hehe
+          var itmToAdd = itemInfo['value']
+          $.each(itmToAdd, function (idx, data) {
+            console.error('each a')
+            console.error(idx)
+            console.error(data)
+            var itemInfoEnable = {
+              parameter: itemArr[0] + '[' + idx + ']' + 'enable'
+            }
+            itemInfoEnable['label'] = data.name + ' display '
+            itemInfoEnable['$el'] = $(self.element)
+            itemInfoEnable['value'] = data.enable
+            itemInfoEnable['orig_value'] = false
+            if (data.enable) {
+              itemInfo['orig_value'] = true
+            }
+            mapArrObj.push(itemInfoEnable)
+
+            itemInfoEnable = {
+              parameter: itemArr[0] + '[' + idx + ']' + 'link'
+            }
+            itemInfoEnable['$el'] = $(self.element)
+            itemInfoEnable['value'] = data.link
+            itemInfoEnable['label'] = data.name + ' link '
+            itemInfoEnable['orig_value'] = '' + data.link
+            mapArrObj.push(itemInfoEnable)
+          })
+        } else {
+          itemInfo['orig_value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
+          if (itemInfo['type'] === 'Image') {
+            itemInfo['currentImage'] = window.goHostUrl + '/' + itemInfo['value']
           }
+          console.error('PUSH OF')
+          console.error(itemInfo)
+          if (typeof itemInfo['value'] === 'undefined') {
+            if (item.startsWith('i18n.')) {
+              itemInfo['value'] = itemInfo['$el'].text()
+              itemInfo['orig_value'] = itemInfo['$el'].text()
+            }
+          }
+          mapArrObj.push(itemInfo)
         }
-        mapArrObj.push(itemInfo)
       })
       return mapArrObj
     }
