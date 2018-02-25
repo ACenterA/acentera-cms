@@ -150,20 +150,28 @@ const isLoggedIn = state => {
 }
 
 const selectedWebsite = (state) => {
+  console.error('selected webiste 01')
   if (state.app.project && state.app.project.websites) {
+    console.error('selected webiste 02')
     if ((state.app.websiteId === 'null' || !state.app.websiteId)) {
       return null
     }
+    console.error('selected webiste 03')
     if (state.session && window.localStorage.getItem('session') === null) {
       return null
     }
-
+    console.error('selected webiste 04')
+    console.error(state.app.project)
+    console.error(state.app.websiteId)
     return state.app.project.websites[state.app.websiteId]
   }
+  console.error('selected webiste 05')
   // return websiteId if any
   if (state.app.websiteId) {
+    console.error('selected webiste 06')
     return state.app.websiteId
   }
+  console.error('selected webiste 07')
   return null
 }
 

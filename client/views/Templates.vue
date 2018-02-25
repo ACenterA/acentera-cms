@@ -320,8 +320,12 @@ export default {
             self.refreshUser()
           } catch (f) {
           }
-          window.vm.$store.commit('SELECT_WEBSITE', initSite)
           setTimeout(function () {
+            // do not update state.app.websiteInCreationMode ... the emit changePage will reset this to false ..
+            self.$store.commit('setProjectIdForCreation', response.data.projectId)
+            self.$store.commit('setWebsiteIdForCreation', response.data.websiteId)
+            window.vm.$store.commit('SELECT_WEBSITE', initSite)
+
             self.$store.state.app.websiteInCreationMode = false
             self.$router.push({ 'path': '/' }) // sites/' + websiteId + '/edit' }) // this route is bad.. it should be going to /
           }, 1000)

@@ -340,9 +340,6 @@ export default {
           headers: h
         }).then((response) => {
           if (!(response.data.type.startsWith('error'))) {
-            // do not update state.app.websiteInCreationMode ... the emit changePage will reset this to false ..
-            self.$store.commit('setProjectIdForCreation', response.data.projectId)
-            self.$store.commit('setWebsiteIdForCreation', response.data.websiteId)
             self.processing = false
             self.$emit('changePage', response.data)
           } else {
