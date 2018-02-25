@@ -21,7 +21,7 @@
   </modal>
 </template>
 
-<style>
+<style scoped>
 .content {
    min-height: 350px;
 }

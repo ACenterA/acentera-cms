@@ -133,6 +133,7 @@ export const refreshUser = ({ commit }, obj) => {
                 headers: h
               }
             ).then((projectDefinitionResponse) => {
+              console.error('SET PROJECT A')
               state.app.project = projectDefinitionResponse.data
               if (state.app.project && state.app.project.websites) {
                 var websiteLen = Object.keys(state.app.project.websites).length
@@ -181,7 +182,8 @@ export const refreshUser = ({ commit }, obj) => {
                   state.app.sidebarglobal.opened = true
                   state.app.sidebarglobal.hidden = false
 
-                  state.app.sidebar.opened = false
+                  console.error('sidebar openend here KK')
+                  state.app.sidebar.opened = true
                   state.app.sidebar.hidden = true
                 } else {
                   state.app.sidebarglobal.opened = false

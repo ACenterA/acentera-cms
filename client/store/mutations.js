@@ -13,6 +13,9 @@ export const clearSession = (state, origState) => {
     for (var key in newState) {
       state.app[key] = newState[key]
     }
+
+    state.app.website = true // force restore of website mode
+
     window.localStorage.removeItem('session')
     state.projectSelected = null
     state.session = null
@@ -27,7 +30,7 @@ export const clearSession = (state, origState) => {
     state.app.sidebarglobal.hidden = true
     state.app.sidebarglobal.opened = false
 
-    window.location.href = '/'
+    window.location.href = '/?expired=' + new Date()
   }
   // Send logout of social account ...
   state.app.github = {} // reset ...

@@ -64,6 +64,8 @@ const github = state => {
 }
 
 const websiteAndNotLoggedIn = state => {
+  console.error('website and not logged in test?')
+  console.error(state)
   return state.app.website && !state.session
 }
 

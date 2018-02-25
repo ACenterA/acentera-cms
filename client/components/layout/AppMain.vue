@@ -15,6 +15,16 @@
                   <div class="error-message" v-text="registerError"></div>
                   <input type="email" name="email" placeholder="Email" v-model="email" v-on:keyup="submit('register', $event)">
                   <input type="password" name="password" placeholder="Password" v-model="registerPassword" v-on:keyup="submit('register', $event)">
+
+                  <vue-recaptcha
+                   style="margin:auto; margin-bottom:10px; float:left;width:304px;"
+                   ref="recaptcha"
+                   @verify="onVerify"
+                   @expired="onExpired"
+                   :sitekey="sitekey">
+                  </vue-recaptcha>
+                  <button style="float: left; min-height:75px; max-width:100px;" class="button rightfloat is-warning" @click="resetRecaptcha"> Reset </button>
+
                   <input type="submit" v-on:click="submit('register')" v-model="registerSubmit" id="registerSubmit">
                   <div class="links"> <a href="" v-on:click="flip('login', $event)">Already have an account?</a>
                   </div>
@@ -61,6 +71,7 @@
 import Levelbar from './Levelbar'
 import Topbar from './Topbar'
 import { mapGetters, mapActions } from 'vuex'
+import VueRecaptcha from 'vue-recaptcha'
 
 var modalSubmitRegister = 'Register'
 var modalSubmitPassword = 'Reset Password'
@@ -69,7 +80,8 @@ var modalSubmitLogin = 'Login'
 export default {
   components: {
     Levelbar,
-    Topbar
+    Topbar,
+    VueRecaptcha
   },
   data () {
     return {
@@ -79,10 +91,12 @@ export default {
       passwordSubmit: modalSubmitPassword,
       loginSubmit: modalSubmitLogin,
       // Modal text fields
+      sitekey: '6LeXX0gUAAAAAEaJvYpRmJnpeYKxLUaqSnylMuFx',
       registerName: '',
       registerEmail: '',
       registerPassword: '',
       email: '',
+      captchaVerify: '',
       loginUser: '',
       loginPassword: '',
       // Modal error messages
@@ -112,6 +126,16 @@ export default {
       'selectWebsite',
       'refreshUser'
     ]),
+    onVerify: function (response) {
+      this.captchaVerify = response
+    },
+    onExpired: function () {
+      console.log('Expired')
+    },
+    resetRecaptcha () {
+      console.error(this)
+      this.$refs.recaptcha.reset() // Direct call reset method
+    },
     close: function (e) {
       e.preventDefault()
       if (e.target === this.$el) {
@@ -164,7 +188,39 @@ export default {
         switch (which) {
           case 'register':
             data.email = this.email
+            data.verify = '' + this.captchaVerify
+
+            /* eslint-disable */
+            var re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+            if (!re.test(data.email)) {
+              $('#' + which + 'Submit').removeClass('disabled')
+              return this.$notify({
+                  title: 'Invalid Parameter',
+                  message: 'You must use a valid e-mail address.',
+                  type: 'warning'
+              })
+            }
+
             data.password = this.registerPassword
+            if (!data.password || (data.password+ '').length <= 5) {
+              $('#' + which + 'Submit').removeClass('disabled')
+              return this.$notify({
+                  title: 'Invalid Parameter',
+                  message: 'Password require at least 6 characters, numbers and at least one special character.',
+                  type: 'warning'
+              })
+            }
+
+            if (data.verify.length <= 10) {
+              $('#' + which + 'Submit').removeClass('disabled')
+              return this.$notify({
+                  title: 'Invalid Parameter',
+                  message: 'ReCaptcha must be validated first..',
+                  type: 'warning'
+              })
+            }
+            /* eslint-enable */
+
             this.registerSubmit = 'Registering account...' // modalSubmitRegister
 
             var regAuth = this.$Base64.encode(data.user + ':' + data.password)
@@ -176,11 +232,11 @@ export default {
               headers: regH
             })
             .then((response) => {
-              this.$notify({
-                title: 'Account created.',
-                message: 'We are loading your account informations.',
-                type: 'success'
-              })
+              console.error('recived message of ')
+              console.error(response)
+              if (!response || (response.data && response.data.status && response.data.status >= 400)) {
+                throw new Error(response)
+              }
 
               // construct session data
               var jsonTokenData = this.parseJwt(response.data.token)
@@ -205,6 +261,11 @@ export default {
               // TODO: this is duplicated code with /login this is bad
               window.localStorage.setItem('session', JSON.stringify(session))
               this.$store.commit('setSession', session)
+              this.$notify({
+                title: 'Account created.',
+                message: 'We are loading your account informations.',
+                type: 'success'
+              })
 
               var self = this
               this.refreshUser({ vue: this,
@@ -225,6 +286,8 @@ export default {
               })
             })
             .catch((error) => {
+              console.error(error)
+              // console.error(error.stack)
               this.loginSubmit = modalSubmitLogin
               $('#' + which + 'Submit').removeClass('disabled')
 
@@ -232,11 +295,16 @@ export default {
               if (error.response && error.response.data) {
                 msg = error.response.data.errorMessage
               }
+              if (msg === '') {
+                msg = 'An error has occured. Please reload your browser'
+              }
+
               this.$notify({
                 title: 'Account creation failed.',
                 message: msg,
                 type: 'danger'
               })
+              this.$refs.recaptcha.reset() // Direct call reset method
             })
 
             break

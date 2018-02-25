@@ -66,6 +66,7 @@
     "vue-fontawesome": "latest",
     "vue-gallery": "^1.2.5",
     "vue-nprogress": "0.1.5",
+    "vue-recaptcha": "^1.1.0",
     "vue-router": "^2.3.0",
     "vuex": "^2.2.1",
     "vuex-router-sync": "^4.1.2",

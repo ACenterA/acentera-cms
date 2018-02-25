@@ -245,7 +245,17 @@ const mutations = {
     item.type = 'ready'
     tmp['websites'][item.websiteId] = item
 
-    state.project = tmp
+    if (state.project === null || (state.project && state.project.projectId !== item.projectId)) {
+      // In the event of no project & no website we simpply assign the project
+      state.project = tmp
+    } else {
+      // In the event of an existing project... project & no website we simpply assign the project
+      if (!state.project['websites']) {
+        state.project = tmp
+      } else {
+        state.project['websites'][item.websiteId] = item
+      }
+    }
   },
   [types.SELECT_WEBSITE] (state, item) {
     if (item == null) {

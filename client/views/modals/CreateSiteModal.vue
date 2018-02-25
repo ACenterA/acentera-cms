@@ -302,6 +302,7 @@ export default {
           'auth': $gitobj.getBasicAuth(),
           'token': window.vueAuth.getToken(),
           'http_repository': httpUrl,
+          'refresh': window.vueAuth.getRefreshToken(),
           'branch': 'master',
           'title': self.websiteTitle,
           'repodetails': repoDetail,

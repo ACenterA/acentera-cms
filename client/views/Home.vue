@@ -5,7 +5,7 @@
     </div>
 
     <div v-if="isLoaded">
-        <div v-if="isWebsite()">
+        <div v-if="isWebsite">
           <!-- For Each Websites -->
           <div v-if="project && project.websites">
               <div v-if="selectedWebsite">
@@ -216,6 +216,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      isWebsite: 'isWebsite',
       selectedWebsite: 'selectedWebsite',
       selectedProject: 'selectedProject'
     }),
@@ -251,9 +252,6 @@ export default {
       'toggleRepoUrl',
       'selectWebsite',
       'refreshUser'
-    ]),
-    ...mapGetters([
-      'isWebsite'
     ]),
     isRepoUpdating () {
       return (this.repoState.updating === 1)

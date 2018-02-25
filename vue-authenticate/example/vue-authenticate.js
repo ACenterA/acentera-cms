@@ -1334,6 +1334,24 @@ VueAuthenticate.prototype.getToken = function getToken () {
   return this.storage.getItem(this.tokenName)
 };
 
+VueAuthenticate.prototype.getRefreshToken = function getRefreshToken () {
+
+  var provider = this.storage.getItem(this.tokenName + '_provider');
+  var refresh_token = this.storage.getItem(this.tokenName + '_refresh_token');
+  if (('' + provider) === 'undefined' || ('' + provider) === 'null' || provider === undefined || provider === null) {
+    var tmptokenName = this.tokenName.replace('vueauth_token','  vueauth_access_token');
+    provider = this.storage.getItem(tmptokenName + '_provider');
+    provider = window.localStorage.getItem('vue-authenticate.vueauth_access_token_provider'); // TODO: Fix this
+  }
+  if (('' + refresh_token) === 'undefined' || ('' + refresh_token) === 'null' || refresh_token === undefined || refresh_token === null) {
+    var tmptokenName = this.tokenName.replace('vueauth_token','  vueauth_access_token');
+    refresh_token = this.storage.getItem(tmptokenName + '_provider');
+    refresh_token = window.localStorage.getItem('vue-authenticate.vueauth_access_token_refresh_token');// TODO: Fix this
+  }
+
+  return refresh_token
+};
+
 VueAuthenticate.prototype.isExpiring = function isExpiring () {
   var currentDate = new Date() / 1000;
   try {
