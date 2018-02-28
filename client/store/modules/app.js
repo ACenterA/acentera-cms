@@ -190,11 +190,12 @@ const mutations = {
     var origState = state.repoState
     origState.updating = update
 
-    if (!state.website) { // <== ?? required ?
-      /*
+    if (!state.website) {
+      // <== ?? required ?
       if (update === 6) {
         origState.sshKeyMissing = true
-      } else {
+      }
+      /* } else {
         // ??
         origState.sshKeyMissing = false
       }

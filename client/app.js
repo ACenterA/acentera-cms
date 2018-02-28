@@ -1,5 +1,4 @@
 import Vue from 'vue'
-// import Turndown from 'Turndown'
 import moment from 'moment'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
@@ -39,17 +38,6 @@ window.goHostUrl = window.goHostUrl || 'http://localhost:8081'
 
 window.websiteapiUrl = window.goHostUrl || 'http://localhost:8081'
 
-/*
-// addEventListener support for IE8
-function bindEvent(element, eventName, eventHandler) {
-    if (element.addEventListener) {
-        element.addEventListener(eventName, eventHandler, false);
-    } else if (element.attachEvent) {
-        element.attachEvent('on' + eventName, eventHandler);
-    }
-}
-*/
-
 console.error('tet sending message?')
 if ((window.location.href + '').indexOf('/oauth/') !== -1) {
   isGitHook = true
@@ -62,11 +50,6 @@ if ((window.location.href + '').indexOf('/oauth/') !== -1) {
   }
 
   // Send the message..
-  /*
-  var authMsg = {
-    link: '' + window.location.href
-  }
-  */
   sendMessage('' + window.location.href) // JSON.stringify(authMsg))
 }
 
