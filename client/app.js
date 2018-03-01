@@ -29,7 +29,7 @@ Vue.filter('formatDate', function (value) {
 
 var app = null
 
-var isGitHook = false
+var isOauthCallback = false
 
 window.goApiUrl = window.goApiUrl || 'http://localhost:1313'
 window.apiUrl = window.apiUrl || 'http://localhost:8081/api'
@@ -40,8 +40,10 @@ window.websiteapiUrl = window.goHostUrl || 'http://localhost:8081'
 
 console.error('tet sending message?')
 if ((window.location.href + '').indexOf('/oauth/') !== -1) {
-  isGitHook = true
+  isOauthCallback = true
 
+  // This was a test but no more required...
+  // Issue was with vue-authenticate not working properly
   // Send a message to the parent
   var sendMessage = function (msg) {
     // Make sure you are sending a string, and to stringify JSON
@@ -62,6 +64,8 @@ if (!window.console) {
     }
   }
 }
+
+// contextMenuEvent helper to find parents
 window.tempHelper = {
   getParents: function getParents (el) {
     var a = el
@@ -75,6 +79,7 @@ window.tempHelper = {
   }
 }
 
+// Notification object
 const NotificationComponent = Vue.extend(Notification)
 const openNotification = (propsData = {
   title: '',
@@ -139,6 +144,9 @@ function handleError (error) {
   }
 }
 
+// Generic Interceptor..
+// This handle to add the authorization from the oauth (for git acces)
+// or leave as-is with custom Authorization header already present
 var bindRequestInterceptorFct = function () {
   this.$http.interceptors.request.use((config) => {
     // this screw up if we already have a authorization we should not add it again..
@@ -171,15 +179,14 @@ var bindResponseInterceptorFct = function () {
 }
 
 var authenticateObj = null
-if (!isGitHook) {
-  // if (!window.location.href.indexOf('.com') > 0) {
+if (!isOauthCallback) {
   window.withCredentials = false
 
-  // TODO: .. if IS WEBSITE... then
+  // TODO: .. If is WEBSITE... then
   // if (window.location.href + "").indexOf("acentera.com") {
   var bitbucketClientId = ''
   var githubClientId = ''
-  if (!isGitHook) {
+  if (!isOauthCallback) {
     if (window.location.href.indexOf('acentera.com') !== -1) {
       // Enable devtools
       Vue.config.devtools = true
@@ -210,6 +217,12 @@ if (!isGitHook) {
       window.withCredentials = true
       */
     }
+
+    Vue.config.devtools = true
+    store.commit('setWebsite', true) // weird ?
+    window.withCredentials = true
+    // window.apiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev/api'
+    window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev'
     // } // end if (hosted version)
     // store.commit('setProjectSelected', false)
     var currentUrl = [location.protocol, '//', location.host, ''].join('')
@@ -350,7 +363,7 @@ if (!isGitHook) {
   const nprogress = new NProgress({ parent: '.nprogress-container' })
 
   const { state } = store
-  if (!isGitHook) {
+  if (!isOauthCallback) {
     if (state.app.website) {
       Vue.prototype.$checkInet = function () {
         store.commit('setInet', true)
@@ -400,6 +413,7 @@ if (!isGitHook) {
   window.hasProcessed = false
 
   router.beforeEach((route, redirect, next) => {
+    // Siebar logic....
     if (store.getters.app.website) {
       if (store.getters.app.websiteId) {
         // Warning, also check where we set it from the localStorage.getItem('selectedWebsite')
@@ -412,11 +426,12 @@ if (!isGitHook) {
       }
       if (!(store.getters.app.websiteId)) {
         if (!(route.path.indexOf('template') >= 0 || route.path === '/')) {
-          console.error('TEST templaet aararara')
+          console.error('SET HIDDEN A ?')
           if (store.getters.app.isLoaded) {
             // THIS IS BAD I KNOW...
             // This is hack, ie end-user click on change site, then hit the back button ...
             // the left menu stay hidden, this fixes that.
+            console.error('SET HIDDEN A1 ?')
             store.getters.app.sidebar.hidden = true
             store.getters.app.sidebar.opened = false
             store.getters.app.sidebartwo.hidden = true
@@ -430,14 +445,20 @@ if (!isGitHook) {
         }
 
         if (route.path === '/') {
+          console.error('SET HIDDEN A2 ?')
           // THIS IS BAD I KNOW...
           // This is hack, ie end-user click on add new template..then hit the back button  or (navigator history which is the most pain)...
           // the left menu stay hidden, I have not investigated...
           // ??? if (store.getters.app.isLoaded) {
           if (store.getters.app.project) {
+            console.error('SET HIDDEN A3 ?')
             if (store.getters.app.sidebarglobal.opened === false) {
+              console.error('SET HIDDEN A4 ?')
               var l = Object.keys(store.getters.app.project.websites).length
+
+              console.error('SET HIDDEN A5 ?')
               if (l >= 1) {
+                console.error('SET HIDDEN A6 ?')
                 store.getters.app.sidebar.hidden = true
                 store.getters.app.sidebar.opened = false
                 store.getters.app.sidebartwo.hidden = true
