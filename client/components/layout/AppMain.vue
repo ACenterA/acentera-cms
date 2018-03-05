@@ -268,6 +268,7 @@ export default {
               })
 
               var self = this
+              console.error('calling refresh user B')
               this.refreshUser({ vue: this,
                 callback: function () {
                   if (self.project && self.project.websites) {
@@ -311,6 +312,27 @@ export default {
           case 'login':
             data.user = this.email
             data.password = this.loginPassword
+
+            /* eslint-disable */
+            var re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+            if (!re.test(data.user)) {
+              $('#' + which + 'Submit').removeClass('disabled')
+              return this.$notify({
+                  title: 'Invalid Parameter',
+                  message: 'You must use a valid e-mail address!',
+                  type: 'warning'
+              })
+            }
+
+            if (!data.password || (data.password+ '').length <= 3) {
+              $('#' + which + 'Submit').removeClass('disabled')
+              return this.$notify({
+                  title: 'Invalid Parameter',
+                  message: 'Invalid password.',
+                  type: 'warning'
+              })
+            }
+
             // this.$set('loginSubmit', 'Logging In...')
             this.loginSubmit = 'Logging In...' // modalSubmitLogin
 
@@ -328,11 +350,6 @@ export default {
             )
             .then((response) => {
               // if (response.data.error !== '') {
-              this.$notify({
-                title: 'Successfully logged in.',
-                message: 'We are loading your account informations.',
-                type: 'success'
-              })
 
               // construct session data
               var jsonTokenData = this.parseJwt(response.data.token)
@@ -357,7 +374,14 @@ export default {
               window.localStorage.setItem('session', JSON.stringify(session))
               this.$store.commit('setSession', session)
 
+              this.$notify({
+                title: 'Successfully logged in.',
+                message: 'We are loading your account informations.',
+                type: 'success'
+              })
+
               var self = this
+              console.error('calling refresh user C')
               this.refreshUser({ vue: this,
                 callback: function () {
                   if (self.project && self.project.websites) {

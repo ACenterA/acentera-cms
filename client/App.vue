@@ -275,6 +275,7 @@ export default {
     window.addEventListener('resize', handler)
 
     var self = this
+    console.error('calling refresh user A')
     this.refreshUser({ vue: this,
       callback: function (gotdata) {
         if (self.project && self.project.websites) {

@@ -54,9 +54,11 @@
                       </div>
                       <div class="width-full">
                         <div class="float-right width-50 small-leftmargin">
+                            <!--
                             <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile" @click="preview(item)">
                               Preview
                             </div>
+                            -->
                         </div>
                         <div class="float-right width-50 small-leftmargin">
                             <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile" @click="selectWebsite(item)">

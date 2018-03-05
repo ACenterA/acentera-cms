@@ -218,11 +218,6 @@ if (!isOauthCallback) {
       */
     }
 
-    Vue.config.devtools = true
-    store.commit('setWebsite', true) // weird ?
-    window.withCredentials = true
-    // window.apiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev/api'
-    window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev'
     // } // end if (hosted version)
     // store.commit('setProjectSelected', false)
     var currentUrl = [location.protocol, '//', location.host, ''].join('')
@@ -267,6 +262,18 @@ if (!isOauthCallback) {
     var vueAuth = VueAuthenticate.factory(Vue.prototype.$http, authenticateObj)
     window.vueAuth = vueAuth
   }
+
+  // DELETE
+  Vue.config.devtools = true
+  // document.domain = 'acentera.com' // TODO: Use en environment variable ...
+  store.commit('setWebsite', true) // weird ?
+  window.withCredentials = true
+  // window.apiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev/api'
+  window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev'
+
+  bitbucketClientId = 'mYJjMLHBCjYn4k9Xu2'
+  githubClientId = 'dd64a961127f3392159d'
+  // DELETE
 
   Vue.prototype.$httpApi = axios.create({
     timeout: 90000,

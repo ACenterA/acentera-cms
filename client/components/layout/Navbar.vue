@@ -197,18 +197,25 @@ export default {
     let raw = window.localStorage.getItem('session')
     if (raw) {
       var session = JSON.parse(raw)
+      console.error('clear session 00')
       if (Date.now() > Date.parse(session['cookie_expiry'])) {
+        console.error('clear session 01')
         window.localStorage.removeItem('session')
+        console.error('clear session 02')
         this.$notify({
           title: 'Session expired',
           message: 'Please login again',
           type: 'warning'
         })
-        this.$store.commit('clearSession')
-        setTimeout(function () {
-          window.location.href = '/?expired=' + new Date()
-        }, 1000)
+        console.error('clear session 03')
+        this.$store.commit('clearSession', this.$store.origState)
+        console.error('clear session 04')
+        // setTimeout(function () {
+        console.error('clear session 05')
+          // window.location.href = '/?expired=' + new Date()
+        // }, 1000)
       } else {
+        console.error('clear session 06')
         this.$store.commit('setSession', session)
       }
     } else {
