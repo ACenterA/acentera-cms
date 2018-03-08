@@ -16,6 +16,11 @@ export default {
       name: 'Theme',
       path: '/theme',
       component: lazyLoading('admin/Themes')
+    },
+    {
+      name: 'Domains',
+      path: '/domains',
+      component: lazyLoading('admin/Domains')
     }
     /*
     {

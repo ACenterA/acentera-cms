@@ -16,7 +16,7 @@
         <p class="hidden">components/GitHub</p>
 
         <div v-if="!isLogIn">
-              <h2>Select the button above to login with your GIT provider.</h2>
+              <h2>Select the button below to login with your GIT provider.</h2>
               <i>If you do not have an account, no worries simply create one its free..</i>
               <br/>
               <br/>

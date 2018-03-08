@@ -315,6 +315,7 @@ export default {
             type: 'success'
           })
 
+          console.error('calling refresh user ZZA')
           window.vm.$store.commit('SELECT_INITIAL_WEBSITE', nextStepData)
           try {
             self.refreshUser()

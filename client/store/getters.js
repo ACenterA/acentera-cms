@@ -151,6 +151,8 @@ const isLoggedIn = state => {
 
 const selectedWebsite = (state) => {
   console.error('selected webiste 01')
+  console.error('sesssion ? ')
+  console.error(state.session)
   if (state.app.project && state.app.project.websites) {
     console.error('selected webiste 02')
     if ((state.app.websiteId === 'null' || !state.app.websiteId)) {

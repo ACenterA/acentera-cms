@@ -256,7 +256,7 @@ export default {
       // purge session from localstorage
       window.localStorage.removeItem('session')
       // mutate vuex state
-      this.$store.commit('clearSession')
+      this.$store.commit('clearSession', this.$store.origState)
     },
 
     clearFormData: function () {

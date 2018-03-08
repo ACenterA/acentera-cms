@@ -81,6 +81,19 @@ export const refreshUser = ({ commit }, obj) => {
   var callback = obj.callback
   var state = vue.$store.state
   var self = vue
+
+  if (state.session === null) {
+    return
+  }
+
+  let raw = window.localStorage.getItem('session')
+  if (raw) {
+    var session = JSON.parse(raw)
+    if (Date.now() > Date.parse(session['cookie_expiry'])) {
+      return
+    }
+  }
+
   if (!state.app.website) {
     // Local Dev Version
     window.localStorage.removeItem('selectedWebsite')
@@ -117,6 +130,7 @@ export const refreshUser = ({ commit }, obj) => {
         var lstProjects = response.data.projects
         var defProject = response.data.defaultProject
         var hasWebsites = false
+        state.app.account = response.data.accountId
         if (state.app.project && state.project.app.projectId) {
           if (!(lstProjects.hasOwnProperty(state.app.project.projectId))) {
             state.app.project = null
@@ -183,6 +197,12 @@ export const refreshUser = ({ commit }, obj) => {
                   state.app.sidebarglobal.hidden = false
 
                   console.error('sidebar openend here KK')
+                  if (window.vm._route.path !== '/templates') {
+                    if (window.vm._route.path === '/') {
+                    } else {
+                      window.location.href = '/'
+                    }
+                  }
                   state.app.sidebar.opened = true
                   state.app.sidebar.hidden = true
                 } else {
@@ -245,8 +265,10 @@ export const refreshUser = ({ commit }, obj) => {
           msg = error.response.data.errorMessage
         }
         if (msg.indexOf('Token is invalid') >= 0) {
-          this.$store.commit('clearSession')
+          this.$store.commit('clearSession', this.$store.origState)
         } else {
+          console.error(error)
+          console.error(error.stack)
           self.$notify({
             title: 'error retreiving account.',
             message: msg,

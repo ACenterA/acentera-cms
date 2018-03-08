@@ -6,31 +6,38 @@ export const setSession = (state, session) => {
 
 export const clearSession = (state, origState) => {
   this.clearGit(state)
-
+  console.error('clear session a')
   // website only
   if (state.app.website) {
-    var newState = JSON.parse(JSON.stringify(origState))
-    for (var key in newState) {
-      state.app[key] = newState[key]
+    console.error('clear session b')
+    if (origState) {
+      var newState = JSON.parse(JSON.stringify(origState))
+      for (var key in newState) {
+        state.app[key] = newState[key]
+      }
     }
-
+    console.error('clear session c')
     state.app.website = true // force restore of website mode
 
+    console.error('clear session d')
     window.localStorage.removeItem('session')
     state.projectSelected = null
     state.session = null
+    console.error('clear session e')
     state.app.project = null
     state.app.projectId = null
     state.app.websiteId = null
+    console.error('clear session ')
 
     state.app.sidebar.hidden = true
     state.app.sidebar.opened = false
     state.app.sidebartwo.hidden = true
+    console.error('clear session g')
     state.app.sidebartwo.opened = false
     state.app.sidebarglobal.hidden = true
     state.app.sidebarglobal.opened = false
-
-    window.location.href = '/?expired=' + new Date()
+    console.error('clear session h')
+    // window.location.href = '/?expired=' + new Date()
   }
   // Send logout of social account ...
   state.app.github = {} // reset ...
