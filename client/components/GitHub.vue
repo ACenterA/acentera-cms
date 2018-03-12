@@ -15,7 +15,14 @@
         </div>
         <p class="hidden">components/GitHub</p>
 
+        <div v-if="!isLogIn && allowNonGit && !isGitSelected">
+          Do you have a Github or BitBucket account?<br/>
+          A git account allows you to build and update your website with your team.
+          <br/>
+        </div>
+
         <div v-if="!isLogIn">
+
               <h2>Select the button below to login with your GIT provider.</h2>
               <i>If you do not have an account, no worries simply create one its free..</i>
               <br/>
@@ -38,6 +45,16 @@
                       </a>
                     </p>
                   </div>
+
+                  <div v-if="!isLogIn && allowNonGit && !isGitSelected">
+                    <p class="control">
+                      <a class="button rightfloat"
+                        @click="selectNoGit()" :disabled="!loaded">
+                            <span>I do not have a git account.</span>
+                      </a>
+                    </p>
+                  </div>
+
 
                 </article>
               </p>
@@ -94,7 +111,7 @@
                   </article>
                 -->
             </p>
-          </div>
+        </div>
     </div>
   </div>
 </template>
@@ -108,6 +125,7 @@
   export default {
     data: function () {
       return {
+        isGitSelected: false,
         parallelData: {},
         password: '',
         github: function () {
@@ -126,15 +144,27 @@
     },
 
     props: {
-      showGitButtons: Boolean
+      showGitButtons: String,
+      allowNonGit: String
     },
 
     computed: {
       ...mapGetters({
-        loaded: 'loaded'
+        loaded: 'loaded',
+        websiteIsGit: 'websiteIsGit',
+        selectedWebsite: 'selectedWebsite'
       }),
+      isShowGit: function () {
+        if (this.allowNonGit === 'True') {
+          if (this.isGitSelected) {
+            return true
+          }
+          return false
+        }
+        return true
+      },
       isShowGitButton: function () {
-        // return ('' + this.showGitButtons === 'true') // weird ???
+        // return ('' + this.showGitButtons === 'True') // weird ???
         return true
       },
       isLogIn: function () {
@@ -298,6 +328,9 @@
           return this.bitbucket === true
         }
       },
+      selectNoGit: function () {
+        this.$emit('noGitSelect')
+      },
       selectBitBucket: function () {
         this.bitbucket = true
 
@@ -396,6 +429,10 @@
 
 <style scoped>
 
+.rightfloat {
+  margin-left: 80px;
+  float: right;
+}
 .hidden {
    display: none
 }

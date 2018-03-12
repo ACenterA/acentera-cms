@@ -66,8 +66,7 @@
                 <label class="label">Post Date</label>
                 <div v-if="selectedPost.frontMatter" class="field has-addons">
                   <p class="control is-expanded">
-                    <input class="input" type="text"
-                           v-model="selectedPost.pubDate" />
+                    <datetime format="YYYY/MM/DD h:i:s" width="300px" @update:date-value="val => dob = val" v-model="selectedPost.pubDate"></datetime>
                   </p>
                 </div>
 
@@ -102,6 +101,7 @@
 
 <script>
 import Tooltip from 'vue-bulma-tooltip'
+import datetime from 'vuejs-datetimepicker'
 // import moment from 'moment'
 import TreeView from 'components/TreeView'
 import { Sidebarblogs } from 'components/layout/'
@@ -118,6 +118,7 @@ import fileUpload from 'components/plekan/fileUpload'
 export default {
   components: {
     Tooltip,
+    datetime,
     TreeView,
     // Modal,
     Sidebarblogs,
@@ -151,6 +152,33 @@ export default {
     var self = this
     this.$store.state.app.topbar.show = true
     this.$store.commit('deleteAllRows', 0, 1)
+
+    this.$bus.$on('previewWebsite', function (data) {
+      if (window.vm.$store.state.app.selectedItem) {
+        var item = window.vm.$store.state.app.selectedItem.item
+        if (item) {
+          var tmpLink = item.link
+          if (item.link.startsWith('//') || item.link.startsWith('http://') || item.link.startsWith('https://')) {
+            console.error(item)
+            console.error('ITM MM LINK WAAAS ' + item.link)
+            tmpLink = item.link.substring(item.link.indexOf('/', 8))
+            console.error('ITM MM LINK NOW ' + item.link)
+          }
+          if (tmpLink.endsWith('/')) {
+            tmpLink = tmpLink.substring(0, tmpLink.lastIndexOf('/'))
+          }
+          var selectedLangItem = self.$store.state.app.languages.languagesHash[self.$store.state.app.languageSelected]
+          window.previewWebsiteSent = -1
+          if (self.$store.state.app.language === selectedLangItem.languagename) {
+            // This is default language, do not add the /{langcode} prefix
+            window.open(window.goHostUrl + item.link, '_blank')
+          } else {
+            window.open(window.goHostUrl + '/' + selectedLangItem.id + item.link, '_blank')
+          }
+        }
+      }
+    })
+
     this.$bus.$on('TOGGLE_ADVANCED_SETTINGS', function (data) {
       if ((self.selectedPost && !self.inPostCreate && !self.postDoesNotExists) && ((self.isPostSelected && !self.postDoesNotExists))) {
         self.showRightSideBar = !self.showRightSideBar
@@ -207,6 +235,23 @@ export default {
       markDownValue = markDownValue.replace('<br>', '\\n').replace('<br/>', '\\n')
       console.error('ITEM IS')
       console.error(item)
+
+      var dtStringDate = item.pubDate
+      try {
+        var arr = item.pubDate.split(/\/|\s|:/) // split string and create array.
+        console.error('arrr is')
+        console.error(arr)
+        var dt = new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4], arr[5]) // decrease month value by 1
+        dtStringDate = dt.toISOString()
+      } catch (e) {
+        this.$notify({
+          title: 'Invalid date.',
+          message: 'Could not update, date was invalid.',
+          type: 'danger'
+        })
+        return
+      }
+
       var updateData = {
         type: 'blogs',
         id: tmpLink,
@@ -214,7 +259,7 @@ export default {
         frontMatter: JSON.parse(JSON.stringify(item.frontMatter)),
         draft: (item.draft === 'true'),
         delete: (item.delete === 'true'),
-        date: item.pubDate,
+        date: dtStringDate,
         lang: selectedLangItem.id,
         content: markDownValue
       }
@@ -266,6 +311,8 @@ export default {
     this.$bus.$off('NO_DATA_FOUND')
     this.$bus.$off('SAVE_CMD')
     this.$bus.$off('UNDRAFT')
+
+    this.$bus.$off('previewWebsite')
   },
   computed: {
     ...mapGetters({
@@ -466,44 +513,53 @@ export default {
             type: 'success'
           })
 
-          if (action === 'new') {
-            // only add the post to the sidebar object if new post not new language
-            // refresh latest data..
-            var tmpLink = newPost.link
-            if (tmpLink.startsWith('/blogs/')) {
-              tmpLink = tmpLink.substring(7)
-            }
-            self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: tmpLink, lang: newPost.lang }, { }).then((res) => {
-              console.error('success 1 s')
-              var curItem = {}
-              curItem['link'] = window.goHostUrl + newPost.link
-              curItem['guid'] = window.goHostUrl + newPost.link
-              // curItem['id'] = window.goHostUrl + tmpLink
-              // newPost.link
-              // window.goHostUrl
-              curItem['frontMatter'] = {}
-              for (var p in res.data) {
-                if (res.data.hasOwnProperty(p)) {
-                  if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
-                    curItem[p] = res.data[p]
-                  } else {
-                    curItem['frontMatter'][p] = res.data[p]
-                  }
+          // if (action === 'new') {
+          // only add the post to the sidebar object if new post not new language
+          // refresh latest data..
+          var tmpLink = newPost.link
+          if (tmpLink.startsWith('/blogs/')) {
+            tmpLink = tmpLink.substring(7)
+          }
+          self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: tmpLink, lang: newPost.lang }, { }).then((res) => {
+            console.error('success 1 s')
+            var curItem = {}
+
+            // curItem['link'] = window.goHostUrl + newPost.link
+            curItem['link'] = newPost.link  // ACE Fixed march
+
+            curItem['guid'] = window.goHostUrl + newPost.link
+            // curItem['id'] = window.goHostUrl + tmpLink
+            // newPost.link
+            // window.goHostUrl
+            curItem['frontMatter'] = {}
+            for (var p in res.data) {
+              if (res.data.hasOwnProperty(p)) {
+                if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
+                  curItem[p] = res.data[p]
+                } else {
+                  curItem['frontMatter'][p] = res.data[p]
                 }
               }
-              console.error('updated item')
-              console.error(curItem)
-              curItem['pubDate'] = curItem['pubDate'] || curItem['date'] // pubDate required for sidebar...
-              self.$store.state.app.sidebarblogData.json.unshift(curItem)
-              self.selectPost({ vue: self, item: curItem, retry: 5 })
-            })
-            .catch((error) => {
-              console.error(error.stack)
-              self.$onError(error)
-            })
-          } else {
-            self.selectPost({ vue: this, item: newPost, retry: 5 })
-          }
+            }
+            console.error('updated item')
+            console.error(curItem)
+            curItem['pubDate'] = curItem['pubDate'] || curItem['date'] // pubDate required for sidebar...
+            self.$store.state.app.sidebarblogData.json.unshift(curItem)
+
+            console.error('selectPost using item : ')
+            console.error(curItem)
+
+            self.selectPost({ vue: self, item: curItem, retry: 5 })
+          })
+          .catch((error) => {
+            console.error(error.stack)
+            self.$onError(error)
+          })
+          // } else {
+          //  console.error('selectPost using item 1 : ')
+          console.error(newPost)
+          self.selectPost({ vue: this, item: newPost, retry: 5 })
+          // }
         }, 500)
 
         // Returned statement in setTimeout

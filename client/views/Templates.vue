@@ -12,7 +12,7 @@
             <div class="box-center-main">
               <div>
                   <div class="center-text">
-                      <h4 class="site-title">Choosea template for your website</h4>
+                      <h4 class="site-title">Choose a template for your website</h4>
                       (i know its duplicated .. lack of theme right now)
                   </div>
               </div>

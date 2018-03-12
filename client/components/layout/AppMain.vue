@@ -497,6 +497,11 @@ export default {
 .app-content {
   padding: 20px;
   height: 100%;
+  width: 100%;
+}
+
+.app-fixed {
+  position: fixed !important;
 }
 
 .user-modal-container * {

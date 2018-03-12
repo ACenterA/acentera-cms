@@ -1,81 +1,96 @@
 <template>
     <div class="tile is-ancestor box is-vertical">
       <div class="tile">
-        <!-- Left side -->
-        <div class="column is-6">
-          <article v-if="isGitHub()"  class="tile is-parent is-5 is-vertical">
-            <!-- Login tile -->
-            <article class="tile is-child is-marginless is-paddingless">
-              <GitHub showGitButtons=false></GitHub>
-            </article>
-          </article>
+        <div v-if="selectedWebsite && !websiteIsGit">
+          <h2>You are not using a GIT account.</h2>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
         </div>
+        <div v-else>
 
-
-        <!-- Right column -->
-        <div class="column is-6">
-
-          <div v-if="isWebsite">
-
-            <!-- Warnings -->
-            <div v-if="username === null" class="field">
-              <article class="message is-warning">
-                <div class="message-body">
-                  <strong>You must be logged in to edit your website.</strong>
-                </div>
+          <!-- Left side -->
+          <div class="column is-6">
+            <article v-if="isGitHub()"  class="tile is-parent is-5 is-vertical">
+              <!-- Login tile -->
+              <article class="tile is-child is-marginless is-paddingless">
+                <GitHub showGitButtons=false></GitHub>
               </article>
-            </div>
-            <div v-if="username !== null">
-              <article class="message is-success">
-                <div class="message-body">
-                  <strong>You can edit and save your website..</strong>
-                </div>
-              </article>
-            </div>
+            </article>
           </div>
-          <div v-if="!isWebsite">
-            <!-- Warnings -->
-            <div v-if="username === null" class="field">
-              <article class="message is-warning">
-                <div class="message-body">
-                  <strong>You must be logged in to manage SSH Keys</strong>
-                </div>
-              </article>
+
+
+          <!-- Right column -->
+          <div class="column is-6">
+
+            <div v-if="isWebsite">
+
+              <!-- Warnings -->
+              <div v-if="username === null" class="field">
+                <article class="message is-warning">
+                  <div class="message-body">
+                    <strong>You must be logged in to edit your website.</strong>
+                  </div>
+                </article>
+              </div>
+              <div v-if="username !== null">
+                <article class="message is-success">
+                  <div class="message-body">
+                    <strong>You can edit and save your website..</strong>
+                  </div>
+                </article>
+              </div>
             </div>
+            <div v-if="!isWebsite">
+              <!-- Warnings -->
+              <div v-if="username === null" class="field">
+                <article class="message is-warning">
+                  <div class="message-body">
+                    <strong>You must be logged in to manage SSH Keys</strong>
+                  </div>
+                </article>
+              </div>
 
 
-            <div v-if="username !== null">
-              <article class="tile is-child box">
-               <strong>SSHKeys</strong>
-               <br/>
-               <br/>
-               <article class="tile is-child">
-                  <p class="control" v-if="!isSshValid()">
-                    <a class="button rightfloat is-primary"
-                    @click="createSSHKey()">
-                    <span>Create SSH Key</span>
-                    </a>
-                  </p>
-
-                  <div v-if="isSshValid()">
-                    <span>Your SSH Key is valid</span>
-                    <br/>
-                    <br/>
-                    <p class="control">
-                      <a class="button leftfloat is-primary" title="Test your ssh key"
-                        @click="testFetch()">
-                        <span>Test SSH Key</span>
-                      </a>
-                      <a class="button rightfloat is-primary" title="Delete the ssh key created"
-                        @click="deleteSSHKeys()">
-                        <span>Delete SSH Key</span>
+              <div v-if="username !== null">
+                <article class="tile is-child box">
+                 <strong>SSHKeys</strong>
+                 <br/>
+                 <br/>
+                 <article class="tile is-child">
+                    <p class="control" v-if="!isSshValid()">
+                      <a class="button rightfloat is-primary"
+                      @click="createSSHKey()">
+                      <span>Create SSH Key</span>
                       </a>
                     </p>
-                  </div>
-               </article>
-              </article>
-            </div>
 
+                    <div v-if="isSshValid()">
+                      <span>Your SSH Key is valid</span>
+                      <br/>
+                      <br/>
+                      <p class="control">
+                        <a class="button leftfloat is-primary" title="Test your ssh key"
+                          @click="testFetch()">
+                          <span>Test SSH Key</span>
+                        </a>
+                        <a class="button rightfloat is-primary" title="Delete the ssh key created"
+                          @click="deleteSSHKeys()">
+                          <span>Delete SSH Key</span>
+                        </a>
+                      </p>
+                    </div>
+                 </article>
+                </article>
+              </div>
+
+            </div>
           </div>
         </div>
     </div>
@@ -121,6 +136,8 @@ export default {
       session: 'session',
       repoState: 'repoState',
       isWebsite: 'isWebsite',
+      websiteIsGit: 'websiteIsGit',
+      selectedWebsite: 'selectedWebsite',
       github: 'github'
     }),
     healthKeys: function () {

@@ -184,6 +184,9 @@ export default {
   background: white;
   border-bottom: solid #AAA 1px;
   min-height:40px;
+  // position: fixed;
+  // width: 100%;
+  // top: 55px;
 }
 .topbar-settings {
   padding-right:50px;

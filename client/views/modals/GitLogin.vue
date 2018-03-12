@@ -17,7 +17,7 @@
 
               <!-- Login tile -->
               <article class="tile is-child is-marginless is-paddingless">
-                <GitHub showGitButtons=true></GitHub>
+                <GitHub allowNonGit=True showGitButtons=True @noGitSelect="noGitSelect"></GitHub>
               </article>
             </article>
           </div>
@@ -157,6 +157,10 @@ export default {
     ...mapActions([
       'toggleRepoState'
     ]),
+    noGitSelect () {
+      var self = this
+      self.$emit('nextStep', self.template)
+    },
     close () {
       this.$emit('close')
     },

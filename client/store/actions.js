@@ -56,6 +56,9 @@ export const selectPost = ({ commit }, obj) => {
           langPrefix += '/'
         }
       }
+      console.error('LINK IS')
+      console.error(obj.item)
+      console.error(obj.item.link)
       obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/' + langPrefix))
     } else {
       obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + langPrefix + obj.item.link)
