@@ -480,9 +480,10 @@ if (!isOauthCallback) {
       }
     }
     $('body').removeClass('overflow-hidden-y')
+    $('.app-content').removeClass('app-fixed')
     store.commit('deleteAllRows', 0, 1)
     window.hasProcessed = false
-
+    window.previewWebsiteSent = -1 // -1 required. see Navbar.vue at emit of previewWebsiteSent
     // SSH Key Top Missing SSH Key error
     // temporary fixes
     if (store.state && store.state.app && store.state.app.repoState && store.state.app.repoState.updating === 6) { // ssh key issue

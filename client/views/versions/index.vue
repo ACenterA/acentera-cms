@@ -5,11 +5,16 @@
       <div class="tile is-parent is-vertical">
         <article class="tile is-child box">
         <div v-if="invalidRepo">
-          Error with repository. Contact us, and provide us with following error: <br/><br/>Invalid Repository {{websiteId}}<br/>
+          <div v-if="!websiteIsGit">
+            You are not using GIT.
+          </div>
+          <div v-if="websiteIsGit">
+              Error with repository. Contact us, and provide us with following error: <br/><br/>Invalid Repository {{websiteId}}<br/>
 
-          <br/>
-          Apologize for the issue.
-          <br/>
+              <br/>
+              Apologize for the issue.
+              <br/>
+          </div>
         </div>
         <div v-if="!invalidRepo && notLoggedIn">
           You must be logged in with your Git account.<br/>
@@ -370,6 +375,12 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      loaded: 'loaded',
+      github: 'github',
+      websiteIsGit: 'websiteIsGit',
+      selectedWebsite: 'selectedWebsite'
+    }),
     invalidRepo: function () {
       if (this.repoState && this.repoState.url !== 'hidden') {
         return false
@@ -377,7 +388,7 @@ export default {
       return true
     },
     notLoggedIn: function () {
-      var tmpGitHub = this.github()
+      var tmpGitHub = this.github
       if (!tmpGitHub) {
         return true
       }
@@ -457,9 +468,6 @@ export default {
   },
 
   methods: {
-    ...mapGetters([
-      'github'
-    ]),
     switchTab: function (index, ctr) {
       var self = this
       if (!this.$store.state.app.isLoaded) {
@@ -492,7 +500,7 @@ export default {
         return
       }
 
-      var gitInfo = this.github()
+      var gitInfo = this.github
       var tmpGit = ('' + this.$store.state.app.repoState.url).substring(('' + this.$store.state.app.repoState.url).lastIndexOf('/') + 1)
       tmpGit = tmpGit.substring(0, tmpGit.lastIndexOf('.git'))
 

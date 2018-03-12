@@ -10,11 +10,17 @@
                 <a v-if="isBitBucket" class="button is-warning leftfloat" title="Sign out from BitBucket"
                   @click="closeAndLogout()">
                     <span>Logout from BitBucket</span>
-                  </a>
+                </a>
                 <a v-if="isGithub" class="button is-warning leftfloat" title="Sign out from GitHub"
                   @click="closeAndLogout()">
                   <span>Logout from Github</span>
                 </a>
+
+                <a v-if="isNotGit" class="button is-warning leftfloat" title="Use all the team features!"
+                  @click="closeAndLogout()">
+                    <span>Wait! I want to use Git.</span>
+                </a>
+
                 <a class="button leftfloat" title="Close and choose another template"
                   @click="close()">
                   <span>Close</span>
@@ -51,10 +57,13 @@
 
                 <div class="column is-6">
                   <p class="control" style="right:50px; right;position:absolute;">
-                    <a v-if="!processing" :disabled="disabled" class="button is-primary leftfloat" title="Create my website" @click="nextStep()">
+                    <a v-if="!processing && !isNotGit" :disabled="disabled" class="button is-primary leftfloat" title="Create my website" @click="nextStep()">
                       <span>Create</span>
                     </a>
-                    <a v-else :disabled="disabled" class="button leftfloat" title="Creating..">
+                    <a v-if="!processing && isNotGit" :disabled="disabled" class="button is-primary leftfloat" title="Create my website" @click="nextStepNotGit()">
+                      <span>Create</span>
+                    </a>
+                    <a v-if="processing" :disabled="disabled" class="button leftfloat" title="Creating..">
                       <span>Creating...</span>
                     </a>
                   </p>
@@ -110,6 +119,9 @@ export default {
       repoState: 'repoState',
       github: 'github'
     }),
+    isNotGit () {
+      return (!(this.isBitBucket || this.isGithub))
+    },
     isBitBucket () {
       try {
         var gitInfo = this.github
@@ -195,6 +207,60 @@ export default {
       }
 
       this.processing = false
+    },
+    nextStepNotGit () {
+      var self = this
+      self.processing = true
+      console.error('ok not git here creating')
+      console.error(self.template)
+      // NOTE: Cannot use 'authorization' as its will bypass the header value for authorization ...
+
+      var projectId = null
+      if (self.$store.state.app.project) {
+        projectId = self.$store.state.app.project.projectId
+      }
+      var initSite = {
+        'projectId': projectId,
+        'refresh': window.vueAuth.getRefreshToken(),
+        'branch': 'master',
+        'title': self.websiteTitle,
+        'type': 'no_git',
+        'theme': self.template.Name,
+        'template_repo': self.template.Repository, // 'https://github.com/FLavalliere/my-first-blog',
+        'template_branch': 'master'
+      }
+
+      var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create'
+
+      self.toggleRepoState(0) // Reset state for creating, to disable any messages... until it got created.
+      self.$store.state.app.websiteInCreationMode = true // prevent navbar messages
+
+      // self.$store.state.session might be null if its not the website app but the local version..
+      var h = { 'authorization': 'Bearer ' + self.$store.state.session.token }
+      self.$http.post(initSiteRepoCall, initSite, {
+        headers: h
+      }).then((response) => {
+        if (!(response.data.type.startsWith('error'))) {
+          self.processing = false
+          self.$emit('changePage', response.data)
+        } else {
+          self.$store.state.app.websiteInCreationMode = false // prevent navbar messages
+          self.processing = false
+          self.$notify({
+            title: 'Could not create website.',
+            message: 'We were unable to create your website. Contact support! ',
+            type: 'danger'
+          })
+        }
+      }, function (errr) {
+        self.$store.state.app.websiteInCreationMode = false // prevent navbar messages
+        self.processing = false
+        self.$notify({
+          title: 'Could not create website.',
+          message: 'We were unable to create your website. Contact support. ',
+          type: 'danger'
+        })
+      })
     },
     nextStep () {
       var self = this
@@ -305,8 +371,9 @@ export default {
           'refresh': window.vueAuth.getRefreshToken(),
           'branch': 'master',
           'title': self.websiteTitle,
+          'type': 'git',
           'repodetails': repoDetail,
-          'theme': 'hugo-agency-theme',
+          'theme': self.template.Name,
           'template_repo': self.template.Repository, // 'https://github.com/FLavalliere/my-first-blog',
           'template_branch': 'master'
         }
