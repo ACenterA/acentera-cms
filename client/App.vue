@@ -33,6 +33,7 @@ export default {
       var self = window.vm
       if (!($('body').hasClass('overflow-hidden-y'))) {
         $('body').addClass('overflow-hidden-y')
+        $('.app-content').addClass('app-fixed')
       }
 
       self.$store.commit('deleteAllRows', 0, 1)
@@ -320,6 +321,10 @@ export default {
 .animated {
   animation-duration: .377s;
 }
+.calender-div {
+  z-index:4;
+  background-color: white;
+}
 
 @import '~bulma';
 
@@ -359,6 +364,10 @@ body.overflow-hidden::-webkit-scrollbar {
 
 #app {
    height: 100%;
+}
+
+.container.is-fluid {
+  width: 100%;
 }
 
 .nprogress-container {

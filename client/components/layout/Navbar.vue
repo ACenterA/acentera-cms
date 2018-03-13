@@ -44,9 +44,11 @@
         <div class="nav-center">
           <div v-if="!isLoggedIn && isWebsiteSelected()">
             <div v-if="isWebsite">
-             <p class="red">
-               You must Login to your 'Git' account first to perform changes. (Login on the left menu)
-             </p>
+             <div v-if="websiteIsGit">
+               <p class="red">
+                 You must Login to your 'Git' account first to perform changes. (Login on the left menu)
+               </p>
+             </div>
             </div>
             <div v-else>
               <p v-if="isKeyMissing()" class="red">
@@ -116,21 +118,24 @@
                 Submit for Review
             </a>
             -->
-            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile" :disabled="(!(repoState.pending == true))">
+
+            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item" :disabled="(!(repoState.pending == true))">
                 Publish
             </a>
 
-            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="saveModal()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
+            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="saveModal()" class="navheighfix button is-primary is-outlined nav-item">
                 Save
             </a>
 
           </div>
 
-          <a v-if="hasSession()" @click="executeLogout()" class="navheighfix button is-primary is-outlined nav-item is-hidden-mobile">
+          <a v-if="hasSession()" @click="executeLogout()" class="navheighfix button is-primary is-outlined nav-item">
               Logout
           </a>
 
-
+          <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="previewWebsite()" class="navheighfix button is-primary is-outlined nav-item">
+              Preview
+          </a>
 
           <div style="margin:5px">&nbsp;</div>
 
@@ -232,6 +237,7 @@ export default {
       loaded: 'loaded',
       repoState: 'repoState',
       isLoggedIn: 'isLoggedIn',
+      websiteIsGit: 'websiteIsGit',
       getBasicAuth: 'getBasicAuth',
       isWebsite: 'isWebsite'
     }),
@@ -260,6 +266,24 @@ export default {
       'selectWebsite',
       'saveNewSettings'
     ]),
+    previewWebsite () {
+      // TODO: Set this preview to the current blog editing section ?
+      // IE: this.$bus.$emit('previewWebsite')
+      // the various pages would know where to load?
+      var self = this
+      if (window.previewWebsiteSent <= -1) {
+        window.previewWebsiteSent = 0
+        this.$bus.$emit('previewWebsite')
+        setTimeout(function () {
+          // only show the home page if nobody already did it using the previewWebsite Emit View
+          if (window.previewWebsiteSent === 0) {
+            var selectedLangItem = self.$store.state.app.languages.languagesHash[self.$store.state.app.languageSelected]
+            window.previewWebsiteSent = -1
+            window.open(window.goHostUrl + '/' + selectedLangItem.id + '/', '_blank')
+          }
+        }, 300)
+      }
+    },
     isManual () {
       if (this.$store.state.app.websiteInCreationMode) { // disable user from changing page while creating website ...
         return false
@@ -402,9 +426,9 @@ export default {
       this.showModalReviewComment = true
     },
     saveAndPushModal () {
-      if (this.$store.statep.app.repoState.pending === true) {
-        this.showModalComment = true
-      }
+      // if (this.$store.state.app.repoState.pending === true) {
+      this.showModalComment = true
+      // }
     },
     saveModal () {
       this.showModalComment = false

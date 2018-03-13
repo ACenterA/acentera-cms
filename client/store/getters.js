@@ -116,6 +116,12 @@ const getBasicAuth = state => {
 const isLoggedIn = state => {
   if (state.app.website) {
     if (window.vm.$store.state.session && window.vm.$store.state.session.display_name !== undefined) {
+      if (!this.websiteIsGit(state)) { // ok we are logged in the website isn't a git hosted repo
+        return true
+      }
+    }
+
+    if (window.vm.$store.state.session && window.vm.$store.state.session.display_name !== undefined) {
       if (state.github == null || (!(state.github && state.github.logininfo && state.github.logininfo.pass !== ''))) {
         if (state.github && state.github.logininfo && state.github.logininfo.token) {
           return true
@@ -147,6 +153,17 @@ const isLoggedIn = state => {
     }
   }
   return true
+}
+
+const websiteIsGit = state => {
+  var selWebsite = selectedWebsite(state)
+  if (selWebsite) {
+    if (selWebsite.hasOwnProperty('git') && selWebsite.git === 'false') {
+      return false
+    }
+    return true
+  }
+  return false
 }
 
 const selectedWebsite = (state) => {
@@ -214,5 +231,6 @@ export {
   inBlog,
   selectedPost,
   isAuthenticated,
-  getBasicAuth
+  getBasicAuth,
+  websiteIsGit
 }
