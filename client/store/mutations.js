@@ -9,6 +9,9 @@ export const clearSession = (state, origState) => {
   console.error('clear session a')
   // website only
   if (state.app.website) {
+    // Remove cookie, user cannot see preview after this..
+    window.vm.$cookie.set('acentera_code_sso', '', {expires: -1, domain: 'acentera.com'})
+
     console.error('clear session b')
     if (origState) {
       var newState = JSON.parse(JSON.stringify(origState))
@@ -67,6 +70,13 @@ export const setProjectIdForCreation = (state, val) => {
 }
 export const setWebsiteIdForCreation = (state, val) => {
   state.app.websiteId = val
+}
+export const SET_WEBSITE_SSO_TOKEN = (state, obj) => {
+  console.error('set of coooke using')
+  console.error(obj)
+  state.app.sso_token = obj.cookie_value
+  console.error('set of coooke name :  acentera_code_sso on ' + obj.domain)
+  window.vm.$cookie.set('acentera_code_sso', obj.cookie_value, {expires: 1, domain: obj.domain})
 }
 
 export const setGit = (state, g) => {

@@ -257,6 +257,10 @@ export default {
                 'cookie_expiry': new Date(Date.now() + 8 * 3600 * 1000).toString() // 8 hours from now
               }
 
+              // Temporary fix previous website selected...
+              window.localStorage.removeItem('selectedWebsite')
+              window.localStorage.removeItem('selectedProject')
+
               // store session data in localstorage
               // TODO: this is duplicated code with /login this is bad
               window.localStorage.setItem('session', JSON.stringify(session))

@@ -27,6 +27,7 @@ const refreshSettings = (state) => {
 */
 
 const refreshConfig = (state) => {
+  console.error('REFRESH CONFIG HERE A')
   window.vm.$store.commit('REFRESH_CONFIG', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
 }
 
@@ -145,6 +146,7 @@ export const refreshUser = ({ commit }, obj) => {
         if (state.app.project == null) {
           if (defProject !== null) {
             // fetch default project...
+            console.error('GET PROJECTS')
             vue.$http.get(window.websiteapiUrl + '/api/projects/v1/' + defProject,
               {
                 headers: h
@@ -189,7 +191,8 @@ export const refreshUser = ({ commit }, obj) => {
 
                   state.app.sidebar.opened = true
                   state.app.sidebar.hidden = false
-                  refreshConfig(state)
+
+                  // refreshConfig(state)
                   // state.app.isLoaded = true
                 }
               } else {
@@ -238,7 +241,8 @@ export const refreshUser = ({ commit }, obj) => {
                 callback()
               } else {
               }
-              refreshConfig(state)
+
+              // refreshConfig(state)
               // state.app.isLoaded = true
             })
           } else {

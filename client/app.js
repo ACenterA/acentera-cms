@@ -20,6 +20,9 @@ import cloneDeep from 'lodash/cloneDeep'
 import GitHubAPI from './GitHubAPI'
 import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
+import VueCookie from 'vue-cookie'
+
+Vue.use(VueCookie)
 
 Vue.filter('formatDate', function (value) {
   if (value) {
@@ -98,7 +101,13 @@ const openNotification = (propsData = {
 function handleError (error) {
   // if the server gave a response message, print that
   try {
-    if (error.response.data.error) {
+    if (error.response && error.response.status === 401) {
+      openNotification({
+        title: 'Authentication failed.',
+        message: 'Please logout, and login again.',
+        type: 'danger'
+      })
+    } else if (error.response.data.error) {
       openNotification({
         title: 'Error: ' + error.response.status,
         message: error.response.data.error,
@@ -150,6 +159,8 @@ function handleError (error) {
 var bindRequestInterceptorFct = function () {
   this.$http.interceptors.request.use((config) => {
     // this screw up if we already have a authorization we should not add it again..
+
+    // Check if we need to pass in SSO Token ...
     if (window.vm.$store.state.app.website && config.url.indexOf(window.websiteapiUrl) >= 0) { // quick fix for multi-authorization header only on website mode, locally we do not  have authorization bearer....
         // ignore double Bearer
     } else {
@@ -165,6 +176,19 @@ var bindRequestInterceptorFct = function () {
         ].join(' ')
       } else {
         delete config.headers['Authorization']
+      }
+    }
+
+    if (window.vm.$store.state.app.website) {
+      if (window.vm.$store.state.app.sso_token) {
+        if (window.goHostUrl) {
+          if (config.url.startsWith('' + window.goHostUrl)) {
+            delete config.headers['Authorization']
+            config.headers['Authorization'] = [
+              'Token', window.vm.$store.state.app.sso_token
+            ].join(' ')
+          }
+        }
       }
     }
     return config
