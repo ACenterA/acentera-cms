@@ -1,7 +1,7 @@
 <template>
     <div class="tile is-ancestor box is-vertical">
       <div class="tile">
-        <div v-if="selectedWebsite && !websiteIsGit">
+        <div v-if="selectedWebsite && !websiteIsGit" class="tile">
           <h2>You are not using a GIT account.</h2>
           <br/>
           <br/>
@@ -13,7 +13,7 @@
           <br/>
           <br/>
         </div>
-        <div v-else>
+        <div v-else class="tile">
 
           <!-- Left side -->
           <div class="column is-6">

@@ -15,7 +15,6 @@
             </select>
           </span>
         </div>
-
         <div v-if="selectedLangItem">
             <!-- Tab navigation -->
             <div class="tabs is-medium is-boxed is-fullwidth">
@@ -100,8 +99,8 @@ export default {
       tabName: 'token',
       store: this.$store,
       tableData: [],
+      lang: null,
       selectedLang: null,
-      selectedLangItem: null,
       selectedLangObject: null,
       allSettings: null,
       availableLanguages: [],
@@ -139,6 +138,16 @@ export default {
   },
 
   computed: {
+    selectedLangItem () {
+      console.error('a1')
+      if (this.lang !== null) {
+        console.error('a2')
+        console.error(this.$store.state.app.settings.languages)
+        console.error(this.lang)
+        return this.$store.state.app.settings.languages[this.lang]
+      }
+      return null
+    }
   },
   filters: {
     capitalize: function (str) {
@@ -237,7 +246,8 @@ export default {
     },
     loadLanguageDetails (lang) {
       if (lang !== undefined) {
-        this.selectedLangItem = this.availableLanguagesHash[lang]
+        // this.selectedLangItem = this.availableLanguagesHash[lang]
+        this.lang = this.availableLanguagesHash[lang].id
         // console.error('test a ' + this.$store.state.app.languages
       }
     },
