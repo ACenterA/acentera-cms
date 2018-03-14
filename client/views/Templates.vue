@@ -317,6 +317,10 @@ export default {
 
           console.error('calling refresh user ZZA')
           window.vm.$store.commit('SELECT_INITIAL_WEBSITE', nextStepData)
+
+          // TODO: change web.acentera.com by a variable
+          self.$store.commit('SET_WEBSITE_SSO_TOKEN', { domain: '.acentera.com', cookie_value: response.data.sso_token })
+
           try {
             self.refreshUser()
           } catch (f) {

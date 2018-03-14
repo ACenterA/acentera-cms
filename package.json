@@ -1,7 +1,7 @@
 {
   "name": "ACenterACMS",
   "version": "0.4.0",
-  "description": "Simple Content Managemnet System for GoHugo Static Site Generators and Serverless solutions",
+  "description": "Simple Content Management System for GoHugo Static Site Generators and Serverless solutions",
   "repository": "acenterainc/acentera-cms",
   "homepage": "",
   "license": "MPL 2.0",

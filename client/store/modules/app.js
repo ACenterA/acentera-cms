@@ -7,6 +7,7 @@ const state = {
   default_git_provider: 'bitbucket',
   account: null,
   project: null,
+  sso_token: null,
   projectId: null,
   websiteId: null,
   websiteInCreationMode: false,
@@ -292,38 +293,49 @@ const mutations = {
     // TODO: Specify which workspace ???
     window.apiUrl = 'http://' + item.websiteId + '.workspace.acentera.com/api'
     window.goHostUrl = 'http://' + item.websiteId + '.workspace.acentera.com'
+
     console.error('SELECT 03B')
-    window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
-
-    console.error('SELECT 03C')
-    var self = window.vm
-    // Refresh for domains...
-
-    console.error('SELECT 03D')
+    console.error('ON REFRESH CONFIG TEST A??')
     console.error(state)
-    var h = { 'Authorization': 'Bearer ' + window.vm.$store.state.session.token } // cannot use state.session as state = the $store.state.app
-    console.error('SENDING OF ...')
-    console.error(h)
-    window.vm.$http.get(window.websiteapiUrl + '/sites/v1/websites/' + state.projectId + '/' + state.websiteId, {
-      headers: h
-    }).then((response) => {
-      console.error('received website info')
-      console.error(response.data)
-      if (response.data && response.data.websiteId === state.websiteId) {
-        window.vm.$store.state.app.project['websites'][state.websiteId] = response.data
-      }
-    }).catch((error) => {
-      var msg = ''
-      if (error.response && error.response.data) {
-        msg = error.response.data.errorMessage
-      }
-      self.$notify({
-        title: 'problem occured while fetching website informations.',
-        message: msg,
-        type: 'warning'
+    if (!state.website) {
+      console.error('ON REFRESH CONFIG TEST B??')
+      window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
+    } else {
+      console.error('SELECT 03C')
+      var self = window.vm
+      // Refresh for domains...
+
+      console.error('SELECT 03D')
+      console.error(state)
+      var h = { 'Authorization': 'Bearer ' + window.vm.$store.state.session.token } // cannot use state.session as state = the $store.state.app
+      console.error('SENDING OF ...')
+      console.error(h)
+      window.vm.$http.get(window.websiteapiUrl + '/sites/v1/websites/' + state.projectId + '/' + state.websiteId, {
+        headers: h
+      }).then((response) => {
+        console.error('received website info')
+        console.error(response.data)
+        if (response.data && response.data.websiteId === state.websiteId) {
+          window.vm.$store.state.app.project['websites'][state.websiteId] = response.data
+          if (response.data.sso_token) {
+            self.$store.commit('SET_WEBSITE_SSO_TOKEN', { domain: '.acentera.com', cookie_value: response.data.sso_token })
+
+            window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
+          }
+        }
+      }).catch((error) => {
+        var msg = ''
+        if (error.response && error.response.data) {
+          msg = error.response.data.errorMessage
+        }
+        self.$notify({
+          title: 'problem occured while fetching website informations.',
+          message: msg,
+          type: 'warning'
+        })
+        // state.app.isLoaded = true
       })
-      // state.app.isLoaded = true
-    })
+    }
     // window.vm.$store.commit('REFRESH_SETTINGS', state) // we still want to refresh settings, for offline version...
   },
   [types.SELECT_POST] (state, item) {
