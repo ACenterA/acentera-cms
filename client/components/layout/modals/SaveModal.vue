@@ -15,7 +15,7 @@
             </p>
           </div>
 
-          <button :disabled="isDisabled()" class="btnNoPad rightfloat" @click="create">Create</button>
+          <button :disabled="isDisabled()" class="btnNoPad rightfloat" @click="create">Submit</button>
 
         </div>
       </article>

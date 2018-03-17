@@ -282,11 +282,37 @@ export default {
         // well we actually did a force rebuild in hugo
         // setTimeout(function () {
         self.selectPost(window.vm.$store.state.app.selectedItem)
-        self.$notify({
-          title: 'Saved.',
-          message: 'Successfully saved your new awesome content.',
-          type: 'success'
+
+        var basicAuth = self.$store.getters.getBasicAuth
+        self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', {
+          headers: {
+            'Authorization': basicAuth,
+            'Token': window.vueAuth.getToken()
+          }
+        }).then((response) => {
+          self.$store.commit('REPO_STATE_UPATE', 0) // all good
+          if (response.data.Extra === 'pending') {
+            self.$store.commit('REPO_STATE_PENDING', 1) // all good
+          } else {
+            self.$store.commit('REPO_STATE_PENDING', 0) // all good
+          }
+          window.vm.$store.commit('REFRESH_SETTINGS', self.$store.state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
+
+          self.$notify({
+            title: 'Saved.',
+            message: 'Successfully saved your new awesome content.',
+            type: 'success'
+          })
         })
+        .catch((error) => {
+          console.error(error)
+          self.$notify({
+            title: 'Saved.',
+            message: 'Successfully saved your new awesome content.',
+            type: 'success'
+          })
+        })
+
         // }, 1000)
       })
       .catch((error) => {

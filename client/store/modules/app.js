@@ -290,9 +290,9 @@ const mutations = {
     window.localStorage.setItem('selectedWebsite', state.websiteId)
     window.localStorage.setItem('selectedProject', state.projectId)
 
-    // TODO: Specify which workspace ???
-    window.apiUrl = 'http://' + item.websiteId + '.workspace.acentera.com/api'
-    window.goHostUrl = 'http://' + item.websiteId + '.workspace.acentera.com'
+    // TODO: Get current scheme from current window...location
+    window.apiUrl = 'https://' + item.websiteId + '.workspace.acentera.com/api'
+    window.goHostUrl = 'https://' + item.websiteId + '.workspace.acentera.com'
 
     console.error('SELECT 03B')
     console.error('ON REFRESH CONFIG TEST A??')
@@ -315,12 +315,20 @@ const mutations = {
       }).then((response) => {
         console.error('received website info')
         console.error(response.data)
+        console.error('SET WEBSITE INFO AAA')
         if (response.data && response.data.websiteId === state.websiteId) {
+          console.error('SET WEBSITE INFO BBBB')
           window.vm.$store.state.app.project['websites'][state.websiteId] = response.data
           if (response.data.sso_token) {
-            self.$store.commit('SET_WEBSITE_SSO_TOKEN', { domain: '.acentera.com', cookie_value: response.data.sso_token })
-
-            window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
+            console.error('SET WEBSITE INFO CCC')
+            self.$store.commit('SET_WEBSITE_SSO_TOKEN', {
+              domain: '.acentera.com',
+              cookie_value: response.data.sso_token,
+              fct: function () {
+                console.error('SET WEBSITE INFO DDD')
+                window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
+              }
+            })
           }
         }
       }).catch((error) => {
@@ -518,128 +526,138 @@ const mutations = {
   },
   [types.REFRESH_CONFIG] (state, update) {
     var self = window.vm
-    try {
-      window.vm.$httpApi.get(window.apiUrl + '/git?action=config&loc=nav&type=refreshConfig').then((response) => {
-        self.$store.commit(types.REPO_URL_UPDATE, response.data.Data)
-        if (response !== null && response.data !== null) {
-          self.$store.commit(types.REPO_UPATE, response.data)
-        }
-
-        if (self.$store.state.app.inet) {
-          self.$store.commit(types.REPO_STATE_UPATE, 0) // first set valid
-          var basicAuth = self.$store.getters.getBasicAuth
-          /*
-          if (self.$store.state.github === null || self.$store.state.github.logininfo === null) {
-            return
+    var retry = 0
+    var fctRetry = function () {
+      try {
+        window.vm.$httpApi.get(window.apiUrl + '/git?action=config&loc=nav&type=refreshConfig').then((response) => {
+          self.$store.commit(types.REPO_URL_UPDATE, response.data.Data)
+          if (response !== null && response.data !== null) {
+            self.$store.commit(types.REPO_UPATE, response.data)
           }
-          */
 
-          var fctRefresh = function () {
-            self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', {
-              headers: {
-                'Authorization': basicAuth,
-                'Token': window.vueAuth.getToken()
-              }
-            }).then((response) => {
-              self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
-              if (response.data.Extra === 'pending') {
-                self.$store.commit(types.REPO_STATE_PENDING, 1) // all good
-              } else {
-                self.$store.commit(types.REPO_STATE_PENDING, 0) // all good
-              }
-              window.vm.$store.commit('REFRESH_SETTINGS', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
-              state.isLoaded = true
-            })
-            .catch((error) => {
-              state.isLoaded = true
-              window.vm.$store.commit('REFRESH_SETTINGS', state) // Might only be becaise user is not logged in.... still usefull to have latest settings
-              if (error.response && error.response.status === 500) {
-                self.$store.commit(types.REPO_STATE_UPATE, 6) // need to setup SSH Key for the user, or wrong login ?
-                if (error.response.data.Data === 'reference not found') {
-                  var uniqueMsg = 'Website Version'
-                  if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsg))) {
-                    // only show it once..
-                    self.$notify({
-                      title: uniqueMsg,
-                      message: 'This website version does not exists anymore... Please select a new version.',
-                      type: 'warning'
-                    })
-                  }
-                } else if (error.response.data.Data === 'authentication required') {
-                  // Ensure user is logged in.
-                  if (self.$store.state.github && self.$store.state.github.logininfo) {
-                    var uniqueMsgAcc = 'Wrong Account?'
-                    if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsgAcc))) {
+          if (self.$store.state.app.inet) {
+            self.$store.commit(types.REPO_STATE_UPATE, 0) // first set valid
+            var basicAuth = self.$store.getters.getBasicAuth
+            /*
+            if (self.$store.state.github === null || self.$store.state.github.logininfo === null) {
+              return
+            }
+            */
+
+            var fctRefresh = function () {
+              self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', {
+                headers: {
+                  'Authorization': basicAuth,
+                  'Token': window.vueAuth.getToken()
+                }
+              }).then((response) => {
+                self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
+                if (response.data.Extra === 'pending') {
+                  self.$store.commit(types.REPO_STATE_PENDING, 1) // all good
+                } else {
+                  self.$store.commit(types.REPO_STATE_PENDING, 0) // all good
+                }
+                window.vm.$store.commit('REFRESH_SETTINGS', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
+                state.isLoaded = true
+              })
+              .catch((error) => {
+                state.isLoaded = true
+                window.vm.$store.commit('REFRESH_SETTINGS', state) // Might only be becaise user is not logged in.... still usefull to have latest settings
+                if (error.response && error.response.status === 500) {
+                  self.$store.commit(types.REPO_STATE_UPATE, 6) // need to setup SSH Key for the user, or wrong login ?
+                  if (error.response.data.Data === 'reference not found') {
+                    var uniqueMsg = 'Website Version'
+                    if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsg))) {
                       // only show it once..
                       self.$notify({
-                        title: uniqueMsgAcc,
-                        message: 'The Git account you are logged with, is not able to perform refresh or updates. Please validate your git account.',
+                        title: uniqueMsg,
+                        message: 'This website version does not exists anymore... Please select a new version.',
                         type: 'warning'
                       })
                     }
-                    self.$store.commit(types.REPO_STATE_UPATE, 7) // need to setup SSH Key for the user, or wrong login ?
+                  } else if (error.response.data.Data === 'authentication required') {
+                    // Ensure user is logged in.
+                    if (self.$store.state.github && self.$store.state.github.logininfo) {
+                      var uniqueMsgAcc = 'Wrong Account?'
+                      if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsgAcc))) {
+                        // only show it once..
+                        self.$notify({
+                          title: uniqueMsgAcc,
+                          message: 'The Git account you are logged with, is not able to perform refresh or updates. Please validate your git account.',
+                          type: 'warning'
+                        })
+                      }
+                      self.$store.commit(types.REPO_STATE_UPATE, 7) // need to setup SSH Key for the user, or wrong login ?
+                    }
+                  } else if (error.response.data.Data) {
+                    var uniqueMsgErr = 'A problem occured.'
+                    if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsgErr))) {
+                      // only show it once..
+                      self.$notify({
+                        title: uniqueMsgErr,
+                        message: error.response.data.Data,
+                        type: 'error'
+                      })
+                    }
                   }
-                } else if (error.response.data.Data) {
-                  var uniqueMsgErr = 'A problem occured.'
-                  if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsgErr))) {
-                    // only show it once..
-                    self.$notify({
-                      title: uniqueMsgErr,
-                      message: error.response.data.Data,
-                      type: 'error'
-                    })
-                  }
+                } else {
+                  self.$onError(error)
                 }
-              } else {
-                self.$onError(error)
-              }
-            })
+              })
+            }
+            if (basicAuth !== null || window.vueAuth.getToken()) { // TODO: If in Dev
+                // OK we got a username / password...
+              fctRefresh()
+            } else {
+                // Not logged in, but maybe we have an ssh key ?
+              self.$httpApi.get(window.apiUrl + '/sshkeys?action=test&loc=app').then((response) => {
+                if (response.data.Data.indexOf('SSH Is Valid') >= 0) {
+                  fctRefresh()
+                  state.repoState.sshKeyMissing = false
+                } else {
+                  state.isLoaded = true
+                  self.$store.commit(types.REPO_STATE_UPATE, 6) // No SSH Key ?
+                }
+              })
+              .catch((error) => {
+                window.vm.$store.commit('REFRESH_SETTINGS', state) // we still want to refresh settings, for offline version...
+                state.repoState.sshKeyMissing = true
+                if (error && error.response && error.response.status === 504) {
+                  state.isLoaded = true
+                  self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
+                  state.inet = false
+                } else {
+                  state.isLoaded = true
+                  self.$store.commit(types.REPO_STATE_UPATE, 6) // all good
+                  state.isLoaded = true
+                }
+              })
+            }
+            // refreshSettings()
           }
-          if (basicAuth !== null || window.vueAuth.getToken()) { // TODO: If in Dev
-              // OK we got a username / password...
-            fctRefresh()
-          } else {
-              // Not logged in, but maybe we have an ssh key ?
-            self.$httpApi.get(window.apiUrl + '/sshkeys?action=test&loc=app').then((response) => {
-              if (response.data.Data.indexOf('SSH Is Valid') >= 0) {
-                fctRefresh()
-                state.repoState.sshKeyMissing = false
-              } else {
-                state.isLoaded = true
-                self.$store.commit(types.REPO_STATE_UPATE, 6) // No SSH Key ?
-              }
-            })
-            .catch((error) => {
-              window.vm.$store.commit('REFRESH_SETTINGS', state) // we still want to refresh settings, for offline version...
-              state.repoState.sshKeyMissing = true
-              if (error && error.response && error.response.status === 504) {
-                state.isLoaded = true
-                self.$store.commit(types.REPO_STATE_UPATE, 0) // all good
-                state.inet = false
-              } else {
-                state.isLoaded = true
-                self.$store.commit(types.REPO_STATE_UPATE, 6) // all good
-                state.isLoaded = true
-              }
-            })
+        })
+        .catch((error) => {
+          if (retry <= 1) {
+            retry++
+            return setTimeout(function () {
+              fctRetry()
+            }, 5000)
           }
-          // refreshSettings()
-        }
-      })
-      .catch((error) => {
-        try {
-          state.isLoaded = true
-          if (error.response && error.response.status === 500) {
+          try {
+            state.isLoaded = true
+            if (error.response && error.response.status === 500) {
+              self.$store.commit(types.REPO_STATE_UPATE, 5) // State 5 = no .git/config file....
+            } else {
+              self.$onError(error)
+            }
+          } catch (ee) {
             self.$store.commit(types.REPO_STATE_UPATE, 5) // State 5 = no .git/config file....
-          } else {
-            self.$onError(error)
           }
-        } catch (ee) {
-          self.$store.commit(types.REPO_STATE_UPATE, 5) // State 5 = no .git/config file....
-        }
-      })
-    } catch (f) {
+        })
+      } catch (f) {
+      }
     }
+    fctRetry()
   }
 }
 

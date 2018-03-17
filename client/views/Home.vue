@@ -10,39 +10,71 @@
           <div v-if="project && project.websites">
               <div v-if="selectedWebsite">
 
-                  <h1 class="is-title is-bold">{{ pkg.name.replace('-', ' ').replace('CMS', ' CMS') }}</h1>
+                <article class="tile is-child box scrollable floatleft fullw">
+                    <h1 class="is-title is-bold">{{ pkg.name.replace('-', ' ').replace('CMS', ' CMS') }}</h1>
 
-                  <p>
-                    <strong>{{ pkg.description }}</strong>
-                  </p>
+                    <p>
+                      <strong>{{ pkg.description }}</strong>
+                    </p>
 
-                  <br/>
-                  <h2 class="is-title">Selected website: {{selectedWebsite.title}}</h2>
-
-                  <div v-if="isRepoUpdating()">
-                    <p>Please wait, we are trying to gather latest updates on your website...</p>
-                  </div>
-
-                  <div v-if="isRepoUpdated()">
-                    <p>Start designing and adding content to your website by using the left toolbar in the design section.</p>
-                    <p>Select new theme, without code changes</p>
-                  </div>
-
-                  <div v-if="isRepoMissing()">
-                    <p>There is an error with your repository configuration. We could not sync from it</p>
-                  </div>
-
-                  <br/>
-
-                  <div v-if="repoUrl">
                     <br/>
-                    Your current Repository Informations: <br/><br/>
-                    Repository: {{ repoUrl }}
+                    <h4 class="is-title">Selected website: <br/>{{selectedWebsite.title}}</h4>
+
+                    <div v-if="isRepoUpdating()">
+                      <p>Please wait, we are trying to gather latest updates on your website...</p>
+                    </div>
+
+                    <div v-if="isRepoUpdated()">
+                      <p>Start designing and adding content to your website by using the left toolbar in the design section.</p>
+                      <p>Add blog content using the Blog menu item.</p>
+                    </div>
+
+                    <div v-if="isRepoMissing()">
+                      <p>There is an error with your repository configuration. We could not sync from it</p>
+                    </div>
+
                     <br/>
-                    Branch: {{ repoState.Branch }}
+
+                    <div v-if="repoUrl">
+                      <br/>
+                      Your current Repository Informations: <br/><br/>
+                      <div v-if="repoUrl !== 'hidden'">Repository: {{ repoUrl }}<br/></div>
+                      Branch: {{ repoState.Branch }}
+                      <br/>
+                    </div>
+
                     <br/>
-                  </div>
+                </article>
+                <article class="tile is-child box scrollable floatleft marginpad fullw">
+                    <h3 class="is-title is-bold">Share your website.</h3>
+
+                    <div>
+                      <label class="label floatleft">Website Preview Url</label><br/>
+                      <br/>
+                      <div class="field has-addons floatleft fullwidth">
+                        <p class="control is-expanded">
+                          <input class="fullwidth" type="text" v-model="websiteUrl" readonly/>
+                        </p>
+                      </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <div>
+                      <label class="label floatleft">Code</label><br/>
+                      <br/>
+                      <div class="field has-addons floatleft fullwidth">
+                        <p class="control is-expanded">
+                          <input class="fullwidth" type="text" v-model="selectedWebsite.code" readonly/>
+                        </p>
+                      </div>
+                    </div>
+                    <br/>
+
+                </article>
+
               </div>
+
+
               <div v-else="selectedWebsite">
                 <div class="box box-template" v-for="item in project.websites"  style="min-height:300px; height:auto;">
                   <div class="template-thumbnails">
@@ -61,8 +93,8 @@
                             -->
                         </div>
                         <div class="float-right width-50 small-leftmargin">
-                            <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile" @click="selectWebsite(item)">
-                              Edit
+                            <div class="button button-site is-primary is-outlined nav-item" @click="selectWebsite(item)">
+                              Select
                             </div>
                         </div>
                       </div>
@@ -222,6 +254,9 @@ export default {
       selectedWebsite: 'selectedWebsite',
       selectedProject: 'selectedProject'
     }),
+    websiteUrl: function () {
+      return window.goHostUrl
+    },
     isLoaded: function () {
       return this.$store.state.app.isLoaded
     },
@@ -240,6 +275,9 @@ export default {
     repoUrl: function () {
       if (this.$store.state.app.repoState.hasOwnProperty('url')) {
         if (this.$store.state.app.repoState.hasOwnProperty('url') !== undefined && this.$store.state.app.repoState.hasOwnProperty('url') !== null && this.$store.state.app.repoState.hasOwnProperty('url') !== '') {
+          // if (this.$store.state.app.repoState.url === 'hidden') {
+          //  return ''
+          // }
           return this.$store.state.app.repoState.url
         }
       }
@@ -281,6 +319,19 @@ export default {
 <style lang="scss" scoped>
 
 @import '~bulma/sass/utilities/variables';
+
+.floatleft {
+  float: left;
+}
+.marginpad {
+  margin-left:30px!important;
+}
+.fullw {
+  width: 45%;
+}
+.fullwidth {
+  width: 100%;
+}
 
 .is-title {
   text-transform: capitalize;

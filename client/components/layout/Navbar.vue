@@ -119,11 +119,11 @@
             </a>
             -->
 
-            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item" :disabled="(!(repoState.pending == true))">
+            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing))" @click="saveAndPushModal()" class="navheighfix button is-primary is-outlined nav-item" :disabled="(!(repoState.pending == true))">
                 Publish
             </a>
 
-            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="saveModal()" class="navheighfix button is-primary is-outlined nav-item">
+            <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing))" @click="saveModal()" class="navheighfix button is-primary is-outlined nav-item">
                 Save
             </a>
 
@@ -133,7 +133,7 @@
               Logout
           </a>
 
-          <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing()))" @click="previewWebsite()" class="navheighfix button is-primary is-outlined nav-item">
+          <a v-if="(((hasSession() || !isKeyMissing()) && !isWebsite) || (hasSession() && isSavePushAvailOrisTestMissing))" @click="previewWebsite()" class="navheighfix button is-primary is-outlined nav-item">
               Preview
           </a>
 
@@ -241,6 +241,31 @@ export default {
       getBasicAuth: 'getBasicAuth',
       isWebsite: 'isWebsite'
     }),
+    isSavePushAvailOrisTestMissing () {
+      if (!this.isLoggedIn) {
+        return false
+      }
+      if (this.$store.state.app.website) {
+        if (this.$store.state.app.websiteId === null || this.$store.state.app.websiteId === undefined) {
+          // if we clicked on change website this must be removed
+          return false
+        }
+      }
+
+      var githubObj = this.github
+      if (!githubObj) {
+        // No Git Login
+        if (!this.isKeyMissing()) {
+          return true
+        } else {
+          return true
+          // return false
+        }
+      } else {
+        // got git access
+        return true
+      }
+    },
     getSelectedWebsiteName: function () {
       return this.selectedWebsite
     },
@@ -369,30 +394,6 @@ export default {
     isSavePreviewAvail () {
       if (!this.isTestMissing()) {
         return false
-      }
-    },
-    isSavePushAvailOrisTestMissing () {
-      if (!this.isLoggedIn) {
-        return false
-      }
-      if (this.$store.state.app.website) {
-        if (this.$store.state.app.websiteId === null || this.$store.state.app.websiteId === undefined) {
-          // if we clicked on change website this must be removed
-          return false
-        }
-      }
-
-      var githubObj = this.github
-      if (!githubObj) {
-        // No Git Login
-        if (!this.isKeyMissing()) {
-          return true
-        } else {
-          return false
-        }
-      } else {
-        // got git access
-        return true
       }
     },
     isSavePushAvail () {

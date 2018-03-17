@@ -104,12 +104,15 @@ export const refreshUser = ({ commit }, obj) => {
     window.localStorage.removeItem('selectedProject')
 
     if (!state.app.isLoaded) {
+      console.error('NOT LOADED 1')
       let raw = state.github || window.localStorage.getItem('github')
       if (typeof raw === 'string') {
         state.github = JSON.parse(raw)
       } else {
         state.github = raw
       }
+      console.error('NOT LOADED 2')
+      console.error(state.github)
       // var $gitobj = this.$github
 
       state.app.sidebarglobal.opened = false
@@ -118,12 +121,15 @@ export const refreshUser = ({ commit }, obj) => {
       state.app.sidebar.opened = true
       state.app.sidebar.hidden = false
       // self.selectWebsite()
+      console.error('NOT LOADED 3')
       refreshConfig(state)
       // state.app.isLoaded = true
     }
   } else {
     // Hosted Version
+    console.error('NOT LOADED TEST SESSION?')
     if (state.session && state.session.token) {
+      console.error('NOT LOADED TEST SESSION AA?')
       var h = { 'Authorization': 'Bearer ' + state.session.token }
       // request it with headers an param
       vue.$http.get(window.websiteapiUrl + '/customer/v1/websites/me',
@@ -134,19 +140,26 @@ export const refreshUser = ({ commit }, obj) => {
         var lstProjects = response.data.projects
         var defProject = response.data.defaultProject
         var hasWebsites = false
+        console.error('NOT LOADED TEST SESSION BB?')
         state.app.account = response.data.accountId
         if (state.app.project && state.project.app.projectId) {
+          console.error('NOT LOADED TEST SESSION CC?')
           if (!(lstProjects.hasOwnProperty(state.app.project.projectId))) {
             state.app.project = null
           }
         }
+        console.error('NOT LOADED TEST SESSION DD?')
         if (defProject === null || defProject === undefined) {
           defProject = null
         }
+        console.error('NOT LOADED TEST SESSION EE?')
+        console.error(state.app.project)
         if (state.app.project == null) {
-          if (defProject !== null) {
+          console.error('NOT LOADED TEST SESSION TEST DEF PROJECT??')
+          console.error(defProject)
+          if (defProject && defProject !== null) {
             // fetch default project...
-            console.error('GET PROJECTS')
+            console.error('GET PROJECTS ?? using ' + window.websiteapiUrl)
             vue.$http.get(window.websiteapiUrl + '/api/projects/v1/' + defProject,
               {
                 headers: h
@@ -246,15 +259,26 @@ export const refreshUser = ({ commit }, obj) => {
               // state.app.isLoaded = true
             })
           } else {
+            console.error('delete select webiste aaa')
             window.localStorage.removeItem('selectedWebsite')
             window.localStorage.removeItem('selectedProject')
+            console.error('delete select webiste bbb')
             if (callback) {
+              console.error('delete select webiste bbbcccc')
               callback()
             } else {
             }
             state.app.isLoaded = true
+
+            if (window.vm._route.path !== '/templates') {
+              if (window.vm._route.path === '/') {
+              } else {
+                window.location.href = '/'
+              }
+            }
           }
         } else {
+          console.error('delete select webiste bbbefefe')
           window.localStorage.removeItem('selectedWebsite')
           window.localStorage.removeItem('selectedProject')
           if (callback) {
@@ -262,9 +286,17 @@ export const refreshUser = ({ commit }, obj) => {
           }
           // refreshConfig(state)
           state.app.isLoaded = true
+
+          if (window.vm._route.path !== '/templates') {
+            if (window.vm._route.path === '/') {
+            } else {
+              window.location.href = '/'
+            }
+          }
         }
       })
       .catch((error) => {
+        console.error('delete select webiste GOT ERROR A')
         window.localStorage.removeItem('selectedWebsite')
         window.localStorage.removeItem('selectedProject')
         var msg = ''

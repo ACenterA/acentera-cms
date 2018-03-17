@@ -456,9 +456,11 @@ if (!isOauthCallback) {
         }
       }
       if (!(store.getters.app.websiteId)) {
+        console.error('TEST ROUTE 1 ')
         if (!(route.path.indexOf('template') >= 0 || route.path === '/')) {
           console.error('SET HIDDEN A ?')
           if (store.getters.app.isLoaded) {
+            console.error('SET HIDDEN A 1a?')
             // THIS IS BAD I KNOW...
             // This is hack, ie end-user click on change site, then hit the back button ...
             // the left menu stay hidden, this fixes that.
@@ -474,8 +476,15 @@ if (!isOauthCallback) {
             return
           }
         }
-
+        console.error('TT SET HIDDEN A 1azzzzz?')
+        console.error(route)
+        console.error(route.path)
         if (route.path === '/') {
+          console.error('SET HIDDEN TEST !?')
+        } else {
+          console.error('SET HIDDEN TEST 2 !?')
+        }
+        if (route && route.path === '/') {
           console.error('SET HIDDEN A2 ?')
           // THIS IS BAD I KNOW...
           // This is hack, ie end-user click on add new template..then hit the back button  or (navigator history which is the most pain)...
@@ -500,6 +509,13 @@ if (!isOauthCallback) {
               }
             }
           }
+        }
+      } else {
+        console.error('SET HIDDEN A ERRRA ?')
+        if (store.getters.app.isLoaded) {
+          console.error('SET HIDDEN A 1 LOADED a?')
+        } else {
+          console.error('SET HIDDEN A 1 NOT LOADED a?')
         }
       }
     }
