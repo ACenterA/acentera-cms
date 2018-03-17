@@ -453,6 +453,7 @@ export default {
           console.error('ta : ' + response.data.success)
           console.error('1 ta : ' + (response.data.success === true))
           if (response.data.type) {
+            console.error('reject using error : ' + response.data.type)
             return reject(new Error(response.data.type))
           }
           if (response.data.message) {
@@ -462,6 +463,8 @@ export default {
           }
           return reject(new Error('invalid_response'))
         }).catch((error) => {
+          console.error('ERRROR REJCT')
+          console.error(error)
           reject(error)
         })
       })
@@ -495,6 +498,11 @@ export default {
       }).catch((error) => {
         console.error('got error')
         console.error(error)
+        console.error('got error msg')
+        if (error && error.message) {
+          console.error('got error msg 1 ' + error.message)
+          self.txterror = error.message
+        }
         self.showConfirmCnameModal = false
         self.showConfirmModal = true
       })

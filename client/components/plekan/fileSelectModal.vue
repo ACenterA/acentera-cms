@@ -119,6 +119,17 @@ export default {
         return null
       }
 
+      console.error('refreshing images ??? a1a')
+      if (this.$store.state.app.website) {
+        console.error('refreshing images ??? a1a erra')
+        // Is Hosted Version ensure, a website is selected..
+        if (!this.$store.state.app.websiteId) {
+          console.error('refreshing images ??? a1a fff')
+          return null
+        }
+      }
+      console.error('refreshing images ??? a1b')
+
       var iterateFolder = function (first, data, acc, cb) {
         var files = data.Files
         var folders = data.Folders
