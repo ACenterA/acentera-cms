@@ -75,8 +75,14 @@ export const SET_WEBSITE_SSO_TOKEN = (state, obj) => {
   console.error('set of coooke using')
   console.error(obj)
   state.app.sso_token = obj.cookie_value
-  console.error('set of coooke name :  acentera_code_sso on ' + obj.domain)
+  console.error('AAAAAAAAAAAAA set of coooke name :  acentera_code_sso on ' + obj.domain)
+  console.error('BBBBBBBBBBBBB set of coooke name :  acentera_code_sso on ' + obj.domain)
   window.vm.$cookie.set('acentera_code_sso', obj.cookie_value, {expires: 1, domain: obj.domain})
+
+  if (obj.fct) {
+    console.error('CCCCCC')
+    obj.fct()
+  }
 }
 
 export const setGit = (state, g) => {

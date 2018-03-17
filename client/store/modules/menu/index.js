@@ -17,6 +17,13 @@ import design from './design'
 const state = {
   items: [
     {
+      name: 'Informations',
+      path: '/',
+      meta: {
+        icon: 'fa-home'
+      }
+    },
+    {
       name: 'Login',
       path: '/login',
       meta: {
