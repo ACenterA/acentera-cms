@@ -105,13 +105,17 @@ export default {
       var self = this
 
       self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: link, lang: langCode }, { }).then((res) => {
-        console.error('success 1 s')
+        console.error('aa success 1 s')
         console.error(res.data)
         console.error(itm.item)
         itm.item['frontMatter'] = {}
         for (var p in res.data) {
           if (res.data.hasOwnProperty(p)) {
             if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
+              // This is bad
+              if (p === 'date') {
+                itm.item['pubDate'] = res.data[p]
+              }
               itm.item[p] = res.data[p]
             } else {
               itm.item['frontMatter'][p] = res.data[p]

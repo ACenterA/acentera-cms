@@ -32,6 +32,8 @@ const refreshConfig = (state) => {
 }
 
 export const selectPost = ({ commit }, obj) => {
+  console.error('received select post ? on ')
+  console.error(obj)
   if (obj.item) {
     obj.item.selected = true
 
@@ -41,16 +43,19 @@ export const selectPost = ({ commit }, obj) => {
         window.vm.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
       }
     }
+    console.error('commit of SELECT+POST? of ')
+    console.error(obj.item)
     commit(types.SELECT_POST, obj.item)
     // TOOD: What about :1313/ replacement variables ???
     window.vm.$store.state.app.selectedItem = obj
-
+    // window.vm.$store.state.app.topbar.selectedPost = obj.item
     var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
     var langPrefix = '/' + selectedLangItem.id
     if (window.vm.$store.state.app.language === window.vm.$store.state.app.languageSelected) {
       langPrefix = '' // no prefix, this is the default site...
     }
 
+    // window.vm.$store.state.app.topbar.selectedPost = obj.item
     if (obj.item.link.indexOf('localhost:') >= 0 && obj.item.link.indexOf('localhost:') <= 8) {
       if (langPrefix !== '') {
         if (!langPrefix.endsWith('/')) {

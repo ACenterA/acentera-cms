@@ -359,10 +359,17 @@ const mutations = {
     // window.vm.$store.commit('REFRESH_SETTINGS', state) // we still want to refresh settings, for offline version...
   },
   [types.SELECT_POST] (state, item) {
+    console.error('recieved item of a')
+    console.error(item)
+    console.error('recieved state of ')
+    console.error(state)
+    // unset previously selected post (sidebar blog selected menu list)
     if (state.topbar.selectedPost) {
       state.topbar.selectedPost.selected = false
     }
+    state.topbar.selectedPost = null
     state.topbar.selectedPost = item
+    state.topbar.selectedPost.selected = true
   },
   [types.SITE_SETTINGS] (state, update) {
     state.settings = update
@@ -446,6 +453,7 @@ const mutations = {
   },
   [types.SITE_SELECT_LANG] (state, update) {
     state.languageSelected = update
+    console.error('set language item to ' + update)
     window.localStorage.setItem('languageSelected', update)
   },
   [types.SITE_AVAILABLE_LANG] (state, update) {
@@ -466,6 +474,7 @@ const mutations = {
         // self.allSettings = result
 
         var selectedLang = window.localStorage.getItem('languageSelected')
+        console.error('RECEIVED selectedLang  selectedLang  lang.. is ' + selectedLang)
         var selectedLangObj = null
         var setDefaultLang = null
         var firstlang = null
@@ -478,7 +487,9 @@ const mutations = {
         }
         for (var i = 0; i < langkeys.length; i++) {
           var tmpLang = result.languages[langkeys[i]]
+          console.error('tmpLang a')
           if (tmpLang) {
+            console.error('tmpLang b')
             tmpLang.id = langkeys[i]
             tmpLang.value = langkeys[i]
             TempAvailablelanguageshash[langkeys[i]] = tmpLang
@@ -488,6 +499,7 @@ const mutations = {
             // }
             if (firstlang === null) {
               firstlang = result.languages[langkeys[i]].languagename
+              console.error('tmpLang first lang.. is ' + firstlang)
             }
 
             if (disabledLanguagesHash.hasOwnProperty(langkeys[i])) {
@@ -504,27 +516,40 @@ const mutations = {
 
             // In case we changed to french language and refresh browser
             // we take the last localStorage language selected
+            console.error('does ' + selectedLang + 'is in ' + result.languages[langkeys[i]].languagename)
             if (selectedLang === result.languages[langkeys[i]].languagename) {
+              console.error('YES IT DOES')
               selectedLang = result.languages[langkeys[i]].languagename
-              selectedLangObj = result.languages[langkeys[i]].languagename
+              selectedLangObj = result.languages[langkeys[i]] // .languagename
             }
             TempAvailablelanguages.push(tmpLang)
           }
         }
         if (!setDefaultLang) {
+          console.error('sellected lang set default a')
           setDefaultLang = firstlang
         }
         console.error('sellected lang test')
         if (!(selectedLang && selectedLangObj)) {
+          console.error('sellected lang test A')
           selectedLang = null
         } else {
+          console.error('sellected lang test B')
+          console.error(selectedLangObj)
+          console.error(selectedLangObj.enable)
           if (!selectedLangObj.enable) { // this language is not enabled anymore..
+            console.error('sellected lang test disabled...')
             selectedLang = null
+          } else {
+            // selectedLang = selectedLangObj
           }
         }
+        console.error('sellected lang test C using ' + selectedLang)
         if (!selectedLang) {
+          console.error('sellected lang test SET DEFAULT... to ' + setDefaultLang)
           selectedLang = setDefaultLang
         }
+
         // self.availableLanguages = TempAvailablelanguages
         // self.availableLanguagesHash = TempAvailablelanguageshash
         self.$store.commit(types.SITE_AVAILABLE_LANG, { languages: TempAvailablelanguages, languagesHash: TempAvailablelanguageshash })
@@ -596,6 +621,17 @@ const mutations = {
                         self.$notify({
                           title: uniqueMsgAcc,
                           message: 'The Git account you are logged with, is not able to perform refresh or updates. Please validate your git account.',
+                          type: 'warning'
+                        })
+                      }
+                      self.$store.commit(types.REPO_STATE_UPATE, 7) // need to setup SSH Key for the user, or wrong login ?
+                    } else {
+                      var uniqueMsgAccGitLog = 'GIT Login required.'
+                      if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsgAccGitLog))) {
+                        // only show it once..
+                        self.$notify({
+                          title: uniqueMsgAccGitLog,
+                          message: 'You must login with your Git Account to perform refresh or updates. Please login first using the login from the left menu.',
                           type: 'warning'
                         })
                       }
