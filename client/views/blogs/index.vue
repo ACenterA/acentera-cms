@@ -281,7 +281,6 @@ export default {
         // TODO: Find a better way ie: ajax polling.. check for E-Tag change up to X times?
         // well we actually did a force rebuild in hugo
         // setTimeout(function () {
-        self.selectPost(window.vm.$store.state.app.selectedItem)
 
         var basicAuth = self.$store.getters.getBasicAuth
         self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', {
@@ -298,19 +297,25 @@ export default {
           }
           window.vm.$store.commit('REFRESH_SETTINGS', self.$store.state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
 
-          self.$notify({
-            title: 'Saved.',
-            message: 'Successfully saved your new awesome content.',
-            type: 'success'
-          })
+          setTimeout(function () {
+            self.selectPost(window.vm.$store.state.app.selectedItem)
+            self.$notify({
+              title: 'Saved.',
+              message: 'Successfully saved your new awesome content.',
+              type: 'success'
+            })
+          }, 1000)
         })
         .catch((error) => {
           console.error(error)
-          self.$notify({
-            title: 'Saved.',
-            message: 'Successfully saved your new awesome content.',
-            type: 'success'
-          })
+          setTimeout(function () {
+            self.selectPost(window.vm.$store.state.app.selectedItem)
+            self.$notify({
+              title: 'Saved.',
+              message: 'Successfully saved your new awesome content.',
+              type: 'success'
+            })
+          }, 1000)
         })
 
         // }, 1000)
@@ -326,7 +331,63 @@ export default {
       // TODO: Validate no pending changes ?
 
       // Refresh selected post link ( it will get the proper language item)
-      self.selectPost(window.vm.$store.state.app.selectedItem)
+      var tmpItem = self.$store.state.app.selectedItem
+      if (tmpItem) {
+        var itm = tmpItem.item
+
+        var link = itm.link
+        var selectedLangItem = self.$store.state.app.languages.languagesHash[self.$store.state.app.languageSelected]
+        var langCode = '' + selectedLangItem.id
+        if (self.$store.state.app.language === self.$store.state.app.languageSelected) {
+          langCode = '' // no prefix, this is the default site...
+        }
+
+        var type = 'blogs'
+        if (link.indexOf('localhost:') >= 0 && link.indexOf('localhost:') <= 8) {
+          link = link.replace('localhost:1313/', '')
+        } else {
+          // link = link // link = window.goHostUrl + langPrefix + link
+        }
+        while (link.startsWith('//')) {
+          link = link.substring(1)
+        }
+        if (link.startsWith('/' + type + '/')) {
+          link = link.substring(('/' + type + '/').length)
+        }
+        while (link.endsWith('/')) {
+          link = link.substring(0, link.length - 1)
+        }
+
+        self.$httpApi.post(window.apiUrl + '/frontmatter', { type: type, id: link, lang: langCode }, { }).then((res) => {
+          console.error('success 1 s')
+          console.error(res.data)
+          console.error(window.vm.$store.state.app.selectedItem.item)
+          window.vm.$store.state.app.selectedItem.item['frontMatter'] = {}
+          for (var p in res.data) {
+            if (res.data.hasOwnProperty(p)) {
+              if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
+                console.error('aa received value of ' + p)
+                if (p === 'date') {
+                  console.error('set of pubDate to ' + res.data[p])
+                  window.vm.$store.state.app.selectedItem.item['pubDate'] = res.data[p]
+                }
+                window.vm.$store.state.app.selectedItem.item[p] = res.data[p]
+              } else {
+                window.vm.$store.state.app.selectedItem.item['frontMatter'][p] = res.data[p]
+              }
+            }
+          }
+          console.error('updated item')
+          console.error(window.vm.$store.state.app.selectedItem.item)
+          self.selectPost(window.vm.$store.state.app.selectedItem) // window.vm.$store.state.app.selectedItem)
+          // self.refreshData() // refresh left sidebar...
+        })
+        .catch((error) => {
+          self.$onError(error)
+        })
+      } else {
+        self.refreshData() // refresh left sidebar...
+      }
     })
     this.refreshData()
   },
@@ -556,13 +617,17 @@ export default {
             for (var p in res.data) {
               if (res.data.hasOwnProperty(p)) {
                 if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
+                  if (p === 'date') {
+                    console.error('updating pubDate ?')
+                    curItem['pubDate'] = res.data[p]
+                  }
                   curItem[p] = res.data[p]
                 } else {
                   curItem['frontMatter'][p] = res.data[p]
                 }
               }
             }
-            console.error('updated item')
+            console.error('updated item 01 a')
             console.error(curItem)
             curItem['pubDate'] = curItem['pubDate'] || curItem['date'] // pubDate required for sidebar...
             self.$store.state.app.sidebarblogData.json.unshift(curItem)
@@ -577,6 +642,11 @@ export default {
             })
 
             self.selectPost({ vue: self, item: curItem, retry: 5 })
+
+            // TODO: Should be better implementation
+            setTimeout(function () {
+              self.refreshData() // refresh left sidebar...
+            }, 1000)
           })
           .catch((error) => {
             console.error(error.stack)
@@ -586,8 +656,13 @@ export default {
           //  console.error('selectPost using item 1 : ')
           console.error(newPost)
           self.selectPost({ vue: this, item: newPost, retry: 5 })
+
+          // TODO: Should be better implementation
+          setTimeout(function () {
+            self.refreshData() // refresh left sidebar...
+          }, 1000)
           // }
-        }, 500)
+        }, 600)
 
         // Returned statement in setTimeout
       })
