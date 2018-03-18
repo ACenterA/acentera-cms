@@ -123,6 +123,7 @@ const mutations = {
     var state = self.$store.state
 
     // if (state.website || state.website) {
+    window.vm.$cookie.set('acentera_code_sso', '', {secure: true, expires: 1, domain: 'acentera.com'})
     if (state.session && state.session.token) {
       var h = { 'Authorization': 'Bearer ' + state.session.token }
       // request it with headers an params
@@ -134,7 +135,6 @@ const mutations = {
       ).then((response) => {
         // force cookie timeout
         document.cookie = 'auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-
         // if (response.data.error !== '') {
         self.$notify({
           title: 'Successfully logged out.',
@@ -316,6 +316,18 @@ const mutations = {
         console.error('received website info')
         console.error(response.data)
         console.error('SET WEBSITE INFO AAA')
+        if (response.data && response.data.errorMessage) {
+          self.$notify({
+            title: 'problem occured while fetching website informations.',
+            message: 'Could not find website.',
+            type: 'warning'
+          })
+          return setTimeout(function () {
+            window.localStorage.removeItem('selectedWebsite')
+            window.localStorage.removeItem('selectedProject')
+            window.location.href = '/'
+          }, 8000)
+        }
         if (response.data && response.data.websiteId === state.websiteId) {
           console.error('SET WEBSITE INFO BBBB')
           window.vm.$store.state.app.project['websites'][state.websiteId] = response.data

@@ -10,7 +10,7 @@ export const clearSession = (state, origState) => {
   // website only
   if (state.app.website) {
     // Remove cookie, user cannot see preview after this..
-    window.vm.$cookie.set('acentera_code_sso', '', {expires: -1, domain: 'acentera.com'})
+    window.vm.$cookie.set('acentera_code_sso', '', {secure: true, expires: -1, domain: 'acentera.com'})
 
     console.error('clear session b')
     if (origState) {
@@ -77,7 +77,7 @@ export const SET_WEBSITE_SSO_TOKEN = (state, obj) => {
   state.app.sso_token = obj.cookie_value
   console.error('AAAAAAAAAAAAA set of coooke name :  acentera_code_sso on ' + obj.domain)
   console.error('BBBBBBBBBBBBB set of coooke name :  acentera_code_sso on ' + obj.domain)
-  window.vm.$cookie.set('acentera_code_sso', obj.cookie_value, {expires: 1, domain: obj.domain})
+  window.vm.$cookie.set('acentera_code_sso', obj.cookie_value, {secure: true, expires: 1, domain: obj.domain})
 
   if (obj.fct) {
     console.error('CCCCCC')

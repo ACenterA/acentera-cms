@@ -45,8 +45,28 @@
 
                     <br/>
                 </article>
+
                 <article class="tile is-child box scrollable floatleft marginpad fullw">
-                    <h3 class="is-title is-bold">Share your website.</h3>
+                    <h3 class="is-title is-bold">Website Informations</h3>
+
+                    <div>
+                      <label class="label floatleft">Website Live Url</label><br/>
+                      <br/>
+                      <div class="field has-addons floatleft fullwidth">
+                        <p class="control is-expanded">
+                          <input class="fullwidth" type="text" v-model="websitePublicUrl" readonly/>
+                        </p>
+                      </div>
+                    </div>
+                    <br/>&nbsp;<br/>
+                    <div class="button button-site is-primary is-outlined nav-item" @click="gotoWebsite()">
+                      View Website
+                    </div>
+                    <br/>
+                    <br/>
+                </article>
+                <article class="tile is-child box scrollable floatleft marginpad fullw">
+                    <h3 class="is-title is-bold">Share your preview</h3>
 
                     <div>
                       <label class="label floatleft">Website Preview Url</label><br/>
@@ -69,7 +89,12 @@
                       </div>
                     </div>
                     <br/>
-
+                    <br/>
+                    <i>Since you are logged in, you will not be asked the preview code</i>
+                    <br/><br/>
+                    <div class="button button-site is-primary is-outlined nav-item" @click="gotoPreviewWebsite()">
+                      View Website Preview
+                    </div>
                 </article>
 
               </div>
@@ -143,7 +168,7 @@
                           <br/>
                           <br/>
                           <router-link :to="{name: 'Templates'}">
-                          <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile">
+                          <div class="button button-site is-primary is-outlined nav-item">
                               <span>Create your website</span>
                           </div>
                           </router-link>
@@ -254,6 +279,23 @@ export default {
       selectedWebsite: 'selectedWebsite',
       selectedProject: 'selectedProject'
     }),
+    websitePublicUrl: function () {
+      if (this.selectedWebsite && this.selectedWebsite.domains) {
+        console.error(' domain tt 1')
+        console.error(this.selectedWebsite)
+        for (var v in this.selectedWebsite.domains) {
+          if (this.selectedWebsite.domains.hasOwnProperty(v)) {
+            var dom = this.selectedWebsite.domains[v]
+            if (dom.primary) {
+              return 'https://' + v
+            }
+          }
+        }
+        return window.goHostUrl.replace('.workspace.acentera.com', '.web.acentera.com')
+      } else {
+        return window.goHostUrl.replace('.workspace.acentera.com', '.web.acentera.com')
+      }
+    },
     websiteUrl: function () {
       return window.goHostUrl
     },
@@ -293,6 +335,12 @@ export default {
       'selectWebsite',
       'refreshUser'
     ]),
+    gotoWebsite () {
+      window.open(this.websitePublicUrl, '_blank')
+    },
+    gotoPreviewWebsite () {
+      window.open(window.goHostUrl, '_blank')
+    },
     isRepoUpdating () {
       return (this.repoState.updating === 1)
     },
@@ -328,6 +376,7 @@ export default {
 }
 .fullw {
   width: 45%;
+  margin-top: 30px!important;
 }
 .fullwidth {
   width: 100%;
