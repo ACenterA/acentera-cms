@@ -458,10 +458,12 @@ export default {
           }
           if (response.data.message) {
             self.txterror = 'Found mistmatched value of ' + response.data.message
+            return reject(self.txterror)
           } else {
             self.txterror = 'No entries found. Please wait few minutes.'
+            return reject(self.txterror)
           }
-          return reject(new Error('invalid_response'))
+          // return reject(new Error('invalid_response'))
         }).catch((error) => {
           console.error('ERRROR REJCT')
           console.error(error)
