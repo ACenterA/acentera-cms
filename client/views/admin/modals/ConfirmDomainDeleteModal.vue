@@ -8,7 +8,7 @@
               Are you sure you want to modify your current website configuration ?
               <br/>
               <br/>
-              This will delete <b>{{ domain }}</b> hostname<br/>
+              This will delete <b>{{ domain }}</b> <br/>
               <br/>
               <br/>
               <br/>

@@ -533,11 +533,6 @@ export default {
         // Lets give 500 milliseconds...
         return setTimeout(function () {
           self.actionPending = false
-          self.$notify({
-            title: 'Success',
-            message: 'Creation successful',
-            type: 'success'
-          })
 
           // if (action === 'new') {
           // only add the post to the sidebar object if new post not new language
@@ -574,6 +569,12 @@ export default {
 
             console.error('selectPost using item : ')
             console.error(curItem)
+
+            self.$notify({
+              title: 'Success',
+              message: 'Creation successful',
+              type: 'success'
+            })
 
             self.selectPost({ vue: self, item: curItem, retry: 5 })
           })

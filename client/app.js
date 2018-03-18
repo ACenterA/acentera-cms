@@ -482,7 +482,7 @@ if (!isOauthCallback) {
         if (route.path === '/') {
           console.error('SET HIDDEN TEST !?')
         } else {
-          console.error('SET HIDDEN TEST 2 !?')
+          console.error('SET HIDDEN TEST 2!?')
         }
         if (route && route.path === '/') {
           console.error('SET HIDDEN A2 ?')
