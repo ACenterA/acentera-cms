@@ -7,7 +7,6 @@ import NProgress from 'vue-nprogress'
 import { sync } from 'vuex-router-sync'
 import App from './App.vue'
 import AppOauth from './AppOauth.vue'
-import router from './router'
 import plekan from './plekan/index.js'
 import store from './store'
 import * as filters from './filters'
@@ -21,6 +20,9 @@ import GitHubAPI from './GitHubAPI'
 import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
 import VueCookie from 'vue-cookie'
+
+import routerImport from './router'
+var router = null
 
 Vue.use(VueCookie)
 
@@ -220,11 +222,15 @@ if (!isOauthCallback) {
       // window.apiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev/api'
       window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev'
 
+      router = routerImport.newRouter('history')
+
       bitbucketClientId = 'mYJjMLHBCjYn4k9Xu2'
       githubClientId = 'dd64a961127f3392159d'
     } else {
       // Enable devtools
       // Local Dev
+      router = routerImport.newRouter('hash')
+
       Vue.config.devtools = true
       window.withCredentials = false
       bitbucketClientId = '9BGHdNKKcppeXRQSSH'
@@ -264,7 +270,7 @@ if (!isOauthCallback) {
         github: {
           clientId: githubClientId, // Iv1.26faaeb37888f8d0',
           redirectUri: currentUrl + '/oauth/github/authorize', // redirectUri: 'http://localhost:8090/oauth/github/authorize', // 8081:api/oauth/github/authorize' // 8090:/oauth/github/authorize' // Your client app URL
-          scope: [ 'admin:repo_hook', 'admin:repo_hook', 'delete_repo', 'repo' ],
+          scope: [ 'admin:repo_hook', 'admin:repo_hook', 'delete_repo', 'repo', 'write:public_key', 'admin:public_key' ],
           defaultUrlParams: ['state', 'client_id', 'redirect_uri'],
           state: function () {
             var val = ((Date.now() + Math.random()) * Math.random()).toString().replace('.', '')
@@ -288,7 +294,12 @@ if (!isOauthCallback) {
   }
 
   // DELETE
+  // alert(router.mode)
+  console.error('router is')
+  // router.mode = 'hash'
+  console.error(router)
   Vue.config.devtools = true
+  /*
   // document.domain = 'acentera.com' // TODO: Use en environment variable ...
   store.commit('setWebsite', true) // weird ?
   window.withCredentials = true
@@ -297,6 +308,7 @@ if (!isOauthCallback) {
 
   bitbucketClientId = 'mYJjMLHBCjYn4k9Xu2'
   githubClientId = 'dd64a961127f3392159d'
+  */
   // DELETE
 
   Vue.prototype.$httpApi = axios.create({
@@ -442,7 +454,6 @@ if (!isOauthCallback) {
   }
 
   window.hasProcessed = false
-
   router.beforeEach((route, redirect, next) => {
     // Siebar logic....
     if (store.getters.app.website) {
@@ -472,6 +483,7 @@ if (!isOauthCallback) {
             store.getters.app.sidebarglobal.hidden = false
             store.getters.app.sidebarglobal.opened = true
             store.getters.app.repoState.isLoaded = false
+            console.error('location href to /')
             window.location.href = '/' // force go back..
             return
           }

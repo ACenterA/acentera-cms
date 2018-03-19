@@ -325,6 +325,7 @@ const mutations = {
           return setTimeout(function () {
             window.localStorage.removeItem('selectedWebsite')
             window.localStorage.removeItem('selectedProject')
+            console.error('locaiton href 82')
             window.location.href = '/'
           }, 8000)
         }
@@ -582,7 +583,7 @@ const mutations = {
             */
 
             var fctRefresh = function () {
-              self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=1', {
+              self.$httpApi.get(window.apiUrl + '/git?action=pull&loc=nav&ts=3', {
                 headers: {
                   'Authorization': basicAuth,
                   'Token': window.vueAuth.getToken()
@@ -644,7 +645,7 @@ const mutations = {
                       self.$notify({
                         title: uniqueMsgErr,
                         message: error.response.data.Data,
-                        type: 'error'
+                        type: 'danger'
                       })
                     }
                   }

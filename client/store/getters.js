@@ -190,7 +190,7 @@ const selectedWebsite = (state) => {
     console.error('selected webiste 06')
     return state.app.websiteId
   }
-  console.error('selected webiste 07')
+  console.error('selected webiste 07 A1')
   return null
 }
 

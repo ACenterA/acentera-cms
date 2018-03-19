@@ -91,18 +91,6 @@ export const refreshUser = ({ commit }, obj) => {
   var state = vue.$store.state
   var self = vue
 
-  if (state.session === null) {
-    return
-  }
-
-  let raw = window.localStorage.getItem('session')
-  if (raw) {
-    var session = JSON.parse(raw)
-    if (Date.now() > Date.parse(session['cookie_expiry'])) {
-      return
-    }
-  }
-
   if (!state.app.website) {
     // Local Dev Version
     window.localStorage.removeItem('selectedWebsite')
@@ -132,6 +120,21 @@ export const refreshUser = ({ commit }, obj) => {
     }
   } else {
     // Hosted Version
+    console.error('refresh user a1 z')
+    if (state.session === null) {
+      console.error('refresh user a2')
+      return
+    }
+
+    console.error('refresh user a3')
+    let raw = window.localStorage.getItem('session')
+    if (raw) {
+      var session = JSON.parse(raw)
+      if (Date.now() > Date.parse(session['cookie_expiry'])) {
+        return
+      }
+    }
+
     console.error('NOT LOADED TEST SESSION?')
     if (state.session && state.session.token) {
       console.error('NOT LOADED TEST SESSION AA?')
@@ -189,6 +192,7 @@ export const refreshUser = ({ commit }, obj) => {
                   // a page reload from bookmark
                   if (state.app.websiteId) {
                     if (window.vm._route.path === '/templates') {
+                      console.error('locatoin href 001')
                       window.location.href = '/' // vm._router.push({ 'path': '/' })
                       return
                     }
@@ -224,6 +228,7 @@ export const refreshUser = ({ commit }, obj) => {
                   if (window.vm._route.path !== '/templates') {
                     if (window.vm._route.path === '/') {
                     } else {
+                      console.error('href local 8')
                       window.location.href = '/'
                     }
                   }
@@ -278,6 +283,7 @@ export const refreshUser = ({ commit }, obj) => {
             if (window.vm._route.path !== '/templates') {
               if (window.vm._route.path === '/') {
               } else {
+                console.error('location href 99')
                 window.location.href = '/'
               }
             }
@@ -295,6 +301,7 @@ export const refreshUser = ({ commit }, obj) => {
           if (window.vm._route.path !== '/templates') {
             if (window.vm._route.path === '/') {
             } else {
+              console.error('locaiton hef 88')
               window.location.href = '/'
             }
           }
