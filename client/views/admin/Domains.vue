@@ -82,7 +82,7 @@
         <div class="tile is-ancestor">
           <div class="tile is-parent">
             <article class="tile is-child box">
-              Only available if you are using the website panel.
+              Only available using the ACenterA hosted version.
             </article>
           </div>
         </div>
