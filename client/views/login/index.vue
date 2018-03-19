@@ -17,14 +17,13 @@
 
           <!-- Left side -->
           <div class="column is-6">
-            <article v-if="isGitHub()"  class="tile is-parent is-5 is-vertical">
+            <article class="tile is-parent is-5 is-vertical">
               <!-- Login tile -->
               <article class="tile is-child is-marginless is-paddingless">
                 <GitHub showGitButtons=false></GitHub>
               </article>
             </article>
           </div>
-
 
           <!-- Right column -->
           <div class="column is-6">
@@ -63,10 +62,10 @@
                  <strong>SSHKeys</strong>
                  <br/>
                  <br/>
-                 <article class="tile is-child">
+                 <article v-if="isGitHub()" class="tile is-child">
                     <p class="control" v-if="!isSshValid()">
                       <a class="button rightfloat is-primary"
-                      @click="createSSHKey()">
+                      @click="createSSHKey()" :disabled="creating">
                       <span>Create SSH Key</span>
                       </a>
                     </p>
@@ -85,6 +84,23 @@
                           <span>Delete SSH Key</span>
                         </a>
                       </p>
+                    </div>
+                 </article>
+                 <article v-if="!isGitHub()" class="tile is-child">
+                    <div v-if="isSshValid()">
+                      <span>Your SSH Key is valid</span>
+                      <br/>
+                      <br/>
+                      <p class="control">
+                        <a class="button leftfloat is-primary" title="Test your ssh key"
+                          @click="testFetch()">
+                          <span>Test SSH Key</span>
+                        </a>
+                      </p>
+                    </div>
+                    <div v-if="!isSshValid()">
+                      Bitbucket doesn't allow anymore to create API Key using their Rest API.<br/>
+                      Create a .ssh/id_rsa inside your application forlder, and add the ssh key to your account in your BitBucket settings.
                     </div>
                  </article>
                 </article>
@@ -195,6 +211,13 @@ export default {
     },
 
     isGitHub: function () {
+      var self = this
+      var $gitobj = this.$github
+      if ($gitobj) {
+        if (self.$store && self.$store.state && self.$store.state.github && self.$store.state.github.logininfo && self.$store.state.github.logininfo.type === 'BitBucket') {
+          return false
+        }
+      }
       return true
     },
     getHealth: function () {
@@ -416,12 +439,21 @@ export default {
               if (self.$store.state.github.logininfo.type === 'BitBucket') {
                 githubPush['accountname'] = self.$store.state.github.logininfo.username
                 githubPush['label'] = 'ACenterA CMS Generated - ' + response.data.Extra
+              } else {
+                githubPush['title'] = 'ACenterA CMS Generated - ' + response.data.Extra
               }
               $gitobj.post(userPostPath, githubPush, function (resp) {
                 if (resp.status === 201 || resp.status === 200) { // 200 = BitBucket success response, 201 = Github success response
                   // SSH Key got created... NICE! Lets fetch
-                  self.testFetch()
-                  self.creating = false
+                  // Leave some time for GitHub to allow the SSH Key ...
+                  setTimeout(function () {
+                    self.testFetch()
+
+                    // allow testFetch to complete ...
+                    setTimeout(function () {
+                      self.creating = false
+                    }, 2000)
+                  }, 2000)
                 }
               }, function (err) {
                 console.error(err)

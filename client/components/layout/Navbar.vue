@@ -75,9 +75,11 @@
                 </div>
 
                 <div v-if="!isWebsite">
+                  <!--
                   <div v-if="hasSession() && isKeyMissing()">
                     <p class="blue">Missing SSH Key.<router-link to="/login" :exact="true"><b>Click here.</b></router-link></p>
                   </div>
+                  -->
                 </div>
 
                 <div v-if="isRepoMissing()">
@@ -304,7 +306,16 @@ export default {
           if (window.previewWebsiteSent === 0) {
             var selectedLangItem = self.$store.state.app.languages.languagesHash[self.$store.state.app.languageSelected]
             window.previewWebsiteSent = -1
-            window.open(window.goHostUrl + '/' + selectedLangItem.id + '/', '_blank')
+
+            // TODO: Find better implementation ...
+            var urlTemp = window.goHostUrl + '/' + selectedLangItem.id + '/'
+
+            // for local development fix, this is ugly ...
+            if (!self.$store.state.app.website) {
+              urlTemp = urlTemp.replace(':8081/', ':1313/') // for local development fix
+            }
+
+            window.open(urlTemp, '_blank')
           }
         }, 300)
       }

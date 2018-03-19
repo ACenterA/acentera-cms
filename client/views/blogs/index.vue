@@ -169,11 +169,33 @@ export default {
           }
           var selectedLangItem = self.$store.state.app.languages.languagesHash[self.$store.state.app.languageSelected]
           window.previewWebsiteSent = -1
+          var urlTemp = window.goHostUrl + item.link
           if (self.$store.state.app.language === selectedLangItem.languagename) {
             // This is default language, do not add the /{langcode} prefix
-            window.open(window.goHostUrl + item.link, '_blank')
+
+            // TODO: Find better implementation ...
+            console.error('selected test A: 2')
+            console.error(window.goHostUrl)
+            console.error(item.link)
+            if (!self.$store.state.app.website) {
+              urlTemp = urlTemp.replace('//localhost:1313', '').replace(':8081/', ':1313/') // our gohugo link contains the whole url which is bad..
+            }
+
+            console.error('selected test A: end')
+            console.error(urlTemp)
+            window.open(urlTemp, '_blank')
           } else {
-            window.open(window.goHostUrl + '/' + selectedLangItem.id + item.link, '_blank')
+            // TODO: Find better implementation ...
+            urlTemp = window.goHostUrl + '/' + selectedLangItem.id + item.link
+            console.error('selected test A: 1')
+            console.error(urlTemp)
+            if (!self.$store.state.app.website) {
+              console.error('selected test G: end')
+              urlTemp = urlTemp.replace('//localhost:1313', '').replace(':8081/', ':1313/') // our gohugo link contains the whole url which is bad..
+            }
+            console.error('selected test F: end')
+            console.error(urlTemp)
+            window.open(urlTemp, '_blank')
           }
         }
       }
@@ -595,73 +617,70 @@ export default {
         return setTimeout(function () {
           self.actionPending = false
 
-          // if (action === 'new') {
-          // only add the post to the sidebar object if new post not new language
-          // refresh latest data..
-          var tmpLink = newPost.link
-          if (tmpLink.startsWith('/blogs/')) {
-            tmpLink = tmpLink.substring(7)
-          }
-          self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: tmpLink, lang: newPost.lang }, { }).then((res) => {
-            console.error('success 1 s')
-            var curItem = {}
-
-            // curItem['link'] = window.goHostUrl + newPost.link
-            curItem['link'] = newPost.link  // ACE Fixed march
-
-            curItem['guid'] = window.goHostUrl + newPost.link
-            // curItem['id'] = window.goHostUrl + tmpLink
-            // newPost.link
-            // window.goHostUrl
-            curItem['frontMatter'] = {}
-            for (var p in res.data) {
-              if (res.data.hasOwnProperty(p)) {
-                if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
-                  if (p === 'date') {
-                    console.error('updating pubDate ?')
-                    curItem['pubDate'] = res.data[p]
-                  }
-                  curItem[p] = res.data[p]
-                } else {
-                  curItem['frontMatter'][p] = res.data[p]
-                }
-              }
-            }
-            console.error('updated item 01 a')
-            console.error(curItem)
-            curItem['pubDate'] = curItem['pubDate'] || curItem['date'] // pubDate required for sidebar...
-            self.$store.state.app.sidebarblogData.json.unshift(curItem)
-
-            console.error('selectPost using item : ')
-            console.error(curItem)
-
-            self.$notify({
-              title: 'Success',
-              message: 'Creation successful',
-              type: 'success'
-            })
-
-            self.selectPost({ vue: self, item: curItem, retry: 5 })
-
-            // TODO: Should be better implementation
-            setTimeout(function () {
-              self.refreshData() // refresh left sidebar...
-            }, 1000)
-          })
-          .catch((error) => {
-            console.error(error.stack)
-            self.$onError(error)
-          })
-          // } else {
-          //  console.error('selectPost using item 1 : ')
-          console.error(newPost)
-          self.selectPost({ vue: this, item: newPost, retry: 5 })
+          // TODO: Should be better implementation
+          self.refreshData() // refresh left sidebar...
 
           // TODO: Should be better implementation
           setTimeout(function () {
-            self.refreshData() // refresh left sidebar...
-          }, 1000)
-          // }
+            // if (action === 'new') {
+            // only add the post to the sidebar object if new post not new language
+            // refresh latest data..
+            var tmpLink = newPost.link
+            if (tmpLink.startsWith('/blogs/')) {
+              tmpLink = tmpLink.substring(7)
+            }
+            self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: tmpLink, lang: newPost.lang }, { }).then((res) => {
+              console.error('success 1 s')
+              var curItem = {}
+
+              // curItem['link'] = window.goHostUrl + newPost.link
+              curItem['link'] = newPost.link  // ACE Fixed march
+
+              curItem['guid'] = window.goHostUrl + newPost.link
+              // curItem['id'] = window.goHostUrl + tmpLink
+              // newPost.link
+              // window.goHostUrl
+              curItem['frontMatter'] = {}
+              for (var p in res.data) {
+                if (res.data.hasOwnProperty(p)) {
+                  if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
+                    if (p === 'date') {
+                      console.error('updating pubDate ?')
+                      curItem['pubDate'] = res.data[p]
+                    }
+                    curItem[p] = res.data[p]
+                  } else {
+                    curItem['frontMatter'][p] = res.data[p]
+                  }
+                }
+              }
+              console.error('updated item 01 a')
+              console.error(curItem)
+              curItem['pubDate'] = curItem['pubDate'] || curItem['date'] // pubDate required for sidebar...
+              self.$store.state.app.sidebarblogData.json.unshift(curItem)
+
+              console.error('selectPost using item : ')
+              console.error(curItem)
+
+              self.$notify({
+                title: 'Success',
+                message: 'Creation successful',
+                type: 'success'
+              })
+
+              self.selectPost({ vue: self, item: curItem, retry: 5 })
+            })
+            .catch((error) => {
+              console.error(error.stack)
+              self.$onError(error)
+            })
+            // } else {
+            //  console.error('selectPost using item 1 : ')
+            console.error(newPost)
+            self.selectPost({ vue: this, item: newPost, retry: 5 })
+
+            // }
+          })
         }, 600)
 
         // Returned statement in setTimeout
