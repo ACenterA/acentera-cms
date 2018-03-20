@@ -213,13 +213,13 @@ if (!isOauthCallback) {
   var bitbucketClientId = ''
   var githubClientId = ''
   if (!isOauthCallback) {
+    // TODO: Use en environment variable ... build / pipeline tooling
     if (window.location.href.indexOf('acentera.com') !== -1) {
       // Enable devtools
       Vue.config.devtools = true
-      document.domain = 'acentera.com' // TODO: Use en environment variable ...
-      store.commit('setWebsite', true) // weird ?
+      document.domain = 'acentera.com'
+      store.commit('setWebsite', true)
       window.withCredentials = true
-      // window.apiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev/api'
       window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev'
 
       router = routerImport.newRouter('history')
@@ -230,7 +230,6 @@ if (!isOauthCallback) {
       // Enable devtools
       // Local Dev
       router = routerImport.newRouter('hash')
-
       Vue.config.devtools = true
       window.withCredentials = false
       bitbucketClientId = '9BGHdNKKcppeXRQSSH'
@@ -239,11 +238,7 @@ if (!isOauthCallback) {
       // Local Dev with Remote
       /*
       Vue.config.devtools = true
-      try {
-        document.domain = 'acentera.com' // TODO: Use en environment variable ...
-      } catch (e) {
-      }
-      store.commit('setWebsite', true) // weird ?
+      store.commit('setWebsite', true)
       window.withCredentials = true
       */
     }
@@ -303,7 +298,6 @@ if (!isOauthCallback) {
   // document.domain = 'acentera.com' // TODO: Use en environment variable ...
   store.commit('setWebsite', true) // weird ?
   window.withCredentials = true
-  // window.apiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev/api'
   window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev'
 
   bitbucketClientId = 'mYJjMLHBCjYn4k9Xu2'
