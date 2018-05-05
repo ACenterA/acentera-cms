@@ -64,8 +64,6 @@ const github = state => {
 }
 
 const websiteAndNotLoggedIn = state => {
-  console.error('website and not logged in test?')
-  console.error(state)
   return state.app.website && !state.session
 }
 
@@ -74,16 +72,13 @@ const loaded = state => {
 }
 
 const getBasicAuth = state => {
-  console.error('A1')
   if (window.vm === undefined) {
     return
   }
-  console.error('A2')
   var gitobj = window.vm.$github
   if (window.vm.$store.state.github === null || window.vm.$store.state.github === undefined) {
     return null
   }
-  console.error('A3')
   if (window.vm.$store.state.github && window.vm.$store.state.github.logininfo && window.vm.$store.state.github.logininfo.type === 'BitBucket') {
     gitobj = window.vm.$bitbucket
   }
@@ -95,20 +90,15 @@ const getBasicAuth = state => {
       window.vm.$store.state.github = raw
     }
   }
-  console.error('A4')
   if (window.vm.$store.state.github && window.vm.$store.state.github.logininfo) {
     if (window.vueAuth.getToken()) {
-      console.error('A5')
       // validate if window.vueAuth.getToken() is same as this.$store.state.github.logininfo.token ??
       gitobj.setToken(window.vueAuth.getToken())
     } else {
-      console.error('A6')
       gitobj.setUserPass(window.vm.$store.state.github.logininfo.username, window.vm.$store.state.github.logininfo.pass)
     }
-    console.error('A7')
     return gitobj.getBasicAuth()
   } else {
-    console.error('A8')
     return ''
   }
 }
@@ -167,30 +157,19 @@ const websiteIsGit = state => {
 }
 
 const selectedWebsite = (state) => {
-  console.error('selected webiste 01')
-  console.error('sesssion ? ')
-  console.error(state.session)
   if (state.app.project && state.app.project.websites) {
-    console.error('selected webiste 02')
     if ((state.app.websiteId === 'null' || !state.app.websiteId)) {
       return null
     }
-    console.error('selected webiste 03')
     if (state.session && window.localStorage.getItem('session') === null) {
       return null
     }
-    console.error('selected webiste 04')
-    console.error(state.app.project)
-    console.error(state.app.websiteId)
     return state.app.project.websites[state.app.websiteId]
   }
-  console.error('selected webiste 05')
   // return websiteId if any
   if (state.app.websiteId) {
-    console.error('selected webiste 06')
     return state.app.websiteId
   }
-  console.error('selected webiste 07 A1')
   return null
 }
 

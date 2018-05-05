@@ -53,7 +53,6 @@ export default {
   },
   methods: {
     openFileUploadModal (e) {
-      console.error('emit here aaa')
       this.$bus.$emit('TOGGLE_FILESELECT')
       var self = this
       this.$bus.$on('TOGGLE_FILESELECT_SELECTED', function (data) {

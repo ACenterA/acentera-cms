@@ -121,7 +121,6 @@ export default {
         }
         this.$bus.$emit(this.multiModal) // 'TOGGLE_FILESELECT_CLOSE')
       } else {
-        console.error('broadcast c 2')
         this.$bus.$emit(this.event.type, this.event)
         // document.dispatchEvent(this.event)
       }

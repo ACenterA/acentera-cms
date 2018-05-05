@@ -62,7 +62,8 @@ const state = {
     json: []
   },
   sidebarblogData: {
-    json: []
+    json: [],
+    loaded: false
   },
   effect: {
     translate3d: true
@@ -107,7 +108,18 @@ const mutations = {
   },
 
   [types.TOGGLE_BLOGDATA] (state, data) {
-    state.sidebarblogData.json = data
+    if (Object.prototype.toString.call(data) === '[object Array]') {
+      // array
+      state.sidebarblogData.json = data
+    } else {
+      // object ?
+      var arrData = []
+      if (data) {
+        arrData.push(data)
+      }
+      state.sidebarblogData.json = arrData
+    }
+    state.sidebarblogData.loaded = true
   },
   [types.TOGGLE_SIDEBAR_TWO_DATA] (state, data) {
     state.sidebartwo.json = data
@@ -286,7 +298,6 @@ const mutations = {
     state.sidebar.opened = true
     state.sidebar.hidden = false
     // && !sidebarglobal.hidden
-    console.error('SELECT 03A')
     window.localStorage.setItem('selectedWebsite', state.websiteId)
     window.localStorage.setItem('selectedProject', state.projectId)
 
@@ -294,28 +305,15 @@ const mutations = {
     window.apiUrl = 'https://' + item.websiteId + '.workspace.acentera.com/api'
     window.goHostUrl = 'https://' + item.websiteId + '.workspace.acentera.com'
 
-    console.error('SELECT 03B')
-    console.error('ON REFRESH CONFIG TEST A??')
-    console.error(state)
     if (!state.website) {
-      console.error('ON REFRESH CONFIG TEST B??')
       window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
     } else {
-      console.error('SELECT 03C')
       var self = window.vm
       // Refresh for domains...
-
-      console.error('SELECT 03D')
-      console.error(state)
       var h = { 'Authorization': 'Bearer ' + window.vm.$store.state.session.token } // cannot use state.session as state = the $store.state.app
-      console.error('SENDING OF ...')
-      console.error(h)
       window.vm.$http.get(window.websiteapiUrl + '/sites/v1/websites/' + state.projectId + '/' + state.websiteId, {
         headers: h
       }).then((response) => {
-        console.error('received website info')
-        console.error(response.data)
-        console.error('SET WEBSITE INFO AAA')
         if (response.data && response.data.errorMessage) {
           self.$notify({
             title: 'problem occured while fetching website informations.',
@@ -325,20 +323,16 @@ const mutations = {
           return setTimeout(function () {
             window.localStorage.removeItem('selectedWebsite')
             window.localStorage.removeItem('selectedProject')
-            console.error('locaiton href 82')
             window.location.href = '/'
           }, 8000)
         }
         if (response.data && response.data.websiteId === state.websiteId) {
-          console.error('SET WEBSITE INFO BBBB')
           window.vm.$store.state.app.project['websites'][state.websiteId] = response.data
           if (response.data.sso_token) {
-            console.error('SET WEBSITE INFO CCC')
             self.$store.commit('SET_WEBSITE_SSO_TOKEN', {
               domain: '.acentera.com',
               cookie_value: response.data.sso_token,
               fct: function () {
-                console.error('SET WEBSITE INFO DDD')
                 window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
               }
             })
@@ -360,10 +354,6 @@ const mutations = {
     // window.vm.$store.commit('REFRESH_SETTINGS', state) // we still want to refresh settings, for offline version...
   },
   [types.SELECT_POST] (state, item) {
-    console.error('recieved item of a')
-    console.error(item)
-    console.error('recieved state of ')
-    console.error(state)
     // unset previously selected post (sidebar blog selected menu list)
     if (state.topbar.selectedPost) {
       state.topbar.selectedPost.selected = false
@@ -454,7 +444,6 @@ const mutations = {
   },
   [types.SITE_SELECT_LANG] (state, update) {
     state.languageSelected = update
-    console.error('set language item to ' + update)
     window.localStorage.setItem('languageSelected', update)
   },
   [types.SITE_AVAILABLE_LANG] (state, update) {
@@ -475,7 +464,6 @@ const mutations = {
         // self.allSettings = result
 
         var selectedLang = window.localStorage.getItem('languageSelected')
-        console.error('RECEIVED selectedLang  selectedLang  lang.. is ' + selectedLang)
         var selectedLangObj = null
         var setDefaultLang = null
         var firstlang = null
@@ -488,71 +476,61 @@ const mutations = {
         }
         for (var i = 0; i < langkeys.length; i++) {
           var tmpLang = result.languages[langkeys[i]]
-          console.error('tmpLang a')
           if (tmpLang) {
-            console.error('tmpLang b')
             tmpLang.id = langkeys[i]
             tmpLang.value = langkeys[i]
-            TempAvailablelanguageshash[langkeys[i]] = tmpLang
-            TempAvailablelanguageshash[result.languages[langkeys[i]].languagename] = tmpLang
-            // if (self.selectedLang === undefined) {
-              // self.selectedLang = langkeys[i].languagename
-            // }
-            if (firstlang === null) {
-              firstlang = result.languages[langkeys[i]].languagename
-              console.error('tmpLang first lang.. is ' + firstlang)
-            }
+            // TempAvailablelanguageshash[langkeys[i].languagename] = tmpLang
+            if (langkeys[i] !== undefined) {
+              TempAvailablelanguageshash[result.languages[langkeys[i]].languagename] = tmpLang
+              TempAvailablelanguageshash[langkeys[i]] = tmpLang
+              // if (self.selectedLang === undefined) {
+                // self.selectedLang = langkeys[i].languagename
+              // }
+              if (firstlang === null) {
+                firstlang = result.languages[langkeys[i]].languagename
+              }
 
-            if (disabledLanguagesHash.hasOwnProperty(langkeys[i])) {
-              result.languages[langkeys[i]]['enable'] = false
-            } else {
-              result.languages[langkeys[i]]['enable'] = true
-            }
+              if (disabledLanguagesHash.hasOwnProperty(langkeys[i])) {
+                result.languages[langkeys[i]]['enable'] = false
+              } else {
+                result.languages[langkeys[i]]['enable'] = true
+              }
 
-            if (langkeys[i] === result.defaultcontentlanguage) { // result.languages[langkeys[i]].languagename === 'English') {
-              setDefaultLang = result.languages[langkeys[i]].languagename
-              result.languages[langkeys[i]]['enable'] = true // default language cannot be disabled...
-              result.languages[langkeys[i]]['locked'] = true // default language cannot be disabled...
-            }
+              if (langkeys[i] === result.defaultcontentlanguage) { // result.languages[langkeys[i]].languagename === 'English') {
+                setDefaultLang = result.languages[langkeys[i]].languagename
+                result.languages[langkeys[i]]['enable'] = true // default language cannot be disabled...
+                result.languages[langkeys[i]]['locked'] = true // default language cannot be disabled...
+              }
 
-            // In case we changed to french language and refresh browser
-            // we take the last localStorage language selected
-            console.error('does ' + selectedLang + 'is in ' + result.languages[langkeys[i]].languagename)
-            if (selectedLang === result.languages[langkeys[i]].languagename) {
-              console.error('YES IT DOES')
-              selectedLang = result.languages[langkeys[i]].languagename
-              selectedLangObj = result.languages[langkeys[i]] // .languagename
+              // In case we changed to french language and refresh browser
+              // we take the last localStorage language selected
+              if (selectedLang === result.languages[langkeys[i]].languagename) {
+                selectedLang = result.languages[langkeys[i]].languagename
+                selectedLangObj = result.languages[langkeys[i]] // .languagename
+              }
+              TempAvailablelanguages.push(tmpLang)
             }
-            TempAvailablelanguages.push(tmpLang)
           }
         }
         if (!setDefaultLang) {
-          console.error('sellected lang set default a')
           setDefaultLang = firstlang
         }
-        console.error('sellected lang test')
         if (!(selectedLang && selectedLangObj)) {
-          console.error('sellected lang test A')
           selectedLang = null
         } else {
-          console.error('sellected lang test B')
-          console.error(selectedLangObj)
-          console.error(selectedLangObj.enable)
           if (!selectedLangObj.enable) { // this language is not enabled anymore..
-            console.error('sellected lang test disabled...')
             selectedLang = null
           } else {
             // selectedLang = selectedLangObj
           }
         }
-        console.error('sellected lang test C using ' + selectedLang)
         if (!selectedLang) {
-          console.error('sellected lang test SET DEFAULT... to ' + setDefaultLang)
           selectedLang = setDefaultLang
         }
 
         // self.availableLanguages = TempAvailablelanguages
         // self.availableLanguagesHash = TempAvailablelanguageshash
+        // delete TempAvailablelanguageshash['undefined']
         self.$store.commit(types.SITE_AVAILABLE_LANG, { languages: TempAvailablelanguages, languagesHash: TempAvailablelanguageshash })
         self.$store.commit(types.SITE_LANG_DEFAULT, setDefaultLang)
         self.$store.commit(types.SITE_SELECT_LANG, selectedLang)
@@ -627,7 +605,7 @@ const mutations = {
                       }
                       self.$store.commit(types.REPO_STATE_UPATE, 7) // need to setup SSH Key for the user, or wrong login ?
                     } else {
-                      var uniqueMsgAccGitLog = 'GIT Login required.'
+                      var uniqueMsgAccGitLog = 'Invalid Git Account?'
                       if (!(('' + $('.notifications').find('.title.is-5').text()) === ('' + uniqueMsgAccGitLog))) {
                         // only show it once..
                         self.$notify({

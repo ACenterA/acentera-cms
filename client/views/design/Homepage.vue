@@ -174,8 +174,6 @@ export default {
       }
     },
     facebookSocial: function () {
-      console.error('acebook social test')
-      console.error(this.$store.state.app.settings)
       if (this.$store.state.app.settings && this.$store.state.app.settings.params && this.$store.state.app.settings.params.social && this.$store.state.app.settings.params.social.data) {
         return this.$store.state.app.settings.params.social.data.facebook
       } else {

@@ -130,10 +130,8 @@ export default {
       this.captchaVerify = response
     },
     onExpired: function () {
-      console.log('Expired')
     },
     resetRecaptcha () {
-      console.error(this)
       this.$refs.recaptcha.reset() // Direct call reset method
     },
     close: function (e) {
@@ -232,8 +230,6 @@ export default {
               headers: regH
             })
             .then((response) => {
-              console.error('recived message of ')
-              console.error(response)
               if (!response || (response.data && response.data.status && response.data.status >= 400)) {
                 throw new Error(response)
               }
@@ -272,7 +268,6 @@ export default {
               })
 
               var self = this
-              console.error('calling refresh user B')
               this.refreshUser({ vue: this,
                 callback: function () {
                   if (self.project && self.project.websites) {
@@ -291,8 +286,6 @@ export default {
               })
             })
             .catch((error) => {
-              console.error(error)
-              // console.error(error.stack)
               this.loginSubmit = modalSubmitLogin
               $('#' + which + 'Submit').removeClass('disabled')
 
@@ -385,7 +378,6 @@ export default {
               })
 
               var self = this
-              console.error('calling refresh user C')
               this.refreshUser({ vue: this,
                 callback: function () {
                   if (self.project && self.project.websites) {
