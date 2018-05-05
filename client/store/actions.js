@@ -27,14 +27,11 @@ const refreshSettings = (state) => {
 */
 
 const refreshConfig = (state) => {
-  console.error('REFRESH CONFIG HERE A')
   window.vm.$store.commit('REFRESH_CONFIG', state) // {projectId: state.app.projectId, websiteId: state.app.websiteId})
 }
 
 export const selectPost = ({ commit }, obj) => {
-  console.error('received select post ? on ')
-  console.error(obj)
-  if (obj.item) {
+  if (obj && obj.item) {
     obj.item.selected = true
 
     window.vm.$store.state.app.selectedItem = null
@@ -43,8 +40,6 @@ export const selectPost = ({ commit }, obj) => {
         window.vm.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
       }
     }
-    console.error('commit of SELECT+POST? of ')
-    console.error(obj.item)
     commit(types.SELECT_POST, obj.item)
     // TOOD: What about :1313/ replacement variables ???
     window.vm.$store.state.app.selectedItem = obj
@@ -55,6 +50,19 @@ export const selectPost = ({ commit }, obj) => {
       langPrefix = '' // no prefix, this is the default site...
     }
 
+    // HACK : Make sure not to have duplicate https://hostname/fr/https://hostname/blogs/site
+    console.error('obj item link test')
+    console.error(obj.item.link)
+    console.error('VS')
+    console.error(window.goHostUrl)
+    if (obj.item.link.indexOf(window.goHostUrl) >= 0) {
+      console.error('substsring : ' + obj.item.link.substring(window.goHostUrl.length + 1))
+      obj.item.link = obj.item.link.substring(window.goHostUrl.length)
+      if (!obj.item.link.startsWith('/')) {
+        obj.item.link = '/'
+      }
+    }
+
     // window.vm.$store.state.app.topbar.selectedPost = obj.item
     if (obj.item.link.indexOf('localhost:') >= 0 && obj.item.link.indexOf('localhost:') <= 8) {
       if (langPrefix !== '') {
@@ -62,9 +70,6 @@ export const selectPost = ({ commit }, obj) => {
           langPrefix += '/'
         }
       }
-      console.error('LINK IS')
-      console.error(obj.item)
-      console.error(obj.item.link)
       obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/' + langPrefix))
     } else {
       obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + langPrefix + obj.item.link)
@@ -97,16 +102,12 @@ export const refreshUser = ({ commit }, obj) => {
     window.localStorage.removeItem('selectedProject')
 
     if (!state.app.isLoaded) {
-      console.error('NOT LOADED 1')
       let raw = state.github || window.localStorage.getItem('github')
       if (typeof raw === 'string') {
         state.github = JSON.parse(raw)
       } else {
         state.github = raw
       }
-      console.error('NOT LOADED 2')
-      console.error(state.github)
-      // var $gitobj = this.$github
 
       state.app.sidebarglobal.opened = false
       state.app.sidebarglobal.hidden = true
@@ -114,19 +115,15 @@ export const refreshUser = ({ commit }, obj) => {
       state.app.sidebar.opened = true
       state.app.sidebar.hidden = false
       // self.selectWebsite()
-      console.error('NOT LOADED 3')
       refreshConfig(state)
       // state.app.isLoaded = true
     }
   } else {
     // Hosted Version
-    console.error('refresh user a1 z')
     if (state.session === null) {
-      console.error('refresh user a2')
       return
     }
 
-    console.error('refresh user a3')
     let raw = window.localStorage.getItem('session')
     if (raw) {
       var session = JSON.parse(raw)
@@ -135,9 +132,7 @@ export const refreshUser = ({ commit }, obj) => {
       }
     }
 
-    console.error('NOT LOADED TEST SESSION?')
     if (state.session && state.session.token) {
-      console.error('NOT LOADED TEST SESSION AA?')
       var h = { 'Authorization': 'Bearer ' + state.session.token }
       // request it with headers an param
       vue.$http.get(window.websiteapiUrl + '/customer/v1/websites/me',
@@ -148,32 +143,23 @@ export const refreshUser = ({ commit }, obj) => {
         var lstProjects = response.data.projects
         var defProject = response.data.defaultProject
         var hasWebsites = false
-        console.error('NOT LOADED TEST SESSION BB?')
         state.app.account = response.data.accountId
         if (state.app.project && state.project.app.projectId) {
-          console.error('NOT LOADED TEST SESSION CC?')
           if (!(lstProjects.hasOwnProperty(state.app.project.projectId))) {
             state.app.project = null
           }
         }
-        console.error('NOT LOADED TEST SESSION DD?')
         if (defProject === null || defProject === undefined) {
           defProject = null
         }
-        console.error('NOT LOADED TEST SESSION EE?')
-        console.error(state.app.project)
         if (state.app.project == null) {
-          console.error('NOT LOADED TEST SESSION TEST DEF PROJECT??')
-          console.error(defProject)
           if (defProject && defProject !== null) {
             // fetch default project...
-            console.error('GET PROJECTS ?? using ' + window.websiteapiUrl)
             vue.$http.get(window.websiteapiUrl + '/api/projects/v1/' + defProject,
               {
                 headers: h
               }
             ).then((projectDefinitionResponse) => {
-              console.error('SET PROJECT A')
               state.app.project = projectDefinitionResponse.data
               if (state.app.project && state.app.project.websites) {
                 var websiteLen = Object.keys(state.app.project.websites).length
@@ -192,7 +178,6 @@ export const refreshUser = ({ commit }, obj) => {
                   // a page reload from bookmark
                   if (state.app.websiteId) {
                     if (window.vm._route.path === '/templates') {
-                      console.error('locatoin href 001')
                       window.location.href = '/' // vm._router.push({ 'path': '/' })
                       return
                     }
@@ -224,11 +209,9 @@ export const refreshUser = ({ commit }, obj) => {
                   state.app.sidebarglobal.opened = true
                   state.app.sidebarglobal.hidden = false
 
-                  console.error('sidebar openend here KK')
                   if (window.vm._route.path !== '/templates') {
                     if (window.vm._route.path === '/') {
                     } else {
-                      console.error('href local 8')
                       window.location.href = '/'
                     }
                   }
@@ -269,12 +252,9 @@ export const refreshUser = ({ commit }, obj) => {
               // state.app.isLoaded = true
             })
           } else {
-            console.error('delete select webiste aaa')
             window.localStorage.removeItem('selectedWebsite')
             window.localStorage.removeItem('selectedProject')
-            console.error('delete select webiste bbb')
             if (callback) {
-              console.error('delete select webiste bbbcccc')
               callback()
             } else {
             }
@@ -283,13 +263,11 @@ export const refreshUser = ({ commit }, obj) => {
             if (window.vm._route.path !== '/templates') {
               if (window.vm._route.path === '/') {
               } else {
-                console.error('location href 99')
                 window.location.href = '/'
               }
             }
           }
         } else {
-          console.error('delete select webiste bbbefefe')
           window.localStorage.removeItem('selectedWebsite')
           window.localStorage.removeItem('selectedProject')
           if (callback) {
@@ -301,14 +279,12 @@ export const refreshUser = ({ commit }, obj) => {
           if (window.vm._route.path !== '/templates') {
             if (window.vm._route.path === '/') {
             } else {
-              console.error('locaiton hef 88')
               window.location.href = '/'
             }
           }
         }
       })
       .catch((error) => {
-        console.error('delete select webiste GOT ERROR A')
         window.localStorage.removeItem('selectedWebsite')
         window.localStorage.removeItem('selectedProject')
         var msg = ''
@@ -318,8 +294,6 @@ export const refreshUser = ({ commit }, obj) => {
         if (msg.indexOf('Token is invalid') >= 0) {
           this.$store.commit('clearSession', this.$store.origState)
         } else {
-          console.error(error)
-          console.error(error.stack)
           self.$notify({
             title: 'error retreiving account.',
             message: msg,

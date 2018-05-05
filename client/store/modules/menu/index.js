@@ -40,6 +40,7 @@ const state = {
       },
       component: lazyLoading('blogs', true)
     },
+    /*
     {
       name: 'Versions',
       path: '/versions',
@@ -48,6 +49,7 @@ const state = {
       },
       component: lazyLoading('versions', true)
     },
+    */
     admin
     // tools
     /*

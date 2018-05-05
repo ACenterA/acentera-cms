@@ -1,7 +1,7 @@
 <template>
   <div class="app-inner-content">
     <div class="fullheight">
-      <sidebarblogs :jsonData="sidebarblogData.json" :show="sidebartwo.opened && !sidebartwo.hidden"></sidebarblogs>
+      <sidebarblogs :jsonData="sidebarblogData.json" :show="sidebarblogData.loaded"></sidebarblogs>
       <div class="plekan-outerdiv tile is-ancestor is-vertical fullheight">
           <article :class="{ hidden: isPostSelected }" class="tile is-child box">
               <label class="label">Select a post post from the left menu, or click on Create new post.</label>
@@ -39,7 +39,7 @@
             </div>
 
             <br/>
-            <button class="button is-info" @click="create('new','blogs')">Create Post</button>
+            <button class="button is-info" @click="create('new','blogs')" :disabled="actionPending">Create Post</button>
           </article>
 
           <div class="rightSide" :class="{ active: showRightSideBar}">
@@ -82,7 +82,10 @@
                   </file-upload>
                 <br/>
                 <!-- <button :disabled="isSaving" class="button is-warning float-let" @click="deletePost()">Delete Post</button> -->
-                <button :disabled="isSaving" class="button is-danger float-let" @click="deleteAllLangPost()">Delete Post (All Languages)</button>
+
+                <button v-if="isDefaultLang" :disabled="isSaving" class="button is-danger float-let" @click="deleteAllLangPost()">Delete Post (All Languages)</button>
+                <button v-if="!isDefaultLang" :disabled="isSaving" class="button is-danger float-let" @click="deleteAllLangPost()">Delete Post (Single Language)</button>
+
                 <button :disabled="isSaving" class="button is-info float-right" @click="updatePage()">Update</button>
                 <br/>
                 <br/>
@@ -159,10 +162,7 @@ export default {
         if (item) {
           var tmpLink = item.link
           if (item.link.startsWith('//') || item.link.startsWith('http://') || item.link.startsWith('https://')) {
-            console.error(item)
-            console.error('ITM MM LINK WAAAS ' + item.link)
             tmpLink = item.link.substring(item.link.indexOf('/', 8))
-            console.error('ITM MM LINK NOW ' + item.link)
           }
           if (tmpLink.endsWith('/')) {
             tmpLink = tmpLink.substring(0, tmpLink.lastIndexOf('/'))
@@ -174,27 +174,16 @@ export default {
             // This is default language, do not add the /{langcode} prefix
 
             // TODO: Find better implementation ...
-            console.error('selected test A: 2')
-            console.error(window.goHostUrl)
-            console.error(item.link)
             if (!self.$store.state.app.website) {
               urlTemp = urlTemp.replace('//localhost:1313', '').replace(':8081/', ':1313/') // our gohugo link contains the whole url which is bad..
             }
-
-            console.error('selected test A: end')
-            console.error(urlTemp)
             window.open(urlTemp, '_blank')
           } else {
             // TODO: Find better implementation ...
             urlTemp = window.goHostUrl + '/' + selectedLangItem.id + item.link
-            console.error('selected test A: 1')
-            console.error(urlTemp)
             if (!self.$store.state.app.website) {
-              console.error('selected test G: end')
               urlTemp = urlTemp.replace('//localhost:1313', '').replace(':8081/', ':1313/') // our gohugo link contains the whole url which is bad..
             }
-            console.error('selected test F: end')
-            console.error(urlTemp)
             window.open(urlTemp, '_blank')
           }
         }
@@ -213,7 +202,6 @@ export default {
     })
 
     this.$bus.$on('UNDRAFT', function (data) {
-      console.error('Received undraft for post ')
       //  SAVE
       data.draft = false
       this.$bus.$emit('SAVE_CMD', data)
@@ -225,44 +213,31 @@ export default {
     })
 
     this.$bus.$on('NO_DATA_FOUND', function (data) {
-      // //console.error('NO DATA FOUND FOR THIS LANGUAGE..')
     })
 
     this.$bus.$on('SAVE_CMD', function (data) {
-      console.error('RECEIVED SAVE CMD A')
       const d = document.getElementsByTagName('iframe')[0].contentWindow.document
       // TODO: use somehting else than contenteditable ? ie: editor-content ?
-      console.error($(d).find('[contenteditable=true]'))
       if ($(d).find('[contenteditable=true]').length !== 1) {
-        console.error('RECEIVED SAVE CMD B1')
         return
       }
       var markDownValue = window.vm.turndownService.turndown($(d).find('[contenteditable=true]')[0].innerHTML)
       if (!(window.vm.$store.state.app.selectedItem && window.vm.$store.state.app.selectedItem.item)) {
-        console.error('RECEIVED SAVE CMD B2')
         return
       }
       var item = window.vm.$store.state.app.selectedItem.item
       var tmpLink = item.link
       if (item.link.startsWith('//') || item.link.startsWith('http://') || item.link.startsWith('https://')) {
-        console.error(item)
-        console.error('ITM MM LINK WAAAS ' + item.link)
         tmpLink = item.link.substring(item.link.indexOf('/', 8))
-        console.error('ITM MM LINK NOW ' + item.link)
       }
       if (tmpLink.endsWith('/')) {
         tmpLink = tmpLink.substring(0, tmpLink.lastIndexOf('/'))
       }
       var selectedLangItem = self.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
       markDownValue = markDownValue.replace('<br>', '\\n').replace('<br/>', '\\n')
-      console.error('ITEM IS')
-      console.error(item)
-
       var dtStringDate = item.pubDate
       try {
         var arr = item.pubDate.split(/\/|\s|:/) // split string and create array.
-        console.error('arrr is')
-        console.error(arr)
         var dt = new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4], arr[5]) // decrease month value by 1
         dtStringDate = dt.toISOString()
       } catch (e) {
@@ -298,8 +273,6 @@ export default {
         // headers: {'TmpHeader': 'tmp'}
       })
       .then((response) => {
-        console.error('selecte save test?')
-
         // TODO: Find a better way ie: ajax polling.. check for E-Tag change up to X times?
         // well we actually did a force rebuild in hugo
         // setTimeout(function () {
@@ -329,7 +302,6 @@ export default {
           }, 1000)
         })
         .catch((error) => {
-          console.error(error)
           setTimeout(function () {
             self.selectPost(window.vm.$store.state.app.selectedItem)
             self.$notify({
@@ -338,12 +310,12 @@ export default {
               type: 'success'
             })
           }, 1000)
+          console.error(error)
         })
 
         // }, 1000)
       })
       .catch((error) => {
-        console.error(error.stack)
         // self.actionPending = false
         self.$onError(error)
       })
@@ -380,17 +352,12 @@ export default {
           link = link.substring(0, link.length - 1)
         }
 
-        self.$httpApi.post(window.apiUrl + '/frontmatter', { type: type, id: link, lang: langCode }, { }).then((res) => {
-          console.error('success 1 s')
-          console.error(res.data)
-          console.error(window.vm.$store.state.app.selectedItem.item)
+        self.$httpApi.post(window.apiUrl + '/frontmatter?blog=1', { type: type, id: link, lang: langCode }, { }).then((res) => {
           window.vm.$store.state.app.selectedItem.item['frontMatter'] = {}
           for (var p in res.data) {
             if (res.data.hasOwnProperty(p)) {
               if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
-                console.error('aa received value of ' + p)
                 if (p === 'date') {
-                  console.error('set of pubDate to ' + res.data[p])
                   window.vm.$store.state.app.selectedItem.item['pubDate'] = res.data[p]
                 }
                 window.vm.$store.state.app.selectedItem.item[p] = res.data[p]
@@ -399,8 +366,6 @@ export default {
               }
             }
           }
-          console.error('updated item')
-          console.error(window.vm.$store.state.app.selectedItem.item)
           self.selectPost(window.vm.$store.state.app.selectedItem) // window.vm.$store.state.app.selectedItem)
           // self.refreshData() // refresh left sidebar...
         })
@@ -433,6 +398,18 @@ export default {
       repoState: 'repoState',
       selectedPost: 'selectedPost'
     }),
+    isDefaultLang () {
+      var self = this
+      if (self.$store.state.app.languageSelected) {
+        var selectedLangItem = self.$store.state.app.languages.languagesHash[self.$store.state.app.languageSelected]
+        if (self.$store.state.app.language === selectedLangItem.languagename) {
+          // This is default language, do not add the /{langcode} prefix
+          return true
+        }
+        return false
+      }
+      return false
+    },
     currentImage () {
       if (this.selectedPost && this.selectedPost.frontMatter && this.selectedPost.frontMatter.image) {
         return window.goHostUrl + '/' + this.selectedPost.frontMatter.image
@@ -511,13 +488,14 @@ export default {
       var self = this
       this.isSaving = true
       this.selectedPost.delete = 'true'
+      // this.$store.state.app.topbar.selectedPost.delete = true
       this.$bus.$emit('SAVE_CMD')
       setTimeout(function () {
         this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS') // hide sidebar ...
         self.isSaving = false
         self.$store.state.app.selectedItem = null
         self.refreshData()
-      }, 600)
+      }, 1500)
     },
     updatePage: function (imgData) {
       var self = this
@@ -529,9 +507,6 @@ export default {
       }, 600)
     },
     fileChange: function (imgData) {
-      console.error('FILE SELECTED OF')
-      console.error(this.selectedPost)
-      console.error(this.selectedPost.frontMatter)
       this.selectedPost.frontMatter['image'] = imgData.data.RelPath
     },
     hideRightBar: function () {
@@ -618,7 +593,7 @@ export default {
           self.actionPending = false
 
           // TODO: Should be better implementation
-          self.refreshData() // refresh left sidebar...
+          // self.refreshData() // refresh left sidebar...
 
           // TODO: Should be better implementation
           setTimeout(function () {
@@ -629,8 +604,7 @@ export default {
             if (tmpLink.startsWith('/blogs/')) {
               tmpLink = tmpLink.substring(7)
             }
-            self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: tmpLink, lang: newPost.lang }, { }).then((res) => {
-              console.error('success 1 s')
+            self.$httpApi.post(window.apiUrl + '/frontmatter?blog=2', { type: 'blogs', id: tmpLink, lang: newPost.lang }, { }).then((res) => {
               var curItem = {}
 
               // curItem['link'] = window.goHostUrl + newPost.link
@@ -645,7 +619,6 @@ export default {
                 if (res.data.hasOwnProperty(p)) {
                   if (p === 'title' || p === 'pubDate' || p === 'date' || p === 'draft') {
                     if (p === 'date') {
-                      console.error('updating pubDate ?')
                       curItem['pubDate'] = res.data[p]
                     }
                     curItem[p] = res.data[p]
@@ -654,34 +627,30 @@ export default {
                   }
                 }
               }
-              console.error('updated item 01 a')
-              console.error(curItem)
               curItem['pubDate'] = curItem['pubDate'] || curItem['date'] // pubDate required for sidebar...
-              self.$store.state.app.sidebarblogData.json.unshift(curItem)
 
-              console.error('selectPost using item : ')
-              console.error(curItem)
-
+              var retryCount = 5
+              if (!(newOrUpdate === 'newLang')) {
+                // only adding a new language here, do not add another row to the blog list
+                retryCount = 0 // no need to retry selecting it, notbe created
+                self.$store.state.app.sidebarblogData.json.unshift(curItem)
+              }
               self.$notify({
                 title: 'Success',
                 message: 'Creation successful',
                 type: 'success'
               })
 
-              self.selectPost({ vue: self, item: curItem, retry: 5 })
+              self.selectPost({ vue: self, item: curItem, retry: retryCount })
             })
             .catch((error) => {
-              console.error(error.stack)
               self.$onError(error)
             })
             // } else {
-            //  console.error('selectPost using item 1 : ')
-            console.error(newPost)
-            self.selectPost({ vue: this, item: newPost, retry: 5 })
-
+            //    self.selectPost({ vue: this, item: newPost, retry: 5 })
             // }
           })
-        }, 600)
+        }, 1000)
 
         // Returned statement in setTimeout
       })
@@ -691,7 +660,6 @@ export default {
       })
     },
     refreshData () {
-      console.error(' rfreshd ata test ')
       var self = this
       if (!this.$store.state.app.isLoaded) {
         return setTimeout(function () {
@@ -703,11 +671,22 @@ export default {
       this.$httpApi.get(window.goHostUrl + '/blogs/index.xml', {
         responseType: 'document'
       }).then((response) => {
-        var jsObj = JSON.parse(JSON.parse(JSON.stringify(window.xml2json(response.data.childNodes[0].children[0])).replace('undefined', '')))
-        this.$store.commit('TOGGLE_SIDEBAR_BLOGDATA', true)
-        this.$store.commit('TOGGLE_BLOGDATA', jsObj.channel.item)
+        if (response.data) {
+          var jsObj = JSON.parse(JSON.parse(JSON.stringify(window.xml2json(response.data.childNodes[0].children[0])).replace('undefined', '')))
+          this.$store.commit('TOGGLE_SIDEBAR_BLOGDATA', true)
+          this.$store.commit('TOGGLE_BLOGDATA', jsObj.channel.item)
+        } else {
+          // no data
+          this.$store.commit('TOGGLE_BLOGDATA', [])
+        }
       })
       .catch((error) => {
+        if (error && error.response) {
+          if (error.response.status === 404) {
+            // no data
+            return this.$store.commit('TOGGLE_BLOGDATA', [])
+          }
+        }
         this.$onError(error)
       })
     },

@@ -225,7 +225,7 @@ export default {
     // self.$store.state.app.sidebarglobal.hidden = true
 
     // TODO: Test github themes, then local file as fallback ?
-    this.$http.get('/assets/themes.json').then((response) => {
+    this.$http.get('./assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
       self.themes = response.data
       this.switchTab(0)
@@ -315,7 +315,6 @@ export default {
             type: 'success'
           })
 
-          console.error('calling refresh user ZZA')
           window.vm.$store.commit('SELECT_INITIAL_WEBSITE', nextStepData)
 
           // TODO: change web.acentera.com by a variable
