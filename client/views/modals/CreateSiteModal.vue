@@ -211,8 +211,6 @@ export default {
     nextStepNotGit () {
       var self = this
       self.processing = true
-      console.error('ok not git here creating')
-      console.error(self.template)
       // NOTE: Cannot use 'authorization' as its will bypass the header value for authorization ...
 
       var projectId = null

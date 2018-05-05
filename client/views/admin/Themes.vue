@@ -94,7 +94,7 @@ export default {
   mounted: function () {
     var self = this
     // TODO: Fetch from github, if fail get local file?
-    this.$http.get('/assets/themes.json').then((response) => {
+    this.$http.get('./assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
       self.themes = response.data
       this.switchTab(0)
@@ -211,8 +211,6 @@ export default {
         return
       }
 
-      console.error('baci auth: ' + self.getBasicAuth)
-      console.error(json)
       this.$httpApi.post(window.apiUrl + '/themes/update', { Name: json.Name, Repository: json.Repository }, {
         headers: {
           'Authorization': self.getBasicAuth,
@@ -229,8 +227,6 @@ export default {
         })
       })
       .catch((error) => {
-        console.error('ok err')
-        console.error(error.stack)
         this.$onError(error)
       })
     },
@@ -244,7 +240,6 @@ export default {
         })
         return
       }
-      console.error('baci auth: ' + self.getBasicAuth)
       this.$httpApi.post(window.apiUrl + '/themes/refresh', { Name: json.Name }, {
         headers: {
           'Authorization': self.getBasicAuth,
@@ -258,8 +253,6 @@ export default {
         })
       })
       .catch((error) => {
-        console.error('ok err')
-        console.error(error.stack)
         this.$onError(error)
       })
     }

@@ -139,11 +139,7 @@ export default {
 
   computed: {
     selectedLangItem () {
-      console.error('a1')
       if (this.lang !== null) {
-        console.error('a2')
-        console.error(this.$store.state.app.settings.languages)
-        console.error(this.lang)
         return this.$store.state.app.settings.languages[this.lang]
       }
       return null
@@ -173,13 +169,16 @@ export default {
       })
       if (!self.selectedLangItem.enable) {
         tmpNewLang.push(selectedLangId) // disable the language..
+        self.$store.state.app.languages.languagesHash[selectedLangId]['disabled'] = true
+        self.$store.state.app.languages.languagesHash[selectedLangId]['enable'] = false
+      } else {
+        self.$store.state.app.languages.languagesHash[selectedLangId]['disabled'] = false
+        self.$store.state.app.languages.languagesHash[selectedLangId]['enable'] = true
       }
       this.$store.state.app.settings.disablelanguages = tmpNewLang.join(' ')
       if (this.$store.state.app.settings.disablelanguages.startsWith(' ')) {
         this.$store.state.app.settings.disablelanguages = this.$store.state.app.settings.disablelanguages.substring(1)
       }
-      console.error('NEW LANGUAGES ARE')
-      console.error(this.$store.state.app.settings.disablelanguages)
     },
     switchTab: function (index) {
       this.tabName = TabNames[index]
@@ -240,15 +239,12 @@ export default {
         }
       })
       .catch((error) => {
-        console.error(error.stack)
         this.$onError(error)
       })
     },
     loadLanguageDetails (lang) {
       if (lang !== undefined) {
-        // this.selectedLangItem = this.availableLanguagesHash[lang]
         this.lang = this.availableLanguagesHash[lang].id
-        // console.error('test a ' + this.$store.state.app.languages
       }
     },
     openModalBasic (index) {

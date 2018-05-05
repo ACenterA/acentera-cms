@@ -125,22 +125,16 @@ export default {
       editorIsVisible =
         window.editorElementDynamic.className.indexOf('active') !== -1
 
-      // console.error('mouse over a')
       if (editorIsVisible) return
 
       target = e.target
       tagname = target.tagName
-      // console.error('mouse over b')
       calc = target.getBoundingClientRect()
 
-
-      // console.error('mouse over c')
       if (true || editableTag.indexOf(tagname) !== -1) {
-        // console.error('mouse over d')
         parents = hasParent(e.target, 'plekan-row-item')
         if (parents) {
           const st = target.scrollTop
-          // console.error('mouse over e')
           var parentElements = []
           if (! target.attributes.hasOwnProperty('parameditable')) {
             parentElements = $(target).parent('[parameditable]')
@@ -151,7 +145,6 @@ export default {
               return
             }
           }
-          // console.error('mouse over g')
           self.editableModalElement = target
 
           // In case se set the param editable element to the parent object...
@@ -201,7 +194,6 @@ export default {
     })
 
     this.$bus.$on('TOGGLE_FILESELECT', function () {
-      console.error('selected here a')
       self.toggleFileSelectModal('TOGGLE_FILESELECT_CLOSE')
     })
     this.$bus.$on('TOGGLE_FILESELECT_CLOSE', function () {
@@ -351,11 +343,9 @@ export default {
       this.showFileUploadModal = false
     },
     toggleFileSelectModalClose () {
-      console.error('received close?')
       this.showFileSelectModal = false
     },
     toggleFileSelectModal (isMulti) {
-      console.error('select modal a3')
       if (isMulti) {
         this.multiModal = isMulti
       } else {

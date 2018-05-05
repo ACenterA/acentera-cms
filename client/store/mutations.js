@@ -6,40 +6,32 @@ export const setSession = (state, session) => {
 
 export const clearSession = (state, origState) => {
   this.clearGit(state)
-  console.error('clear session a')
   // website only
   if (state.app.website) {
     // Remove cookie, user cannot see preview after this..
     window.vm.$cookie.set('acentera_code_sso', '', {secure: true, expires: -1, domain: 'acentera.com'})
 
-    console.error('clear session b')
     if (origState) {
       var newState = JSON.parse(JSON.stringify(origState))
       for (var key in newState) {
         state.app[key] = newState[key]
       }
     }
-    console.error('clear session c')
     state.app.website = true // force restore of website mode
 
-    console.error('clear session d')
     window.localStorage.removeItem('session')
     state.projectSelected = null
     state.session = null
-    console.error('clear session e')
     state.app.project = null
     state.app.projectId = null
     state.app.websiteId = null
-    console.error('clear session ')
 
     state.app.sidebar.hidden = true
     state.app.sidebar.opened = false
     state.app.sidebartwo.hidden = true
-    console.error('clear session g')
     state.app.sidebartwo.opened = false
     state.app.sidebarglobal.hidden = true
     state.app.sidebarglobal.opened = false
-    console.error('clear session h')
     // window.location.href = '/?expired=' + new Date()
   }
   // Send logout of social account ...
@@ -72,15 +64,10 @@ export const setWebsiteIdForCreation = (state, val) => {
   state.app.websiteId = val
 }
 export const SET_WEBSITE_SSO_TOKEN = (state, obj) => {
-  console.error('set of coooke using')
-  console.error(obj)
   state.app.sso_token = obj.cookie_value
-  console.error('AAAAAAAAAAAAA set of coooke name :  acentera_code_sso on ' + obj.domain)
-  console.error('BBBBBBBBBBBBB set of coooke name :  acentera_code_sso on ' + obj.domain)
   window.vm.$cookie.set('acentera_code_sso', obj.cookie_value, {secure: true, expires: 1, domain: obj.domain})
 
   if (obj.fct) {
-    console.error('CCCCCC')
     obj.fct()
   }
 }
@@ -274,19 +261,14 @@ export const editorStart = (state) => {
   /* eslint-disable */
   bus.$on('contextMenuEvent', (evtInfo) => {
     evtInfo.detail.preventDefault()
-    console.error('received a')
     const el = evtInfo.detail.target // window.selo.selection.focusNode.parentNode
 
     // Well do not show menu
-    console.error('received b')
     var parents = window.tempHelper.getParents($(el))
-    console.error('received c')
     var targetEl = $(el)[0]
     var viewMenuType = null
-    console.error('received d')
     var attrContentEditableIdx = -1 // el.attributes.indexOf('contenteditable')
     for (var i = targetEl.attributes.length - 1; i >= 0; i--) {
-      console.error('received e')
       if (targetEl.attributes[i].name === 'contenteditable') {
         attrContentEditableIdx = i
         break
@@ -296,14 +278,9 @@ export const editorStart = (state) => {
       }
     }
 
-    console.error('received f')
-    console.error(targetEl)
-    console.error($(el))
-    console.error($(el).parents())
     // $(el).addClass('testaace')
     if (attrContentEditableIdx === -1) {
       // Not found lets find closet parent...
-      console.error('received g')
       var findParentObject = $(el).parents('[show-editor-menu]')
       if (findParentObject.length >= 1) {
         targetEl = findParentObject[0]
@@ -315,14 +292,10 @@ export const editorStart = (state) => {
         }
       }
     }
-    console.error('received h')
     if (attrContentEditableIdx !== -1) {
       // //console.error('THIS WAS A VALID CONTEXT MENU')
     } else {
-      console.error('received i')
       // Not a valid contextmenu option
-
-      console.error('received g')
       /*
       var findChildObject = $(el).next('[show-editor-menu]').first()
       if (findChildObject.length >= 1) {

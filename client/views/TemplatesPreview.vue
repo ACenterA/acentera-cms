@@ -21,7 +21,7 @@ export default {
     $('body').addClass('overflow-hidden')
 
     var self = this
-    this.$http.get('/assets/themes.json').then((response) => {
+    this.$http.get('./assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
       self.themes = response.data
       for (var idx in self.themes) {

@@ -281,8 +281,6 @@ export default {
     }),
     websitePublicUrl: function () {
       if (this.selectedWebsite && this.selectedWebsite.domains) {
-        console.error(' domain tt 1')
-        console.error(this.selectedWebsite)
         for (var v in this.selectedWebsite.domains) {
           if (this.selectedWebsite.domains.hasOwnProperty(v)) {
             var dom = this.selectedWebsite.domains[v]

@@ -83,7 +83,7 @@ export default {
     enabledLanguages () {
       var tmpArr = []
       $.each(this.$store.state.app.languages.languages, function (idx, lang) {
-        if (lang.enable) {
+        if (!lang.disabled) {
           tmpArr.push(lang)
         }
       })

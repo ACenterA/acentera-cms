@@ -141,7 +141,7 @@ export default {
     /*
     var self = this
     // TODO: Fetch from github, if fail get local file?
-    this.$http.get('/assets/themes.json').then((response) => {
+    this.$http.get('./assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
       self.themes = response.data
       this.switchTab(0)
@@ -231,10 +231,9 @@ export default {
         // OK TXT has been validated, he own the DNS domain.
         self.validateCnameOrCreate()
       }).catch((error) => {
-        console.error('got error')
-        console.error(error)
         this.showConfirmCnameModal = false
         this.showConfirmModal = true
+        console.error(error)
       })
     },
     validateCnameOrCreate () {
@@ -242,8 +241,6 @@ export default {
       this.validateCnameDomain().then(function (data) {
         // OK TXT has been validated, he own the DNS domain.
         // OK IT HAS BEEN CREATED
-        console.error('validate cname domain is resp')
-        console.error(data)
         if (data.type && data.type === 'missing_cname') {
           self.showConfirmCnameModal = true
           self.showConfirmModal = false
@@ -260,24 +257,17 @@ export default {
           self.proceedDomainAssociation()
         }
       }).catch((error) => {
-        // TODO: ????
-        console.error(error)
         try {
           if (error && error.type && error.type === 'missing_cname') {
-            console.error('A1')
             self.showConfirmCnameModal = true
             self.showConfirmModal = false
           } else if (error && error.type && error.type === 'record_not_found') {
-            console.error('A2')
             self.showConfirmCnameModal = true
             self.showConfirmModal = false
           } else if (error && error.type && error.type === 'invalid_txt') {
-            console.error('A3')
             self.showConfirmModal = true
             self.showConfirmCnameModal = false
           } else {
-            console.error('A4')
-            console.error(self)
             self.showConfirmCnameModal = true
             self.showConfirmModal = false
           }
@@ -302,8 +292,6 @@ export default {
         }
       ).then((response) => {
         if (response && response.data && (response.data.websiteId === self.selectedWebsite.websiteId)) {
-          console.error('GOOD WEBSITE')
-          console.error(response.data)
           if (!self.selectedWebsite.domains) {
             self.selectedWebsite.domains = {}
           }
@@ -339,7 +327,6 @@ export default {
           self.showConfirmCreatingModal = false
         }
       }).catch((error) => {
-        console.error(error)
         self.validateText = 'Validate & Create'
         self.updating = false
         self.$notify({
@@ -347,6 +334,7 @@ export default {
           message: 'An error has occured, please try again or contact us.',
           type: 'danger'
         })
+        console.error(error)
       })
     },
     proceedDomainDelete (primary) {
@@ -409,18 +397,14 @@ export default {
       return new Promise(function (resolve, reject) {
         var h = { 'Authorization': 'Bearer ' + self.$store.state.session.token }
         // request it with headers an param
-        console.error('validate CNAME')
         self.$http.get(window.websiteapiUrl + '/sites/v1/websites/' + self.selectedWebsite.projectId + '/' + self.selectedWebsite.websiteId + '/cname/' + self.newDomainName,
           {
             headers: h
           }
         ).then((response) => {
-          console.error('received of')
-
           if (!response.data) {
             reject(new Error('No response?'))
           }
-          console.error('got type:' + response.data.type)
           if ((response.data.success === true)) {
             return resolve(response.data)
           }
@@ -437,23 +421,18 @@ export default {
       return new Promise(function (resolve, reject) {
         var h = { 'Authorization': 'Bearer ' + self.$store.state.session.token }
         // request it with headers an param
-        console.error('validate TXT')
         self.$http.get(window.websiteapiUrl + '/sites/v1/dns/domain/validate/' + self.newDomainName + '/' + self.txt.replace('v=', ''),
           {
             headers: h
           }
         ).then((response) => {
-          console.error('received of')
           if (!response.data) {
             reject(new Error('No response?'))
           }
           if ((response.data.success === true)) {
             return resolve(response.data)
           }
-          console.error('ta : ' + response.data.success)
-          console.error('1 ta : ' + (response.data.success === true))
           if (response.data.type) {
-            console.error('reject using error : ' + response.data.type)
             return reject(new Error(response.data.type))
           }
           if (response.data.message) {
@@ -465,8 +444,6 @@ export default {
           }
           // return reject(new Error('invalid_response'))
         }).catch((error) => {
-          console.error('ERRROR REJCT')
-          console.error(error)
           reject(error)
         })
       })
@@ -498,11 +475,7 @@ export default {
         // all good
         self.createCnameDomain()
       }).catch((error) => {
-        console.error('got error')
-        console.error(error)
-        console.error('got error msg')
         if (error && error.message) {
-          console.error('got error msg 1 ' + error.message)
           self.txterror = error.message
         }
         self.showConfirmCnameModal = false

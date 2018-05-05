@@ -43,7 +43,6 @@ window.goHostUrl = window.goHostUrl || 'http://localhost:8081'
 
 window.websiteapiUrl = window.goHostUrl || 'http://localhost:8081'
 
-console.error('tet sending message?')
 if ((window.location.href + '').indexOf('/oauth/') !== -1) {
   isOauthCallback = true
 
@@ -220,7 +219,7 @@ if (!isOauthCallback) {
       document.domain = 'acentera.com'
       store.commit('setWebsite', true)
       window.withCredentials = true
-      window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev'
+      window.websiteapiUrl = 'https://cms.acentera.com/prod'
 
       router = routerImport.newRouter('history')
 
@@ -289,16 +288,12 @@ if (!isOauthCallback) {
   }
 
   // DELETE
-  // alert(router.mode)
-  console.error('router is')
-  // router.mode = 'hash'
-  console.error(router)
-  Vue.config.devtools = true
+  // Vue.config.devtools = true
   /*
   // document.domain = 'acentera.com' // TODO: Use en environment variable ...
   store.commit('setWebsite', true) // weird ?
   window.withCredentials = true
-  window.websiteapiUrl = 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/dev'
+  window.websiteapiUrl = 'https://cms.acentera.com/dev'
 
   bitbucketClientId = 'mYJjMLHBCjYn4k9Xu2'
   githubClientId = 'dd64a961127f3392159d'
@@ -412,7 +407,7 @@ if (!isOauthCallback) {
       }
       Vue.prototype.$checkInetBad = function () {
         $.ajax({
-          url: 'https://w3trnpl5z2.execute-api.us-east-1.amazonaws.com/',
+          url: 'https://cms.acentera.com/',
           type: 'GET',
           timeout: 5000,
           crossDomain: true,
@@ -461,15 +456,11 @@ if (!isOauthCallback) {
         }
       }
       if (!(store.getters.app.websiteId)) {
-        console.error('TEST ROUTE 1 ')
         if (!(route.path.indexOf('template') >= 0 || route.path === '/')) {
-          console.error('SET HIDDEN A ?')
           if (store.getters.app.isLoaded) {
-            console.error('SET HIDDEN A 1a?')
             // THIS IS BAD I KNOW...
             // This is hack, ie end-user click on change site, then hit the back button ...
             // the left menu stay hidden, this fixes that.
-            console.error('SET HIDDEN A1 ?')
             store.getters.app.sidebar.hidden = true
             store.getters.app.sidebar.opened = false
             store.getters.app.sidebartwo.hidden = true
@@ -477,34 +468,19 @@ if (!isOauthCallback) {
             store.getters.app.sidebarglobal.hidden = false
             store.getters.app.sidebarglobal.opened = true
             store.getters.app.repoState.isLoaded = false
-            console.error('location href to /')
             window.location.href = '/' // force go back..
             return
           }
         }
-        console.error('TT SET HIDDEN A 1azzzzz?')
-        console.error(route)
-        console.error(route.path)
-        if (route.path === '/') {
-          console.error('SET HIDDEN TEST !?')
-        } else {
-          console.error('SET HIDDEN TEST 2!?')
-        }
         if (route && route.path === '/') {
-          console.error('SET HIDDEN A2 ?')
           // THIS IS BAD I KNOW...
           // This is hack, ie end-user click on add new template..then hit the back button  or (navigator history which is the most pain)...
           // the left menu stay hidden, I have not investigated...
           // ??? if (store.getters.app.isLoaded) {
           if (store.getters.app.project) {
-            console.error('SET HIDDEN A3 ?')
             if (store.getters.app.sidebarglobal.opened === false) {
-              console.error('SET HIDDEN A4 ?')
               var l = Object.keys(store.getters.app.project.websites).length
-
-              console.error('SET HIDDEN A5 ?')
               if (l >= 1) {
-                console.error('SET HIDDEN A6 ?')
                 store.getters.app.sidebar.hidden = true
                 store.getters.app.sidebar.opened = false
                 store.getters.app.sidebartwo.hidden = true
@@ -515,13 +491,6 @@ if (!isOauthCallback) {
               }
             }
           }
-        }
-      } else {
-        console.error('SET HIDDEN A ERRRA ?')
-        if (store.getters.app.isLoaded) {
-          console.error('SET HIDDEN A 1 LOADED a?')
-        } else {
-          console.error('SET HIDDEN A 1 NOT LOADED a?')
         }
       }
     }

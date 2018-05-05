@@ -73,11 +73,7 @@ export default {
       'selectPost'
     ]),
     clickSelectPost (itm) {
-      console.error('recieved click select post here')
-      console.error(this)
       var link = itm.item.link
-      console.error('curr link')
-      console.error(link)
 
       var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
       var langCode = '' + selectedLangItem.id
@@ -100,14 +96,9 @@ export default {
       while (link.endsWith('/')) {
         link = link.substring(0, link.length - 1)
       }
-      console.error('curr link final language ' + langCode)
-      console.error(link)
       var self = this
 
-      self.$httpApi.post(window.apiUrl + '/frontmatter', { type: 'blogs', id: link, lang: langCode }, { }).then((res) => {
-        console.error('aa success 1 s')
-        console.error(res.data)
-        console.error(itm.item)
+      self.$httpApi.post(window.apiUrl + '/frontmatter?sidebarblogs=1', { type: 'blogs', id: link, lang: langCode }, { }).then((res) => {
         itm.item['frontMatter'] = {}
         for (var p in res.data) {
           if (res.data.hasOwnProperty(p)) {
@@ -122,8 +113,6 @@ export default {
             }
           }
         }
-        console.error('updated item')
-        console.error(itm.item)
         self.selectPost(itm)
       })
       .catch((error) => {

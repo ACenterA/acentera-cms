@@ -113,22 +113,17 @@ export default {
       return window.goHostUrl
     },
     refreshImages () {
-      console.error('refreshing images ??? a1')
       var self = this
       if (!this.$store.state.app.isLoaded) {
         return null
       }
 
-      console.error('refreshing images ??? a1a')
       if (this.$store.state.app.website) {
-        console.error('refreshing images ??? a1a erra')
         // Is Hosted Version ensure, a website is selected..
         if (!this.$store.state.app.websiteId) {
-          console.error('refreshing images ??? a1a fff')
           return null
         }
       }
-      console.error('refreshing images ??? a1b')
 
       var iterateFolder = function (first, data, acc, cb) {
         var files = data.Files
@@ -147,7 +142,6 @@ export default {
         }
         return acc
       }
-      console.error('refreshing images AA ?? using ' + window.apiUrl + '/imagelist')
       this.$httpApi.get(window.apiUrl + '/imagelist').then((response) => {
         this.$data.chart = response.data
         var StaticImages = response.data.StaticImages

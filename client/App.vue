@@ -238,7 +238,18 @@ export default {
         oList.forEach((e) => {
             self.$store.commit('addRow', e, 0)
         })
-      });
+      }).catch((error) => {
+        if (error && error.response && error.response.status === 404) {
+          self.$store.state.app.nodata = true
+          if (self.$store.state.app.createItem) {
+            return self.$bus.$emit('NO_DATA_FOUND')
+          } else {
+            return self.$bus.$emit('CREATE_ITEM')
+          }
+        } else {
+          this.$onError(error)
+        }
+      })
     })
 
 
@@ -276,7 +287,6 @@ export default {
     window.addEventListener('resize', handler)
 
     var self = this
-    console.error('calling refresh user A')
     this.refreshUser({ vue: this,
       callback: function (gotdata) {
         if (self.project && self.project.websites) {

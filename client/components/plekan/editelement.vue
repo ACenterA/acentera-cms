@@ -149,8 +149,6 @@ export default {
       var mapArrObj = []
       var self = this
       $.each(editorParamDatas, function (idx, item) {
-        console.error('get element of')
-        console.error(item)
         var itemArr = item.split(':')
         var itemInfo = {
           parameter: itemArr[0]
@@ -163,15 +161,11 @@ export default {
         }
         itemInfo['$el'] = $(self.element)
         itemInfo['value'] = window.getEditorProperty(itemArr[0], self.$store.state.app.settings.params)
-        console.error((typeof itemInfo['value']))
         if (typeof itemInfo['value'] === 'object') {
           // we received an object meaning its an array ie: social buttons ???
           // well we changed this logic here.. hehe
           var itmToAdd = itemInfo['value']
           $.each(itmToAdd, function (idx, data) {
-            console.error('each a')
-            console.error(idx)
-            console.error(data)
             var itemInfoEnable = {
               parameter: itemArr[0] + '[' + idx + ']' + 'enable'
             }
@@ -198,8 +192,6 @@ export default {
           if (itemInfo['type'] === 'Image') {
             itemInfo['currentImage'] = window.goHostUrl + '/' + itemInfo['value']
           }
-          console.error('PUSH OF')
-          console.error(itemInfo)
           if (typeof itemInfo['value'] === 'undefined') {
             if (item.startsWith('i18n.')) {
               itemInfo['value'] = itemInfo['$el'].text()
@@ -333,17 +325,12 @@ export default {
               hasError = true // if it works we have to update this to false
 
               window.updateEditorProperty(item.parameter, self.$store.state.app.settings.params, item.value)
-              console.error('updating a')
               // TODO: Set settings dirty ??
               // TODO: We should implement a editor function to edit elements....
-              // ie: an
-              console.error('updated test ?')
               if (item['type'].toLowerCase() === 'text') {
                 item['$el'].html(item.value)
-                console.error('updated test  tt')
                 if (item.parameter.startsWith('i18n.')) {
                   // TODO: Set i18n
-                  console.error('updated test  yes')
                   var tmpParma = item.parameter
                   if (tmpParma.startsWith('i18n.')) {
                     tmpParma = tmpParma.substring(5)
@@ -355,13 +342,9 @@ export default {
                 }
                 hasError = false
               } else if (item['type'].toLowerCase() === 'image') {
-                console.error('updating b')
                 // Find where the img is ... matching the orig_value ...
                 var imgs = item['$el'].find('img')
-                console.error('updating c')
-                console.error(imgs)
                 if (imgs[0]) {
-                  console.error('updating d')
                   var isImgUpdated = updateImageByBgStyle(imgs[0], item)
                   if (isImgUpdated) {
                     hasError = false
@@ -370,11 +353,8 @@ export default {
                     hasError = false
                   }
                 } else {
-                  console.error('updating e')
                   if (imgs) {
-                    console.error('updating f')
                     if (imgs.prevObject) {
-                      console.error('updating g')
                       var tmpImg = imgs.prevObject[0]
                       var isImgUpdated1 = updateImageByBgStyle(tmpImg, item)
                       if (isImgUpdated1) {
