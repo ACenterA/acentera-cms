@@ -467,7 +467,8 @@ if (!isOauthCallback) {
             store.getters.app.sidebarglobal.hidden = false
             store.getters.app.sidebarglobal.opened = true
             store.getters.app.repoState.isLoaded = false
-            window.location.href = '/' // force go back..
+            // window.location.href = '/' // force go back..
+            router.push({ 'path': '/' })
             return
           }
         }
@@ -522,7 +523,7 @@ if (!isOauthCallback) {
     //TODO: Find a better way, in case user is offline...
     if (!(route.name === 'Home')) {
       if (state.app.repoState.updating === -1) {
-        window.location.href = '/'
+        window.vm.$router.push({ 'path': '/' }); //window.location.href = '/'
       }
     }
     */

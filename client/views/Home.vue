@@ -303,12 +303,6 @@ export default {
     project: function () {
       return this.selectedProject
     },
-    baaadselectedWebsite: function () {
-      if (this.$store.state.app.project && this.$store.state.app.project.websites) {
-        return this.$store.state.app.project.websites[this.$store.state.app.websiteId]
-      }
-      return this.$store.state.app.websiteId
-    },
     repoState: function () {
       return this.$store.state.app.repoState
     },

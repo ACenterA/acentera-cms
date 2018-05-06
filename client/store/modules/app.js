@@ -294,62 +294,70 @@ const mutations = {
     state.projectId = item.projectId
     state.websiteId = item.websiteId
 
-    state.sidebarglobal.opened = false
-    state.sidebar.opened = true
-    state.sidebar.hidden = false
-    // && !sidebarglobal.hidden
-    window.localStorage.setItem('selectedWebsite', state.websiteId)
-    window.localStorage.setItem('selectedProject', state.projectId)
+    if (!state.websiteId) {
+      window.localStorage.removeItem('selectedWebsite')
+      window.vm.$router.push({ 'path': '/' })
 
-    // TODO: Get current scheme from current window...location
-    window.apiUrl = 'https://' + item.websiteId + '.workspace.acentera.com/api'
-    window.goHostUrl = 'https://' + item.websiteId + '.workspace.acentera.com'
-
-    if (!state.website) {
-      window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
+      state.sidebarglobal.opened = true
+      state.sidebar.opened = false
     } else {
-      var self = window.vm
-      // Refresh for domains...
-      var h = { 'Authorization': 'Bearer ' + window.vm.$store.state.session.token } // cannot use state.session as state = the $store.state.app
-      window.vm.$http.get(window.websiteapiUrl + '/sites/v1/websites/' + state.projectId + '/' + state.websiteId, {
-        headers: h
-      }).then((response) => {
-        if (response.data && response.data.errorMessage) {
+      state.sidebarglobal.opened = false
+      state.sidebar.opened = true
+      state.sidebar.hidden = false
+      // && !sidebarglobal.hidden
+      window.localStorage.setItem('selectedWebsite', state.websiteId)
+      window.localStorage.setItem('selectedProject', state.projectId)
+
+      // TODO: Get current scheme from current window...location
+      window.apiUrl = 'https://' + item.websiteId + '.workspace.acentera.com/api'
+      window.goHostUrl = 'https://' + item.websiteId + '.workspace.acentera.com'
+
+      if (!state.website) {
+        window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
+      } else {
+        var self = window.vm
+        // Refresh for domains...
+        var h = { 'Authorization': 'Bearer ' + window.vm.$store.state.session.token } // cannot use state.session as state = the $store.state.app
+        window.vm.$http.get(window.websiteapiUrl + '/sites/v1/websites/' + state.projectId + '/' + state.websiteId, {
+          headers: h
+        }).then((response) => {
+          if (response.data && response.data.errorMessage) {
+            self.$notify({
+              title: 'problem occured while fetching website informations.',
+              message: 'Could not find website.',
+              type: 'warning'
+            })
+            return setTimeout(function () {
+              window.localStorage.removeItem('selectedWebsite')
+              window.localStorage.removeItem('selectedProject')
+              window.location.href = '/'
+            }, 8000)
+          }
+          if (response.data && response.data.websiteId === state.websiteId) {
+            window.vm.$store.state.app.project['websites'][state.websiteId] = response.data
+            if (response.data.sso_token) {
+              self.$store.commit('SET_WEBSITE_SSO_TOKEN', {
+                domain: '.acentera.com',
+                cookie_value: response.data.sso_token,
+                fct: function () {
+                  window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
+                }
+              })
+            }
+          }
+        }).catch((error) => {
+          var msg = ''
+          if (error.response && error.response.data) {
+            msg = error.response.data.errorMessage
+          }
           self.$notify({
             title: 'problem occured while fetching website informations.',
-            message: 'Could not find website.',
+            message: msg,
             type: 'warning'
           })
-          return setTimeout(function () {
-            window.localStorage.removeItem('selectedWebsite')
-            window.localStorage.removeItem('selectedProject')
-            window.location.href = '/'
-          }, 8000)
-        }
-        if (response.data && response.data.websiteId === state.websiteId) {
-          window.vm.$store.state.app.project['websites'][state.websiteId] = response.data
-          if (response.data.sso_token) {
-            self.$store.commit('SET_WEBSITE_SSO_TOKEN', {
-              domain: '.acentera.com',
-              cookie_value: response.data.sso_token,
-              fct: function () {
-                window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
-              }
-            })
-          }
-        }
-      }).catch((error) => {
-        var msg = ''
-        if (error.response && error.response.data) {
-          msg = error.response.data.errorMessage
-        }
-        self.$notify({
-          title: 'problem occured while fetching website informations.',
-          message: msg,
-          type: 'warning'
+          // state.app.isLoaded = true
         })
-        // state.app.isLoaded = true
-      })
+      }
     }
     // window.vm.$store.commit('REFRESH_SETTINGS', state) // we still want to refresh settings, for offline version...
   },
