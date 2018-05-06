@@ -206,20 +206,19 @@ var bindResponseInterceptorFct = function () {
 var authenticateObj = null
 if (!isOauthCallback) {
   window.withCredentials = false
-
-  // TODO: .. If is WEBSITE... then
-  // if (window.location.href + "").indexOf("acentera.com") {
   var bitbucketClientId = ''
   var githubClientId = ''
   if (!isOauthCallback) {
     // TODO: Use en environment variable ... build / pipeline tooling
-    if (window.location.href.indexOf('acentera.com') !== -1) {
+    if (window.location.href.indexOf('.acentera') !== -1) {
       // Enable devtools
       Vue.config.devtools = true
       document.domain = 'acentera.com'
       store.commit('setWebsite', true)
       window.withCredentials = true
-      window.websiteapiUrl = 'https://cms.acentera.com/prod'
+      if (window.location.href.indexOf('.acentera.com') !== -1) {
+        window.websiteapiUrl = 'https://cms.acentera.com/prod'
+      }
 
       router = routerImport.newRouter('history')
 
@@ -253,7 +252,7 @@ if (!isOauthCallback) {
         bitbucket: {
           clientId: bitbucketClientId,
           responseType: 'code',
-          redirectUri: currentUrl + '/oauth/bitbucket/authorize', // http://localhost:8090/oauth/bitbucket/authorize', // 8081:api/oauth/github/authorize' // 8090:/oauth/github/authorize' // Your client app URL
+          redirectUri: currentUrl + '/admin/oauth/bitbucket/authorize', // http://localhost:8090/oauth/bitbucket/authorize', // 8081:api/oauth/github/authorize' // 8090:/oauth/github/authorize' // Your client app URL
           defaultUrlParams: ['state', 'client_id', 'redirect_uri', 'response_type'],
           state: function () {
             var val = ((Date.now() + Math.random()) * Math.random()).toString().replace('.', '')
@@ -263,7 +262,7 @@ if (!isOauthCallback) {
         },
         github: {
           clientId: githubClientId, // Iv1.26faaeb37888f8d0',
-          redirectUri: currentUrl + '/oauth/github/authorize', // redirectUri: 'http://localhost:8090/oauth/github/authorize', // 8081:api/oauth/github/authorize' // 8090:/oauth/github/authorize' // Your client app URL
+          redirectUri: currentUrl + '/admin/oauth/github/authorize', // redirectUri: 'http://localhost:8090/oauth/github/authorize', // 8081:api/oauth/github/authorize' // 8090:/oauth/github/authorize' // Your client app URL
           scope: [ 'admin:repo_hook', 'admin:repo_hook', 'delete_repo', 'repo', 'write:public_key', 'admin:public_key' ],
           defaultUrlParams: ['state', 'client_id', 'redirect_uri'],
           state: function () {
