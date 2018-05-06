@@ -20,6 +20,7 @@ function generateRoutesFromMenu (menu = [], routes = []) {
 var newRouter = function (mode) {
   return new Router({
   // mode: 'hash', // Demo is living in GitHub.io, so required!
+    base: '/admin/',
     mode: mode,
     linkActiveClass: 'is-active',
     scrollBehavior: () => ({ y: 0 }),

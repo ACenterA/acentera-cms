@@ -228,7 +228,7 @@ export default {
         'template_branch': 'master'
       }
 
-      var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create'
+      var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create?createSiteModal=1'
 
       self.toggleRepoState(0) // Reset state for creating, to disable any messages... until it got created.
       self.$store.state.app.websiteInCreationMode = true // prevent navbar messages
@@ -238,15 +238,25 @@ export default {
       self.$http.post(initSiteRepoCall, initSite, {
         headers: h
       }).then((response) => {
-        if (!(response.data.type.startsWith('error'))) {
-          self.processing = false
-          self.$emit('changePage', response.data)
+        if (response && response.data && response.data.type) {
+          if (!(response.data.type.startsWith('error'))) {
+            self.processing = false
+            self.$emit('changePage', response.data)
+          } else {
+            self.$store.state.app.websiteInCreationMode = false // prevent navbar messages
+            self.processing = false
+            self.$notify({
+              title: 'Could not create website.',
+              message: 'We were unable to create your website. Contact support! ',
+              type: 'danger'
+            })
+          }
         } else {
           self.$store.state.app.websiteInCreationMode = false // prevent navbar messages
           self.processing = false
           self.$notify({
             title: 'Could not create website.',
-            message: 'We were unable to create your website. Contact support! ',
+            message: 'We were unable to create your website. Contact support. ',
             type: 'danger'
           })
         }
@@ -376,7 +386,7 @@ export default {
           'template_branch': 'master'
         }
 
-        var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create'
+        var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create?createSiteModal=2'
 
         self.toggleRepoState(0) // Reset state for creating, to disable any messages... until it got created.
         self.$store.state.app.websiteInCreationMode = true // prevent navbar messages
@@ -404,11 +414,15 @@ export default {
         self.$http.post(initSiteRepoCall, initSite, {
           headers: h
         }).then((response) => {
-          if (!(response.data.type.startsWith('error'))) {
-            self.processing = false
-            self.$emit('changePage', response.data)
+          if (response && response.data && response.data.type) {
+            if (!(response.data.type.startsWith('error'))) {
+              self.processing = false
+              self.$emit('changePage', response.data)
+            } else {
+              rollback(response.data.type)
+            }
           } else {
-            rollback(response.data.type)
+            rollback('Invalid response..')
           }
         }, function (errr) {
           rollback('Cannot connect to api server')
