@@ -21,6 +21,11 @@ export default {
       name: 'Domains',
       path: '/domains',
       component: lazyLoading('admin/Domains')
+    },
+    {
+      name: 'Danger Zone',
+      path: '/danger',
+      component: lazyLoading('admin/Danger')
     }
     /*
     {

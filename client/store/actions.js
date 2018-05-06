@@ -178,8 +178,7 @@ export const refreshUser = ({ commit }, obj) => {
                   // a page reload from bookmark
                   if (state.app.websiteId) {
                     if (window.vm._route.path === '/templates') {
-                      window.location.href = '/' // vm._router.push({ 'path': '/' })
-                      return
+                      return window.vm.$router.push({ 'path': '/' })
                     }
                   }
                 }
@@ -212,7 +211,8 @@ export const refreshUser = ({ commit }, obj) => {
                   if (window.vm._route.path !== '/templates') {
                     if (window.vm._route.path === '/') {
                     } else {
-                      window.location.href = '/'
+                      // window.location.href = '/'
+                      return window.vm.$router.push({ 'path': '/' })
                     }
                   }
                   state.app.sidebar.opened = true
@@ -263,7 +263,7 @@ export const refreshUser = ({ commit }, obj) => {
             if (window.vm._route.path !== '/templates') {
               if (window.vm._route.path === '/') {
               } else {
-                window.location.href = '/'
+                window.vm.$router.push({ 'path': '/' }) // window.location.href = '/'
               }
             }
           }
@@ -279,7 +279,7 @@ export const refreshUser = ({ commit }, obj) => {
           if (window.vm._route.path !== '/templates') {
             if (window.vm._route.path === '/') {
             } else {
-              window.location.href = '/'
+              return window.vm.$router.push({ 'path': '/' }) // window.location.href = '/'
             }
           }
         }
