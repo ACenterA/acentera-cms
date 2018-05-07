@@ -89,8 +89,3 @@ Special thanks for the Go-Git created by(https://sourced.tech/)source{d}
     <a href="https://github.com/src-d/go-git">Go-Git</a>
   </sub>
 </p>
-
-
-
-Go-Git
-Go-Git
