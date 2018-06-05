@@ -83,10 +83,10 @@ function objectExtend(a, b) {
 
 /**
  * Assemble url from two segments
- *
+ * 
  * @author Sahat Yalkabov <https://github.com/sahat>
  * @copyright Method taken from https://github.com/sahat/satellizer
- *
+ * 
  * @param  {String} baseUrl Base url
  * @param  {String} url     URI
  * @return {String}
@@ -108,10 +108,10 @@ function joinUrl(baseUrl, url) {
 
 /**
  * Get full path based on current location
- *
+ * 
  * @author Sahat Yalkabov <https://github.com/sahat>
  * @copyright Method taken from https://github.com/sahat/satellizer
- *
+ * 
  * @param  {Location} location
  * @return {String}
  */
@@ -124,10 +124,10 @@ function getFullUrlPath(location) {
 
 /**
  * Parse query string variables
- *
+ * 
  * @author Sahat Yalkabov <https://github.com/sahat>
  * @copyright Method taken from https://github.com/sahat/satellizer
- *
+ * 
  * @param  {String} Query string
  * @return {String}
  */
@@ -149,7 +149,7 @@ function parseQueryString(str) {
  * Decode base64 string
  * @author Sahat Yalkabov <https://github.com/sahat>
  * @copyright Method taken from https://github.com/sahat/satellizer
- *
+ * 
  * @param  {String} str base64 encoded string
  * @return {Object}
  */
@@ -791,11 +791,11 @@ function StorageFactory(options) {
         window.sessionStorage.removeItem('testKey');
         return new LocalStorage$2(options.storageNamespace)
       } catch (e) {}
-
+      
     case 'cookieStorage':
       return new CookieStorage(options.cookieStorage);
 
-    case 'memoryStorage':
+    case 'memoryStorage': 
     default:
       return new MemoryStorage(options.storageNamespace)
       break;
@@ -980,7 +980,7 @@ var OAuth = function OAuth($http, storage, providerConfig, options) {
 };
 
 /**
- * Initialize OAuth1 process
+ * Initialize OAuth1 process 
  * @param{Object} userData User data
  * @return {Promise}
  */

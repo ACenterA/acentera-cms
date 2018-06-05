@@ -8,6 +8,8 @@ export SidebarGlobal from './SidebarGlobal'
 
 export Sidebarblogs from './Sidebarblogs'
 
+export Sidebarrecettes from './Sidebarrecettes'
+
 export AppMain from './AppMain'
 
 export FooterBar from './FooterBar'

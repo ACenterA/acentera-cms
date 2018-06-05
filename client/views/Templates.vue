@@ -13,7 +13,6 @@
               <div>
                   <div class="center-text">
                       <h4 class="site-title">Choose a template for your website</h4>
-                      (i know its duplicated .. lack of theme right now)
                   </div>
               </div>
             </div>
@@ -225,7 +224,7 @@ export default {
     // self.$store.state.app.sidebarglobal.hidden = true
 
     // TODO: Test github themes, then local file as fallback ?
-    this.$http.get('./assets/themes.json').then((response) => {
+    this.$http.get(window.currentUrl + '/assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
       self.themes = response.data
       this.switchTab(0)

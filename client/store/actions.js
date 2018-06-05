@@ -31,6 +31,8 @@ const refreshConfig = (state) => {
 }
 
 export const selectPost = ({ commit }, obj) => {
+  console.error('SELECT POST ... ')
+  console.error(obj)
   if (obj && obj.item) {
     obj.item.selected = true
 
@@ -43,36 +45,58 @@ export const selectPost = ({ commit }, obj) => {
     commit(types.SELECT_POST, obj.item)
     // TOOD: What about :1313/ replacement variables ???
     window.vm.$store.state.app.selectedItem = obj
-    // window.vm.$store.state.app.topbar.selectedPost = obj.item
+
+    console.error('GOT CLICK ON..')
+    console.error(obj)
+    console.error(obj.item)
+
     var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
-    var langPrefix = '/' + selectedLangItem.id
-    if (window.vm.$store.state.app.language === window.vm.$store.state.app.languageSelected) {
-      langPrefix = '' // no prefix, this is the default site...
-    }
-
-    // HACK : Make sure not to have duplicate https://hostname/fr/https://hostname/blogs/site
-    console.error('obj item link test')
-    console.error(obj.item.link)
-    console.error('VS')
-    console.error(window.goHostUrl)
-    if (obj.item.link.indexOf(window.goHostUrl) >= 0) {
-      console.error('substsring : ' + obj.item.link.substring(window.goHostUrl.length + 1))
-      obj.item.link = obj.item.link.substring(window.goHostUrl.length)
-      if (!obj.item.link.startsWith('/')) {
-        obj.item.link = '/'
+    var langPrefix = selectedLangItem.id
+    if (obj.item.hasOwnProperty('alternate')) {
+      // New Logic
+      var link = obj.item.link
+      var alternateLangLinks = obj.item.alternate
+      // var type = obj.item.section
+      console.error(alternateLangLinks)
+      console.error('check of ;' + langPrefix)
+      if (alternateLangLinks.hasOwnProperty(langPrefix)) {
+        console.error('ok link has alternate of ' + langPrefix)
+        link = alternateLangLinks[langPrefix]
+      } else {
+        console.error('2 - ok link does not have alternate of ' + langPrefix)
       }
-    }
+      obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + link)
+    } else {
+      // Old logic
+      langPrefix = '/' + selectedLangItem.id
+      if (window.vm.$store.state.app.language === window.vm.$store.state.app.languageSelected) {
+        langPrefix = '' // no prefix, this is the default site...
+      }
 
-    // window.vm.$store.state.app.topbar.selectedPost = obj.item
-    if (obj.item.link.indexOf('localhost:') >= 0 && obj.item.link.indexOf('localhost:') <= 8) {
-      if (langPrefix !== '') {
-        if (!langPrefix.endsWith('/')) {
-          langPrefix += '/'
+      // HACK : Make sure not to have duplicate https://hostname/fr/https://hostname/blogs/site
+      console.error('obj item link test')
+      console.error(obj.item.link)
+      console.error('VS')
+      console.error(window.goHostUrl)
+      if (obj.item.link.indexOf(window.goHostUrl) >= 0) {
+        console.error('substsring : ' + obj.item.link.substring(window.goHostUrl.length + 1))
+        obj.item.link = obj.item.link.substring(window.goHostUrl.length)
+        if (!obj.item.link.startsWith('/')) {
+          obj.item.link = '/'
         }
       }
-      obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/' + langPrefix))
-    } else {
-      obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + langPrefix + obj.item.link)
+
+      // window.vm.$store.state.app.topbar.selectedPost = obj.item
+      if (obj.item.link.indexOf('localhost:') >= 0 && obj.item.link.indexOf('localhost:') <= 8) {
+        if (langPrefix !== '') {
+          if (!langPrefix.endsWith('/')) {
+            langPrefix += '/'
+          }
+        }
+        obj.vue.$bus.$emit('updateEditFrame', obj.item.link.replace('localhost:1313/', 'localhost:8081/' + langPrefix))
+      } else {
+        obj.vue.$bus.$emit('updateEditFrame', window.goHostUrl + langPrefix + obj.item.link)
+      }
     }
   }
 }

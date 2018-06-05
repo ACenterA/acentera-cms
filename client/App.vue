@@ -403,4 +403,16 @@ body.overflow-hidden::-webkit-scrollbar {
     }
   }
 }
+
+.is-hidden-not-4k {
+  display:none;
+}
+
+// For Login name to be shown in navbar only with 4k screens...
+@media screen and (max-width: 1200px) {
+  .is-hidden-not-4k {
+    width: 30%;
+  }
+}
+
 </style>

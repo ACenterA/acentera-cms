@@ -298,8 +298,12 @@ const mutations = {
       window.localStorage.removeItem('selectedWebsite')
       window.vm.$router.push({ 'path': '/' })
 
-      state.sidebarglobal.opened = true
       state.sidebar.opened = false
+      state.sidebar.hidden = true
+
+      // Lets show the global sidebar and not the project level..
+      state.sidebarglobal.hidden = false
+      state.sidebarglobal.opened = true
     } else {
       state.sidebarglobal.opened = false
       state.sidebar.opened = true
@@ -330,7 +334,8 @@ const mutations = {
             return setTimeout(function () {
               window.localStorage.removeItem('selectedWebsite')
               window.localStorage.removeItem('selectedProject')
-              window.location.href = '/'
+              // window.location.href = '/'
+              return window.vm.$router.push({ 'path': '/' })
             }, 8000)
           }
           if (response.data && response.data.websiteId === state.websiteId) {

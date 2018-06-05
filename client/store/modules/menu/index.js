@@ -40,6 +40,14 @@ const state = {
       },
       component: lazyLoading('blogs', true)
     },
+    {
+      name: 'Recipes',
+      path: '/editor/recipes',
+      meta: {
+        icon: 'fa-edit'
+      },
+      component: lazyLoading('recipes', true)
+    },
     /*
     {
       name: 'Versions',

@@ -33,6 +33,7 @@
     "test": "echo lol"
   },
   "dependencies": {
+    "@formschema/native": "file:forms-schema",
     "animate.css": "3.5.2",
     "animejs": "^2.0.1",
     "axios": "^0.15.3",
@@ -40,6 +41,7 @@
     "bluebird": "^3.5.1",
     "bootstrap": "latest",
     "bulma": "^0.4.2",
+    "element-ui": "^2.4.0",
     "font-awesome": "4.7.0",
     "github-buttons": "https://github.com/ntkme/github-buttons.git",
     "highlight.js": "^9.12.0",
@@ -53,6 +55,7 @@
     "sortablejs": "^1.5.1",
     "tooltip.js": "^1.1.6",
     "turndown": "latest",
+    "vfg-field-array": "file:vfg-field-array",
     "vue": "^2.2.1",
     "vue-authenticate": "file:vue-authenticate",
     "vue-bulma-breadcrumb": "^1.0.1",
@@ -65,6 +68,7 @@
     "vue-bulma-tooltip": "^1.0.3",
     "vue-fontawesome": "latest",
     "vue-gallery": "^1.2.5",
+    "vue-json-schema": "latest",
     "vue-nprogress": "0.1.5",
     "vue-recaptcha": "^1.1.0",
     "vue-router": "^2.3.0",

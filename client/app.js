@@ -20,6 +20,24 @@ import GitHubAPI from './GitHubAPI'
 import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
 import VueCookie from 'vue-cookie'
+//
+// or register the whole module with vue
+//
+import VueFormGenerator from 'vue-form-generator/dist/vfg-core.js'
+import 'vue-form-generator/dist/vfg-core.css'
+Vue.use(VueFormGenerator)
+
+if (typeof Array.isArray === 'undefined') {
+  Array.isArray = function (obj) {
+    return Object.prototype.toString.call(obj) === '[object Array]'
+  }
+}
+
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import locale from 'element-ui/lib/locale/lang/en'
+
+Vue.use(ElementUI, { locale })
 
 import routerImport from './router'
 var router = null
@@ -244,6 +262,8 @@ if (!isOauthCallback) {
     // } // end if (hosted version)
     // store.commit('setProjectSelected', false)
     var currentUrl = [location.protocol, '//', location.host, ''].join('')
+    window.currentUrl = currentUrl + '/admin'
+
     authenticateObj = {
       baseUrl: window.websiteapiUrl + '/api/oauth', // Your API domain
       storageType: 'localStorage',
