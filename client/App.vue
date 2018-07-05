@@ -2,7 +2,7 @@
   <div id="app">
     <nprogress-container></nprogress-container>
     <navbar :notLoggedIn="websiteAndNotLoggedIn" :selectedWebsite="selectedWebsite" :show="true"></navbar>
-    <sidebar :notLoggedIn="websiteAndNotLoggedIn" :selectedWebsite="!selectedWebsite" :show="!sidebar.hidden"></sidebar>
+    <sidebar :notLoggedIn="websiteAndNotLoggedIn" :websiteObject="selectedWebsite" :selectedWebsite="!selectedWebsite" :show="!sidebar.hidden"></sidebar>
     <sidebar-global :hide="sidebarglobal.hidden" :show="sidebarglobal.opened && !sidebarglobal.hidden"></sidebar-global>
     <app-main :notLoggedIn="websiteAndNotLoggedIn" :hasSidebar="(!sidebarglobal.hidden || !sidebar.hidden)" :inBlog="inBlog"></app-main>
     <footer-bar :show="!sidebartwo.opened"></footer-bar>

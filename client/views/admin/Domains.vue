@@ -15,7 +15,7 @@
                   <br/>
                   <br/>
                   <label class="label">Enter your domain name below</label>
-                  <i>Note: you need to use a subdomain such as 'www', otherwise contact us.</i>
+                  <i>Note: We currently do not support naked domains. You need to use a subdomain. ie: 'www'.</i>
                   <div class="field has-addons">
                     <p class="control is-expanded">
                       <input class="input" type="text" placeholder="www.mydomainname.com"

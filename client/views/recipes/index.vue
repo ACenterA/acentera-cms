@@ -289,9 +289,38 @@ export default {
       if ((self.selectedPost && !self.inPostCreate && !self.postDoesNotExists) && ((self.isPostSelected && !self.postDoesNotExists))) {
         var dataFile = $(data).attr('editor-data')
         var schemaFile = $(data).attr('editor-schema')
-        console.error(dataFile)
-        console.error(schemaFile)
-        self.showJsonRightSideBar = true
+
+        var item = window.vm.$store.state.app.selectedItem.item
+        var currSection = window.vm.$store.state.app.selectedItem.item.section
+
+        var getJsonPostData = {
+          id: item.dir,
+          data_file: dataFile,
+          schema: currSection + '/schema.json'
+        }
+
+        if (!(schemaFile === undefined)) {
+          getJsonPostData['schema'] = schemaFile
+        }
+
+        console.error('would send of ')
+        console.error(getJsonPostData)
+        var basicAuth = self.$store.getters.getBasicAuth
+        self.$httpApi.post(window.apiUrl + '/content/data/get?view=gen&loc=sidebar&ts=1', getJsonPostData, {
+          headers: {
+            'Authorization': basicAuth,
+            'Token': window.vueAuth.getToken()
+          }
+        }).then((response) => {
+          self.showJsonRightSideBar = true
+        }).catch((error) => {
+          self.$notify({
+            title: 'Could not get data.',
+            message: 'An error occured while trying to retreive the data.',
+            type: 'warning'
+          })
+          console.error(error)
+        })
       }
     })
 

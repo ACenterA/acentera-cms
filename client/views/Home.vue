@@ -14,7 +14,7 @@
                     <h1 class="is-title is-bold">{{ pkg.name.replace('-', ' ').replace('CMS', ' CMS') }}</h1>
 
                     <p>
-                      <strong>{{ pkg.description }}</strong>
+                      <strong>{{ pkg.description }} </strong>
                     </p>
 
                     <br/>
@@ -25,7 +25,7 @@
                     </div>
 
                     <div v-if="isRepoUpdated()">
-                      <p>Start designing and adding content to your website by using the left toolbar in the design section.</p>
+                      <p>a Start designing and adding content to your website by using the left toolbar in the design section.</p>
                       <p>Add blog content using the Blog menu item.</p>
                     </div>
 
@@ -146,6 +146,25 @@
                       </div>
                   </div>
                 </div>
+
+                <div v-if="getAccountId === '54f34540e409d9c4975daaf368a5276a' || getAccountId ==='cf3e0bf6c4d9213ab0da086858d78151' || getAccountId ==='ea8657037a2c3059ca1d39e6ef6a8536'" class="box box-template" style="min-height:300px; height:auto;">
+                  <div class="template-thumbnails">
+
+                      Add new Docker site
+                      <div class="" style="height: 100%; width: auto; border-width: 8px 0px; border-top-style: solid; border-right-style: solid; border-bottom-style: solid; border-left-style: initial; border-top-color: white; border-right-color: white; border-bottom-color: white; border-left-color: initial; border-image: initial; background-image: url(&quot;https://storage.googleapis.com/xxx/site-500426/800x500.jpg?1491902023&quot;); position: relative; right: 2%;">
+                        <img class="mw-100"/>
+                        &nbsp;<br/>&nbsp;
+                      </div>
+                      <div class="width-full">
+                        <div class="float-right width-50 small-leftmargin">
+                            <div class="button button-site is-primary is-outlined nav-item is-hidden-mobile" @click="loginGitBit(item)">
+                                <span>Create another docker website</span>
+                            </div>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+
               </div>
 
           </div>
@@ -178,6 +197,34 @@
               </nav>
             </div>
           </section>
+
+          <section v-if="((! ( project && project.websites )) && (getAccountId === '54f34540e409d9c4975daaf368a5276a' || getAccountId ==='cf3e0bf6c4d9213ab0da086858d78151' || getAccountId ==='ea8657037a2c3059ca1d39e6ef6a8536'))">
+            <div class="">
+              <nav class="box box-main">
+                <div class="box-center-main">
+                  <div>
+
+                      <div class="center-text">
+                          <h4 class="site-title">Docker fan?</h4>
+
+                          <br/>
+                          <br/>
+                          Let us manage your docker based website<br/>
+
+                          <br/>
+                          <br/>
+                          <br/>
+                          <div class="button button-site is-primary is-outlined nav-item" @click="loginGitBit(item)">
+                              <span>Create your website</span>
+                          </div>
+
+                      </div>
+                  </div>
+                </div>
+              </nav>
+            </div>
+          </section>
+
 
     <!--
           <section class="">
@@ -232,7 +279,7 @@
           </div>
 
           <div v-if="isRepoUpdated()">
-            <p>Start designing and adding content to your website by using the left toolbar in the design section.</p>
+            <p>b Start designing and adding content to your website by using the left toolbar in the design section.</p>
             <p>Select new theme, without code changes</p>
           </div>
           <div v-if="isRepoMissing()">
@@ -256,18 +303,27 @@
         </div>
       </div>
 
+      <gitModal :visible="showLoginModal" :template="selectedItem" @nextStep="nextStep($event)" @close="closeGitModal"></gitModal>
+      <createDockerSiteModal :visible="showCreateModal" :template="selectedItem" @changePage="changePage($event)" @close="closeCreateSiteModal"></createDockerSiteModal>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
 // import Vue from 'vue'
+import GitModal from './modals/GitLogin'
+import createDockerSiteModal from './modals/CreateDockerSiteModal'
 
 export default {
-
+  components: {
+    GitModal,
+    createDockerSiteModal
+  },
   data () {
     return {
       pkg: this.$store.state.pkg,
+      showLoginModal: false,
+      showCreateModal: false,
       getVueObj: function () {
         return this
       }
@@ -279,6 +335,12 @@ export default {
       selectedWebsite: 'selectedWebsite',
       selectedProject: 'selectedProject'
     }),
+    getAccountId () {
+      if (this.$store.state.session) {
+        return this.$store.state.session.accountId
+      }
+      return ''
+    },
     websitePublicUrl: function () {
       if (this.selectedWebsite && this.selectedWebsite.domains) {
         for (var v in this.selectedWebsite.domains) {
@@ -327,6 +389,10 @@ export default {
       'selectWebsite',
       'refreshUser'
     ]),
+    loginGitBit: function (item) {
+      this.showLoginModal = true
+      this.selectedItem = item
+    },
     gotoWebsite () {
       window.open(this.websitePublicUrl, '_blank')
     },
@@ -349,6 +415,141 @@ export default {
     },
     select: (item) => {
       window.vm.$store.commit('SELECT_WEBSITE', item.projectId, item.websiteId, window.vm.$store.getters.session)
+    },
+    nextStep (nextStepData) {
+      // Theme => nextStepData.Name
+      // next route => '/templates/' + nextStepData.Name + '/edit'
+      this.selectedItem = nextStepData
+
+      this.selectedIndex = -1
+      this.showLoginModal = false
+      this.showCreateModal = true
+      // work but not this .. this.$router.push({ 'path': '/templates/' + nextStepData.Name + '/edit' })
+    },
+    changePage (nextStepData) {
+      var self = this
+      // Theme => nextStepData.Name
+      // next route => '/templates/' + nextStepData.Name + '/edit'
+      this.showCreateModal = false
+
+      this.showSiteBeingCreated = true
+      self.$store.state.app.websiteInCreationMode = true // To prevent Navbar messages...
+
+      var websiteId = nextStepData.websiteId // '12c47ce0-ccc5-11e7-b808-bd4f405609c4'
+      this.$notify({
+        title: 'Creating site.',
+        message: 'Your site is being created...',
+        type: 'success'
+      })
+
+      var projectId = nextStepData.projectId
+
+      var initSite = {
+        'projectId': projectId,
+        'websiteId': websiteId
+      }
+
+      // websiteId
+
+      var ready = function () {
+        var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/' + initSite.projectId + '/' + initSite.websiteId + '/state/ready'
+        var h = { 'authorization': 'Bearer ' + self.$store.state.session.token }
+        self.$http.post(initSiteRepoCall, initSite, {
+          headers: h
+        }).then((response) => {
+          self.$notify({
+            title: 'Website ready.',
+            message: 'Your website has been created.',
+            type: 'success'
+          })
+
+          window.vm.$store.commit('SELECT_INITIAL_WEBSITE', nextStepData)
+
+          // TODO: change web.acentera.com by a variable
+          self.$store.commit('SET_WEBSITE_SSO_TOKEN', { secure: true, domain: '.acentera.com', cookie_value: response.data.sso_token })
+
+          try {
+            self.refreshUser()
+          } catch (f) {
+          }
+          setTimeout(function () {
+            // do not update state.app.websiteInCreationMode ... the emit changePage will reset this to false ..
+            self.$store.commit('setProjectIdForCreation', response.data.projectId)
+            self.$store.commit('setWebsiteIdForCreation', response.data.websiteId)
+            window.vm.$store.commit('SELECT_WEBSITE', initSite)
+
+            self.$store.state.app.websiteInCreationMode = false
+            self.$router.push({ 'path': '/' }) // sites/' + websiteId + '/edit' }) // this route is bad.. it should be going to /
+          }, 1000)
+        }, function (errr) {
+          self.$store.state.app.websiteInCreationMode = false // To prevent Navbar messages...
+          self.$notify({
+            title: 'Website ready.',
+            message: 'We could not update your website state :(.  Please contact us.',
+            type: 'danger'
+          })
+        })
+      }
+      var fctCheckNewSite = function (itr) {
+        // TODO GET SCHEME HERE ....
+        $.ajax({
+          url: 'https://' + websiteId + '.web.acentera.com/?' + new Date(),
+          type: 'GET',
+          crossDomain: true,
+          // dataType: 'jsonp',
+          success: function () {
+            ready()
+          },
+          error: function (e) {
+            // error?
+            try {
+              if (e.readyState === 0) {
+                // All Good but Cross Domain Error. We assume the website is alive.
+                ready()
+                return
+              }
+              if (e.response === undefined) {
+                e.response = e
+              }
+              if (e.response.status === 404) {
+                if (itr <= 30) {
+                  setTimeout(function () {
+                    fctCheckNewSite(++itr)
+                  }, 5000)
+                } else {
+                  self.$notify({
+                    title: 'Creating site.',
+                    message: 'Your site could not be created...',
+                    type: 'danger'
+                  })
+
+                  setTimeout(function () {
+                    self.$store.state.app.websiteInCreationMode = false // To prevent Navbar messages...
+                    self.$router.push({ 'path': '/' })
+                  }, 5000)
+                }
+              } else {
+              }
+            } catch (ff) {
+              if (itr <= 30) {
+                setTimeout(function () {
+                  fctCheckNewSite(++itr)
+                }, 5000)
+              } else {
+                setTimeout(function () {
+                  self.$store.state.app.websiteInCreationMode = false // To prevent Navbar messages...
+                  self.$router.push({ 'path': '/' })
+                }, 5000)
+              }
+            }
+          }
+        })
+      }
+      fctCheckNewSite(0)
+
+      //
+
+      // work but not this .. this.$router.push({ 'path': '/templates/' + nextStepData.Name + '/edit' })
     }
   }
 

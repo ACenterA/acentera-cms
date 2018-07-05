@@ -35,6 +35,7 @@ const state = {
     {
       name: 'Blogs',
       path: '/blogs',
+      showOnlyIf: 'isHugo',
       meta: {
         icon: 'fa-edit'
       },
@@ -43,6 +44,7 @@ const state = {
     {
       name: 'Recipes',
       path: '/editor/recipes',
+      showOnlyIf: 'isHugo',
       meta: {
         icon: 'fa-edit'
       },

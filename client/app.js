@@ -2,6 +2,7 @@ import Vue from 'vue'
 import moment from 'moment'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import VueSelect from 'vue-select'
 import VueAuthenticate from 'vue-authenticate'
 import NProgress from 'vue-nprogress'
 import { sync } from 'vuex-router-sync'
@@ -20,6 +21,8 @@ import GitHubAPI from './GitHubAPI'
 import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
 import VueCookie from 'vue-cookie'
+
+Vue.component('v-select', VueSelect)
 //
 // or register the whole module with vue
 //
@@ -252,11 +255,10 @@ if (!isOauthCallback) {
       githubClientId = '830bd8b7d0520c42508d'
 
       // Local Dev with Remote
-      /*
+
       Vue.config.devtools = true
       store.commit('setWebsite', true)
       window.withCredentials = true
-      */
     }
 
     // } // end if (hosted version)

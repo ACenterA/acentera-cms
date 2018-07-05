@@ -10,11 +10,13 @@ export default {
     {
       name: 'Site',
       path: '/site',
+      showOnlyIf: 'isHugo',
       component: lazyLoading('admin/Sites')
     },
     {
       name: 'Theme',
       path: '/theme',
+      showOnlyIf: 'isHugo',
       component: lazyLoading('admin/Themes')
     },
     {
