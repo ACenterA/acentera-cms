@@ -20,7 +20,7 @@
   ],
   "engines": {
     "node": ">=7",
-    "npm": ">=3"
+    "npm": "6.5.0-next.0"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production node build/build.js",
@@ -59,9 +59,12 @@
     "sortablejs": "^1.5.1",
     "tooltip.js": "^1.1.6",
     "turndown": "latest",
+    "v-autosuggest": "latest",
     "vfg-field-array": "file:vfg-field-array",
+    "vfg-field-object": "0.0.0-development",
     "vue": "^2.2.1",
     "vue-axios": "^2.1.1",
+    "vue-bootstrap-typeahead": "^0.1.2",
     "vue-bulma-breadcrumb": "^1.0.1",
     "vue-bulma-expanding": "^0.0.1",
     "vue-bulma-message": "^1.1.1",
@@ -77,6 +80,7 @@
     "vue-recaptcha": "^1.1.0",
     "vue-router": "^2.3.0",
     "vue-select": "^2.4.0",
+    "vue2-autocomplete-js": "^0.2.2",
     "vuejs-datetimepicker": "^1.1.7",
     "vuex": "^2.2.1",
     "vuex-router-sync": "^4.1.2",

@@ -95,7 +95,7 @@ export default {
       var mnuToDisplay = []
       for (var i = 0; i < len; i++) {
         var isValid = true
-        console.error('test...of ' + (mnu[i].name || mnu[i].meta.name))
+        console.error('AA test...of ' + (mnu[i].name || mnu[i].meta.name))
         console.error(mnu[i])
         if (mnu[i].hasOwnProperty('showOnlyIf') || (mnu[i].meta && mnu[i].meta.hasOwnProperty('showOnlyIf'))) {
           console.error('test...AD')

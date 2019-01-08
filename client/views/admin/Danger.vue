@@ -139,6 +139,27 @@ export default {
                   type: 'danger'
                 })
               }
+            } else if (response && response.data && response.data.typeid) {
+              if (!(response.data.typeid.startsWith('error'))) {
+                self.$notify({
+                  title: 'Website deleted.',
+                  message: 'We successfully deleted your website from our hosting. We thank you for using it.',
+                  type: 'success'
+                })
+
+                setTimeout(function () {
+                  self.processing = false
+                  delete window.vm.$store.getters.app.project.websites[deleteSite.websiteId]
+                  self.$store.commit('SELECT_WEBSITE', {projectId: projectId, websiteId: null})
+                }, 5000)
+              } else {
+                self.processing = false
+                self.$notify({
+                  title: 'Could delete website.',
+                  message: 'We were unable to delete your website. Contact support! ',
+                  type: 'danger'
+                })
+              }
             } else {
               self.processing = false
               self.$notify({

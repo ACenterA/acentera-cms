@@ -168,6 +168,7 @@ export const refreshUser = ({ commit }, obj) => {
         var defProject = response.data.defaultProject
         var hasWebsites = false
         state.app.account = response.data.accountId
+        state.app.accountObject = response.data
         if (state.app.project && state.project.app.projectId) {
           if (!(lstProjects.hasOwnProperty(state.app.project.projectId))) {
             state.app.project = null
@@ -193,7 +194,7 @@ export const refreshUser = ({ commit }, obj) => {
               }
 
               if (state.app.websiteId === null) {
-                if (state.app.project.websites.hasOwnProperty(window.localStorage.getItem('selectedWebsite'))) {
+                if (state.app.project && state.app.project.websites && state.app.project.websites.hasOwnProperty(window.localStorage.getItem('selectedWebsite'))) {
                   state.app.websiteId = window.localStorage.getItem('selectedWebsite')
                   state.app.projectId = window.localStorage.getItem('selectedProject')
                   window.vm.$store.commit('SELECT_WEBSITE', {projectId: state.app.projectId, websiteId: state.app.websiteId})
@@ -262,6 +263,11 @@ export const refreshUser = ({ commit }, obj) => {
               if (error.response && error.response.data) {
                 msg = error.response.data.errorMessage
               }
+              if (msg === '') {
+                msg = JSON.stringify(error)
+              }
+              console.error('GOT ERROR')
+              console.error(error.stack)
               self.$notify({
                 title: 'error retreiving project.',
                 message: msg,

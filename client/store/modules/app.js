@@ -6,6 +6,7 @@ const state = {
   isLoaded: false,
   default_git_provider: 'bitbucket',
   account: null,
+  accountObject: {},
   project: null,
   sso_token: null,
   projectId: null,
@@ -572,17 +573,23 @@ const mutations = {
         }
 
         if (!selWebsite) {
-          console.error('Debug: no website selected ...')
-          return
+          // Local not hosted version
+          if (self.$store.state.app.website) {
+            console.error(self.$store.state.app.website)
+            console.error('Debug: no website selected ...')
+            return
+          }
         }
-
-        if (selWebsite.acentera_type && selWebsite.acentera_type === 'docker-simple') {
+        console.error('AAAAA 01')
+        if (selWebsite && selWebsite.acentera_type && selWebsite.acentera_type === 'docker-simple') {
+          console.error('AAAAA 02')
           console.error('zz sl')
           self.$store.commit(types.REPO_STATE_UPATE, 0) // first set valid
           self.$store.commit(types.REPO_STATE_PENDING, 0) // all good
           // var basicAuth = self.$store.getters.getBasicAuth
           state.isLoaded = true
-        } else if (!selWebsite.acentera_type || selWebsite.acentera_type === 'hugo') {
+        } else if (!selWebsite || (!selWebsite.acentera_type || selWebsite.acentera_type === 'hugo')) {
+          console.error('AAAAA 03')
           window.vm.$httpApi.get(window.apiUrl + '/git?action=config&loc=nav&type=refreshConfig').then((response) => {
             self.$store.commit(types.REPO_URL_UPDATE, response.data.Data)
             if (response !== null && response.data !== null) {

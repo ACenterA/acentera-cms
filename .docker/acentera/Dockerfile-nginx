@@ -28,14 +28,20 @@ RUN cd /code/ && \
 COPY . /code/.
 
 RUN cd /code && \
-    npm run build
+    npm run build && \
+    D=$(date +%s) && \
+    mv public/assets/js/app.js public/assets/js/app-${D}.js && \
+    mv public/assets/js/vendor.js public/assets/js/vendor-${D}.js && \
+    sed -ri "s~/js/app.js~/js/app-${D}.js~g" public/index.html && \
+    sed -ri "s~/js/vendor.js~/js/vendor-${D}.js~g" public/index.html && \
+    echo ${DT} > public/health.html
 
 # No need for this due to cloudfront ??
 # RUN sed -ri 's~/assets/~/admin/assets/g' /code/index.html
 
 FROM nginx:alpine
-ADD .docker/config/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=intermediate /code/public/ /www/public/
+ADD .docker/config/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Cannot use http for now as
 # websites.acentera.com hostname is required ...
@@ -45,7 +51,7 @@ ENV SERVICE_NAMESPACE "acentera"
 ENV SERVICE_80_NAME "admin-static"
 ENV SERVICE_80_NAME "admin-static"
 ENV SERVICE_80_TAGS "_http_"
-# optional, Consul default used otherwise
-ENV SERVICE_80_CHECK_HTTP /
+## optional, Consul default used otherwise
+ENV SERVICE_80_CHECK_HTTP /health.html
 ENV SERVICE_80_CHECK_INTERVAL 15s
 ENV SERVICE_80_CHECK_TIMEOUT 1s

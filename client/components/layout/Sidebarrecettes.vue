@@ -78,6 +78,7 @@ export default {
       console.error('clicked on post')
       console.error(itm.item)
       var type = ''
+      var langCode = ''
       var langPrefix = ''
       if (itm.item.hasOwnProperty('alternate')) {
         // New Logic
@@ -86,15 +87,19 @@ export default {
         type = itm.item.section
         if (alternateLangLinks.hasOwnProperty(langPrefix)) {
           console.error('ok link has alternate of ' + langPrefix)
-          link = alternateLangLinks[langPrefix]
+          link = itm.item.dir
+          langCode = langPrefix
+          // link = alternateLangLinks[langPrefix]
         } else {
           console.error('1 -ok link does not have alternate of ' + langPrefix)
+          var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
+          langCode = '' + selectedLangItem.id
         }
         link = itm.item.dir
         console.error('ok DID GOT LINK ALTER?')
       } else {
-        var selectedLangItem = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
-        var langCode = '' + selectedLangItem.id
+        var selectedLangItem1 = window.vm.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
+        langCode = '' + selectedLangItem1.id
         if (window.vm.$store.state.app.language === window.vm.$store.state.app.languageSelected) {
           langCode = '' // no prefix, this is the default site...
         }

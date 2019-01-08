@@ -354,15 +354,10 @@ export default {
           error: function (e) {
             // error?
             try {
-              if (e.readyState === 0) {
-                // All Good but Cross Domain Error. We assume the website is alive.
-                ready()
-                return
-              }
-              if (e.response === undefined) {
+              if (e && e.response === undefined) {
                 e.response = e
               }
-              if (e.response.status === 404) {
+              if (e && e.response && e.response.status === 404) {
                 if (itr <= 30) {
                   setTimeout(function () {
                     fctCheckNewSite(++itr)
@@ -380,8 +375,15 @@ export default {
                   }, 5000)
                 }
               } else {
+                console.error(e)
+                if (e.readyState === 0) {
+                  // All Good but Cross Domain Error. We assume the website is alive.
+                  ready()
+                  return
+                }
               }
             } catch (ff) {
+              console.error(ff.stack)
               if (itr <= 30) {
                 setTimeout(function () {
                   fctCheckNewSite(++itr)

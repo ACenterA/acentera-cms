@@ -8,41 +8,17 @@
           </article>
 
           <article :class="{ hideme: !isPostSelected || inPostCreate, hidden: ((isPostSelected && !postDoesNotExists)) }" class="tile is-child box">
-              <label class="label">This Post doesn't have this language created yet.</label>
+              <label class="label">This Recipe doesn't have this language created yet.</label>
               <button class="button is-info" @click="create('newLang','recipes')">Create Draft</button>
           </article>
 
           <article :class="{ hidden: !inPostCreate }" class="tile is-child box">
-            <label class="label">{{ blogPostEnterLang }}</label>
-            <label class="label">Current Language: {{ selectedLanguage }}</label>
+            <vue-form-generator :schema="schemaCreateNew" :model="modelCreateNew" :options="formOptions"></vue-form-generator>
             <br/>
-            <!--
-            <div class="field has-addons">
-              <p class="control is-expanded">
-                    <span>Title</span>
-                    <input class="input" type="text"
-                           v-model="newTitle"
-                           :placeholder="titlePlaceHolder">
-              </p>
-            </div>
-            <br/>
-            <br/>
-            -->
-            <div class="field has-addons">
-              <p class="control is-expanded">
-                  <span>File Name</span>
-                  <input type="text" v-model="fileName" @input="fileNameValidator()" :placeholder="shortName">
-                  <br/>
-                  <br/>
-                  <small>recettes/{filename}.{lang}.md <br/><br/>lang.md will be appended to the filename</small>
-              </p>
-            </div>
-
-            <br/>
-            <button class="button is-info" @click="create('new','recipes')" :disabled="actionPending">Create Post</button>
+            <button class="button is-info" @click="create('new','recipes')" :disabled="actionPending">Create Recipes</button>
           </article>
 
-          <div class="rightSide" :class="{ active: showRightSideBar}">
+          <div class="rightSide" :class="{ active: showRightSideBar}" style="overflow:auto;">
             <button class="button is-info float-right" @click="hideRightBar">Close</button>
 
             <article class="tile is-child box scrollable">
@@ -98,17 +74,12 @@
             <button class="button is-info float-right" @click="hideRightBar">Close</button>
 
             <article class="tile is-child box scrollable">
-                <label class="label">JSON </label>
 
-                {{ model }}
-                <div v-if="schema !== null">
-                  <vue-form-generator :schema="schemaA" :model="modelA" :options="formOptions"></vue-form-generator>
-                </div>
-
+                old form was here
                 <button v-if="isDefaultLang" :disabled="isSaving" class="button is-danger float-let" @click="deleteAllLangPost()">Delete Post (All Languages)</button>
                 <button v-if="!isDefaultLang" :disabled="isSaving" class="button is-danger float-let" @click="deleteAllLangPost()">Delete Post (Single Language)</button>
 
-                <button :disabled="isSaving" class="button is-info float-right" @click="updatePage()">Update</button>
+                <button :disabled="isSaving" class="button is-info float-right" @click="updateSchemaData()">Update</button>
                 <br/>
                 <br/>
                 <br/>
@@ -117,7 +88,141 @@
           </div>
 
 
-          <plekan :class="{ hidden: inPostCreate || !isPostSelected || postDoesNotExists }"></plekan>
+          <article v-if="selectedPost" :class="{ hidden: inPostCreate || !isPostSelected || postDoesNotExists }" style="overflow:auto;">
+              <!-- Tab navigation -->
+              <div class="tabs is-medium is-boxed is-fullwidth">
+                <ul>
+                  <li v-bind:class="tabName === 'Recette' ? 'is-active' : ''" v-on:click="switchTab(0)"><a>Configuration</a></li>
+                  <li v-bind:class="tabName === 'Ingredients' ? 'is-active' : ''" v-on:click="switchTab(1)"><a>Ingredients</a></li>
+                  <li v-bind:class="tabName === 'Steps' ? 'is-active' : ''" v-on:click="switchTab(2)"><a>Steps</a></li>
+                  <li v-bind:class="tabName === 'Sauce' ? 'is-active' : ''" v-on:click="switchTab(3)"><a>Sauce</a></li>
+                  <!-- <li v-bind:class="tabName === 'approle' ? 'is-active' : ''" v-on:click="switchTab(2)"><a>Approle</a></li> -->
+                  <!-- <li disabled><a>Certificates</a></li> -->
+                </ul>
+              </div>
+
+              <!-- Ingredients -->
+              <div v-if="tabName === 'ingredients'" class="tile is-parent table-responsive is-vertical">
+                        <button :disabled="isSaving" class="button is-info float-right" @click="updateIngSchemaData()">Update</button>
+                          <article class="tile is-child box scrollable">
+                              <div v-if="ingredientSchema !== null">
+                                <vue-form-generator :schema="ingredientSchema" :model="ingredientModel" :options="formOptions"></vue-form-generator>
+                              </div>
+
+                              <br/>
+                              <br/>
+                              <br/>
+                              <br/>
+                              <button :disabled="isSaving" class="button is-info float-right" @click="updateIngSchemaData()">Update</button>
+                          </article>
+                          <br/>
+                          <br/>
+                          <br/>
+              </div>
+
+              <!-- Ingredients -->
+              <div v-if="tabName === 'sauce'" class="tile is-parent table-responsive is-vertical">
+                  <div v-if="ingredientModel && !ingredientModel.sauce">
+                    Sauce is not defined. Go to the ingredients tabs. and enable it.
+                  </div>
+                  <div v-else>
+                        <button :disabled="isSaving" class="button is-info float-right" @click="updateStepsSchemaData()">Update</button>
+                          <article class="tile is-child box scrollable">
+                              <div v-if="sauceSchema !== null">
+                                <vue-form-generator :schema="sauceSchema" :model="stepsModel" :options="formOptions"></vue-form-generator>
+                              </div>
+
+                              <br/>
+                              <br/>
+                              <button :disabled="isSaving" class="button is-info float-right" @click="updateStepsSchemaData()">Update</button>
+                              <br/>
+                              <br/>
+                          </article>
+
+                          <br/>
+                          <br/>
+                          <br/>
+                  </div>
+              </div>
+
+
+              <!-- Steps -->
+              <div v-if="tabName === 'steps'" class="tile is-parent table-responsive is-vertical">
+              <button :disabled="isSaving" class="button is-info float-right" @click="updateStepsSchemaData()">Update</button>
+                          <article class="tile is-child box scrollable">
+                              <div v-if="stepsSchema !== null">
+                                <vue-form-generator :schema="stepsSchema" :model="stepsModel" :options="formOptions"></vue-form-generator>
+                              </div>
+
+                              <br/>
+                              <br/>
+                              <br/>
+                              <button :disabled="isSaving" class="button is-info float-right" @click="updateStepsSchemaData()">Update</button>
+                              <br/>
+                              <br/>
+                          </article>
+                          <br/>
+              </div>
+
+
+              <!-- Tokens tab -->
+              <div v-if="tabName === 'configuration'" class="tile is-parent table-responsive is-vertical">
+
+                  <button class="button is-info" @click="saveUpdatePostTest()">Update</button>
+                  <br/>
+
+                  <label class="label">Title</label>
+                  <div class="field has-addons">
+                    <p class="control is-expanded">
+                      <input class="input" type="text"
+                             v-model="selectedPost.title"/>
+                    </p>
+                  </div>
+                  <br/>
+                  <label class="label">Description</label>
+                  <div v-if="selectedPost.frontMatter" class="field has-addons">
+                    <p class="control is-expanded">
+                      <input class="input" type="text"
+                             v-model="selectedPost.frontMatter.description"/>
+                    </p>
+                  </div>
+                  <br/>
+
+                  <label class="label">Post Date</label>
+                  <div v-if="selectedPost.frontMatter" class="field has-addons">
+                    <p class="control is-expanded">
+                      <datetime format="YYYY/MM/DD h:i:s" width="300px" @update:date-value="val => dob = val" v-model="selectedPost.pubDate"></datetime>
+                    </p>
+                  </div>
+
+                  <br/>
+                  <label class="label">Cover Image</label>
+                    <file-upload :clean="true"
+                              types="png|jpg|jpeg|gif"
+                              :preventDrop="false"
+                              :origimage="currentImage"
+                              :elementItem="tmpItem"
+                              :fileChange="fileChange"
+                              >
+                    </file-upload>
+                  <br/>
+                  <br/>
+
+                  <button class="button is-info" @click="saveUpdatePostTest()">Update</button>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+              </div>
+
+          </article>
       </div>
     </div>
 
@@ -140,9 +245,26 @@ import fileUpload from 'components/plekan/fileUpload'
 
 import ArrayContainer from 'components/ArrayContainer'
 Vue.component('ArrayContainer', ArrayContainer)
+
+import StepsArrayContainer from 'components/StepsArrayContainer'
+Vue.component('StepsArrayContainer', StepsArrayContainer)
+
+import IngredientsArrayContainer from 'components/IngredientsArrayContainer'
+Vue.component('IngredientsArrayContainer', IngredientsArrayContainer)
+
+import NutritionsArrayContainer from 'components/NutritionsArrayContainer'
+Vue.component('NutritionsArrayContainer', NutritionsArrayContainer)
+
+import Autocomplete from 'vue2-autocomplete-js'
+
 import ModuleLibrary from 'vfg-field-array'
 // Install this library
 Vue.use(ModuleLibrary)
+
+import VgObject from 'vfg-field-object'
+Vue.use(VgObject)
+
+var TabNames = ['configuration', 'ingredients', 'steps', 'sauce']
 
 export default {
   components: {
@@ -152,7 +274,8 @@ export default {
     // Modal,
     Sidebarrecettes,
     plekan,
-    fileUpload
+    fileUpload,
+    Autocomplete
   },
 
   data () {
@@ -160,6 +283,18 @@ export default {
       csrf: '',
       isSaving: false,
       showModal: false,
+      tabName: 'configuration',
+      tableData: [],
+      arrayData: [
+        {
+          name: 'Ben',
+          description: '180cm'
+        }, {
+          name: 'Jon',
+          description: '179cm'
+        }
+      ],
+      store: this.$store,
       plaintext: '',
       tmpItem: {},
       newTitle: null,
@@ -174,8 +309,56 @@ export default {
       userTransitKey: '',
       extra: '?editMode=widget&apiPort=8081&jsPort=8091',
       editing: false,
+      schemaInfo: null,
       schema: null,
       model: {},
+      ingredientModel: null,
+      ingredientschema: {},
+      sauceschema: {},
+      sauceModel: {},
+      stepsModel: {},
+      stepsSchema: {},
+      modelCreateNew: {
+      },
+      schemaCreateNew: {
+        fields: [
+          {
+            type: 'select',
+            inputType: 'text',
+            label: 'Categories',
+            model: 'category',
+            inputName: 'category',
+            styleClasses: 'field-one-class',
+            validator: 'string',
+            values: [
+              {
+                id: 'desserts',
+                name: 'desserts'
+              },
+              { id: 'snacks', name: 'snacks' },
+              { id: 'breakfast', name: 'breakfast' },
+              { id: 'beverages', name: 'beverages' },
+              { id: 'lunch', name: 'meal' }
+            ]
+          },
+          {
+            type: 'input',
+            inputType: 'text',
+            label: 'Sous-Categorie ie: eggs,chicken',
+            model: 'subcategory',
+            inputName: 'subcategory',
+            validator: 'string'
+          },
+          {
+            type: 'input',
+            inputType: 'text',
+            label: 'Titre de la recette',
+            model: 'title',
+            inputName: 'title',
+            validator: 'string'
+          }
+        ]
+      },
       modelA: {
         id: 1,
         name: 'John Doe',
@@ -216,7 +399,7 @@ export default {
           required: function (model) {
             return true // return model && (model.type === 'select' || model.type === 'multiselect')
           },
-          OkMabyeitemContainerComponent: 'ArrayContainer'
+          itemContainerComponent: 'ArrayContainer'
         }]
       },
       formOptions: {
@@ -288,7 +471,10 @@ export default {
     this.$bus.$on('SHOW_ADVANCED_SETTINGS', function (data) {
       if ((self.selectedPost && !self.inPostCreate && !self.postDoesNotExists) && ((self.isPostSelected && !self.postDoesNotExists))) {
         var dataFile = $(data).attr('editor-data')
+        console.error('show advanced settings 01')
+        console.error(data)
         var schemaFile = $(data).attr('editor-schema')
+        var modelPath = $(data).attr('editor-model')
 
         var item = window.vm.$store.state.app.selectedItem.item
         var currSection = window.vm.$store.state.app.selectedItem.item.section
@@ -303,6 +489,7 @@ export default {
           getJsonPostData['schema'] = schemaFile
         }
 
+        self.schemaInfo = getJsonPostData
         console.error('would send of ')
         console.error(getJsonPostData)
         var basicAuth = self.$store.getters.getBasicAuth
@@ -313,6 +500,12 @@ export default {
           }
         }).then((response) => {
           self.showJsonRightSideBar = true
+          console.error(self.model)
+          self.model = response.data.data
+          self.schema = response.data.schema
+          if (modelPath) {
+            self.schema.fields[0].model = modelPath
+          }
         }).catch((error) => {
           self.$notify({
             title: 'Could not get data.',
@@ -344,7 +537,11 @@ export default {
     })
 
     this.$bus.$on('SAVE_CMD', function (data) {
-      const d = document.getElementsByTagName('iframe')[0].contentWindow.document
+      /*
+      var d = null
+      if (document.getElementsByTagName('iframe')[0] && document.getElementsByTagName('iframe')[0].contentWindow) {
+        d = document.getElementsByTagName('iframe')[0].contentWindow.document
+      }
       // TODO: use somehting else than contenteditable ? ie: editor-content ?
       if ($(d).find('[contenteditable=true]').length !== 1) {
         return
@@ -353,6 +550,8 @@ export default {
       if (!(window.vm.$store.state.app.selectedItem && window.vm.$store.state.app.selectedItem.item)) {
         return
       }
+      */
+
       var item = window.vm.$store.state.app.selectedItem.item
       var tmpLink = item.link
       if (item.link.startsWith('//') || item.link.startsWith('http://') || item.link.startsWith('https://')) {
@@ -362,7 +561,7 @@ export default {
         tmpLink = tmpLink.substring(0, tmpLink.lastIndexOf('/'))
       }
       var selectedLangItem = self.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
-      markDownValue = markDownValue.replace('<br>', '\\n').replace('<br/>', '\\n')
+      // markDownValue = markDownValue.replace('<br>', '\\n').replace('<br/>', '\\n')
       var dtStringDate = item.pubDate
       try {
         var arr = item.pubDate.split(/\/|\s|:/) // split string and create array.
@@ -377,22 +576,25 @@ export default {
         return
       }
 
+      console.error('test save temp link ????' + tmpLink)
+      // tmpLink,
+      console.error('saving item... of')
+      console.error(item)
       var updateData = {
         type: 'blogs',
-        id: tmpLink,
+        id: item.dir,
         title: item.title,
         frontMatter: JSON.parse(JSON.stringify(item.frontMatter)),
         draft: (item.draft === 'true'),
         delete: (item.delete === 'true'),
         date: dtStringDate,
-        lang: selectedLangItem.id,
-        content: markDownValue
+        lang: selectedLangItem.id
       }
       delete updateData.frontMatter.title
       delete updateData.frontMatter.draft
       delete updateData.frontMatter.date
       delete updateData.frontMatter.pubDate
-
+      console.error(updateData)
       // TODO: modiy the httpAction to be a .delete instead of a .put if (updateData.delete)
       // better REST API
 
@@ -461,22 +663,28 @@ export default {
         var itm = tmpItem.item
         var type = ''
         var link = ''
+        var langCode = ''
         if (itm.hasOwnProperty('alternate')) {
           // New Logic
           var alternateLangLinks = itm.alternate
           type = itm.section
           if (alternateLangLinks.hasOwnProperty(langPrefix)) {
             console.error('ok link has alternate of ' + langPrefix)
-            link = alternateLangLinks[langPrefix]
+            console.error('lang prefix? ' + langPrefix)
+            langCode = langPrefix
+            // console.error()
+            link = itm.dir
+            // link = alternateLangLinks[langPrefix]
           } else {
             console.error('3 - ok link does not have alternate of ' + langPrefix)
+            self.$store.state.app.nodata = true
           }
         } else {
           // Old Logic to be deprecated
 
           link = itm.link
           var selectedLangItem = self.$store.state.app.languages.languagesHash[self.$store.state.app.languageSelected]
-          var langCode = '' + selectedLangItem.id
+          langCode = '' + selectedLangItem.id
           if (self.$store.state.app.language === self.$store.state.app.languageSelected) {
             langCode = '' // no prefix, this is the default site...
           }
@@ -499,7 +707,8 @@ export default {
         }
 
         console.error('GOT LINK OF...' + link)
-        self.$httpApi.post(window.apiUrl + '/frontmatter?blog=2', { type: type, id: link, lang: langCode }, { }).then((res) => {
+        console.error(selectedLangItem)
+        self.$httpApi.post(window.apiUrl + '/frontmatter?recipes=2', { type: type, id: link, lang: langCode }, { }).then((res) => {
           window.vm.$store.state.app.selectedItem.item['frontMatter'] = {}
           for (var p in res.data) {
             if (res.data.hasOwnProperty(p)) {
@@ -559,8 +768,8 @@ export default {
       return false
     },
     currentImage () {
-      if (this.selectedPost && this.selectedPost.frontMatter && this.selectedPost.frontMatter.image) {
-        return window.goHostUrl + '/' + this.selectedPost.frontMatter.image
+      if (this.selectedPost && this.selectedPost.frontMatter && this.selectedPost.frontMatter.cover) {
+        return window.goHostUrl + '/' + this.selectedPost.dir + this.selectedPost.frontMatter.cover
       }
       return null
     },
@@ -629,6 +838,111 @@ export default {
     ...mapActions([
       'selectPost'
     ]),
+    getData (obj) {
+      console.log(obj)
+    },
+    switchTab: function (index) {
+      this.tabName = TabNames[index]
+      var self = this
+
+      if (!this.$store.state.app.isLoaded) {
+        return setTimeout(function () {
+          self.switchTab(index)
+        }, 1000)
+      }
+
+      var schemaFile = 'recipes/schema.json'
+      var dataFile = 'data/data.yaml'
+      var modelPath = ''
+      var item = window.vm.$store.state.app.selectedItem.item
+      var currSection = window.vm.$store.state.app.selectedItem.item.section
+      var getJsonPostData = {}
+
+      var selectedLangItem = this.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
+
+      var basicAuth = self.$store.getters.getBasicAuth
+      if (index === 1) {
+        schemaFile = 'recipes/schema.json'
+        dataFile = 'data/data.yaml'
+        modelPath = ''
+
+        getJsonPostData = {
+          id: item.dir,
+          data_file: dataFile,
+          schema: currSection + '/schema.json'
+        }
+        if (!(schemaFile === undefined)) {
+          getJsonPostData['schema'] = schemaFile
+        }
+
+        self.schemaInfo = getJsonPostData
+        console.error('would send of ')
+        console.error(getJsonPostData)
+        self.$httpApi.post(window.apiUrl + '/content/data/get?view=gen&loc=sidebar&ts=1', getJsonPostData, {
+          headers: {
+            'Authorization': basicAuth,
+            'Token': window.vueAuth.getToken()
+          }
+        }).then((response) => {
+          console.error(self.model)
+          self.ingredientModel = response.data.data
+          self.ingredientSchema = response.data.schema
+          if (modelPath) {
+            self.ingredientSchema.fields[0].model = modelPath
+          }
+        }).catch((error) => {
+          self.$notify({
+            title: 'Could not get data.',
+            message: 'An error occured while trying to retreive the data.',
+            type: 'warning'
+          })
+          console.error(error)
+        })
+      } else if (index === 2 || index === 3) {
+        schemaFile = 'recipes/schema-steps.json'
+        dataFile = 'data/steps/' + selectedLangItem.id + '.yaml'
+        modelPath = 'steps'
+
+        getJsonPostData = {
+          id: item.dir,
+          data_file: dataFile,
+          schema: currSection + '/schema.json'
+        }
+        if (!(schemaFile === undefined)) {
+          getJsonPostData['schema'] = schemaFile
+        }
+
+        self.schemaInfo = getJsonPostData
+        console.error('would send of ')
+        console.error(getJsonPostData)
+        self.$httpApi.post(window.apiUrl + '/content/data/get?view=gen&loc=sidebar&ts=1&steps01', getJsonPostData, {
+          headers: {
+            'Authorization': basicAuth,
+            'Token': window.vueAuth.getToken()
+          }
+        }).then((response) => {
+          console.error(self.model)
+          self.stepsModel = response.data.data
+          self.stepsSchema = response.data.schema
+
+          self.sauceSchema = JSON.parse(JSON.stringify(response.data.schema))
+          self.sauceSchema.fields[0].model = 'sauce'
+
+          self.stepsSchema.fields[0].model = modelPath
+
+          console.error('RECEIGED ALL')
+          console.error(self.stepsModel)
+          console.error(self.stepsSchema)
+        }).catch((error) => {
+          self.$notify({
+            title: 'Could not get data.',
+            message: 'An error occured while trying to retreive the data.',
+            type: 'warning'
+          })
+          console.error(error)
+        })
+      }
+    },
     submit (e) {
       // this.model contains the valid data according your JSON Schema.
       // You can submit your model to the server here
@@ -650,6 +964,119 @@ export default {
         self.refreshData()
       }, 1500)
     },
+
+    saveUpdatePostTest: function () {
+      var self = this
+      this.isSaving = true
+      this.$bus.$emit('SAVE_CMD')
+      setTimeout(function () {
+        self.isSaving = false
+        // self.$store.state.app.selectedItem = null
+        self.refreshData()
+      }, 500)
+    },
+
+    updateSchemaData: function (imgData) {
+      var self = this
+      this.isSaving = true
+      console.error('update schema  data then.. call save')
+      console.error(self.schemaInfo)
+
+      var basicAuth = self.$store.getters.getBasicAuth
+
+      self.schemaInfo['data'] = self.model
+
+      self.$httpApi.post(window.apiUrl + '/content/data/update?view=gen&loc=sidebar&ts=1', self.schemaInfo, {
+        headers: {
+          'Authorization': basicAuth,
+          'Token': window.vueAuth.getToken()
+        }
+      }).then((response) => {
+        this.$bus.$emit('SAVE_CMD')
+        setTimeout(function () {
+          self.$bus.$emit('TOGGLE_ADVANCED_SETTINGS') // hide sidebar ...
+          // setTimeout(function () {
+          self.showRightSideBar = false
+          self.showJsonRightSideBar = false
+          self.isSaving = false
+          // }, 200);
+        }, 400)
+        self.schemaInfo = null
+      }).catch((error) => {
+        self.$notify({
+          title: 'Could not save data.',
+          message: 'An error occured while trying to save the data.',
+          type: 'warning'
+        })
+        self.isSaving = false
+        console.error(error)
+      })
+    },
+
+    updateIngSchemaData: function (imgData) {
+      var self = this
+      this.isSaving = true
+      console.error('update schema  data then.. call save')
+      console.error(self.schemaInfo)
+
+      var basicAuth = self.$store.getters.getBasicAuth
+
+      self.schemaInfo['data'] = self.ingredientModel
+
+      self.$httpApi.post(window.apiUrl + '/content/data/update?view=gen&loc=sidebar01&ts=1', self.schemaInfo, {
+        headers: {
+          'Authorization': basicAuth,
+          'Token': window.vueAuth.getToken()
+        }
+      }).then((response) => {
+        self.$notify({
+          title: 'Saved data.',
+          message: 'Successfully saved.',
+          type: 'success'
+        })
+        self.isSaving = false
+      }).catch((error) => {
+        self.$notify({
+          title: 'Could not save data.',
+          message: 'An error occured while trying to save the data.',
+          type: 'warning'
+        })
+        self.isSaving = false
+        console.error(error)
+      })
+    },
+    updateStepsSchemaData: function (imgData) {
+      var self = this
+      this.isSaving = true
+      console.error('update schema  data then.. call save')
+      console.error(self.schemaInfo)
+
+      var basicAuth = self.$store.getters.getBasicAuth
+
+      self.schemaInfo['data'] = self.stepsModel
+
+      self.$httpApi.post(window.apiUrl + '/content/data/update?view=gen&loc=sidebar01&ts=1', self.schemaInfo, {
+        headers: {
+          'Authorization': basicAuth,
+          'Token': window.vueAuth.getToken()
+        }
+      }).then((response) => {
+        self.$notify({
+          title: 'Saved data.',
+          message: 'Successfully saved.',
+          type: 'success'
+        })
+        self.isSaving = false
+      }).catch((error) => {
+        self.$notify({
+          title: 'Could not save data.',
+          message: 'An error occured while trying to save the data.',
+          type: 'warning'
+        })
+        self.isSaving = false
+        console.error(error)
+      })
+    },
     updatePage: function (imgData) {
       var self = this
       this.isSaving = true
@@ -660,7 +1087,35 @@ export default {
       }, 600)
     },
     fileChange: function (imgData) {
+      console.error('file change here a')
+      console.error(imgData)
       this.selectedPost.frontMatter['image'] = imgData.data.RelPath
+
+      var item = window.vm.$store.state.app.selectedItem.item
+
+      var form = new FormData()
+      form.append('id', item.dir)
+      form.append('ext', imgData.data.type.split('/')[1])
+      form.append('name', 'cover' + '.' + imgData.data.type.split('/')[1])
+      form.append('file', imgData.data)
+
+      var self = this
+      this.$httpApi.post(window.apiUrl + '/coverupload', form, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      .then((response) => {
+        self.$notify({
+          title: 'Success',
+          message: 'Image saved successfully',
+          type: 'success'
+        })
+      })
+      .catch((error) => {
+        self.close()
+        self.$onError(error)
+      })
     },
     hideRightBar: function () {
       console.error(this.showJsonRightSideBar)
@@ -688,13 +1143,24 @@ export default {
       }
 
       var self = this
-
+      var selectedLangItem = this.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
       var fileToCreate = null
       var action = 'new'
       var tmpId = ''
+      var postData = {
+        type: type,
+        lang: selectedLangItem.id
+      }
+      var tmpLink = null
+
       if (newOrUpdate === 'newLang') {
         action = 'newlang'
         var item = window.vm.$store.state.app.selectedItem.item
+        tmpId = item.dir
+        postData['newlang'] = true
+        postData['id'] = tmpId
+        tmpLink = item.dir
+        /*
         var tmpLink = item.link
         if (item.link.startsWith('//') || item.link.startsWith('http://') || item.link.startsWith('https://')) {
           tmpLink = item.link.substring(item.link.indexOf('/', 8))
@@ -704,17 +1170,31 @@ export default {
         }
         fileToCreate = tmpLink // includes the /{type}/
         tmpId = fileToCreate
+        */
       } else {
-        fileToCreate = this.fileNameValidator()
-        tmpId = '/' + type + '/' + fileToCreate
-      }
-      var selectedLangItem = this.$store.state.app.languages.languagesHash[window.vm.$store.state.app.languageSelected]
-      var postData = {
-        type: type,
-        title: this.newTitle,
-        lang: selectedLangItem.id,
-        filename: fileToCreate,
-        id: tmpId
+        var category = this.modelCreateNew.category
+        if (category === undefined) {
+          category = 'uncategorized'
+        }
+        var subcategory = this.modelCreateNew.subcategory
+        fileToCreate = this.modelCreateNew.title
+
+        if (tmpId === '') {
+          tmpId = category
+          if (subcategory !== '') {
+            tmpId = tmpId + '/' + subcategory.split(' ').join('-')
+          }
+          if (fileToCreate !== '') {
+            tmpId = tmpId + '/' + fileToCreate.split(' ').join('-')
+          }
+        }
+        action = 'new'
+        postData['newlang'] = false
+        postData['filename'] = tmpId + '/'
+        postData['id'] = tmpId
+        postData['id'] = postData['id'].split(' ').join('-')
+        postData['title'] = fileToCreate
+        tmpLink = postData['id']
       }
 
       if (!postData.title || postData.title === '') {
@@ -725,6 +1205,7 @@ export default {
       if (newOrUpdate === 'update') {
         httpApiAction = this.$httpApi.put
       }
+      tmpLink = tmpLink.toLowerCase()
 
       // action = new, or newlang
       httpApiAction(window.apiUrl + '/content/' + action, postData, {
@@ -736,14 +1217,23 @@ export default {
           title: postData.title,
           draft: true
         }
+        console.error('got new post?')
+        console.error(postData)
+        var forceLink = null
         if (action === 'new') {
-          newPost['guid'] = '/' + type + '/' + postData.filename
-          newPost['link'] = '/' + type + '/' + postData.filename
+          newPost['guid'] = response.data // '/' + type + '/' + postData.filename
+          forceLink = response.data
+          newPost['link'] = '/' + type + '/' + tmpLink
+          newPost['dir'] = '/' + type + '/' + tmpLink
         } else {
           // newlang
           newPost['guid'] = postData.id
+          forceLink = postData.id
           newPost['link'] = postData.id
+          forceLink = response.data
+          newPost['dir'] = postData.id
         }
+        console.error(newPost)
 
         // Select the post for editing..
         // Lets give 500 milliseconds...
@@ -759,10 +1249,12 @@ export default {
             // only add the post to the sidebar object if new post not new language
             // refresh latest data..
             var tmpLink = newPost.link
-            if (tmpLink.startsWith('/blogs/')) {
-              tmpLink = tmpLink.substring(7)
+
+            if (tmpLink.startsWith('/' + type + '/')) {
+              tmpLink = tmpLink.substring(type.lenght + 2)
             }
-            self.$httpApi.post(window.apiUrl + '/frontmatter?blog=2', { type: 'blogs', id: tmpLink, lang: newPost.lang }, { }).then((res) => {
+
+            self.$httpApi.post(window.apiUrl + '/frontmatter?rcpblog=2', { type: type, id: tmpLink, lang: newPost.lang }, { }).then((res) => {
               var curItem = {}
 
               // curItem['link'] = window.goHostUrl + newPost.link
@@ -799,6 +1291,13 @@ export default {
                 type: 'success'
               })
 
+              console.error('sleect post test')
+              console.error(curItem)
+              curItem.link = forceLink
+              curItem.dir = ('/' + tmpLink + '/').replace('//', '/')
+              curItem.id = ('/' + tmpLink + '/').replace('//', '/')
+              console.error('select item of')
+              console.error(curItem)
               self.selectPost({ vue: self, item: curItem, retry: retryCount })
             })
             .catch((error) => {
@@ -917,9 +1416,26 @@ export default {
 }
 </script>
 
+<style>
+.group-one-class {
+  background-color: #dcd0d0;
+}
+
+.form-group.field-one-class {
+  width: 15%;
+  max-width: 15%;
+  float: left;
+}
+
+.form-group.field-step-class {
+  width: 90%;
+  max-width: 90%;
+  line-height:30px;
+  float: left;
+}
+
+</style>
 <style scoped>
-
-
 html {
 	font-family: Tahoma;
 	font-size: 14px;
@@ -1062,6 +1578,7 @@ fieldset {
   .rightSide.active {
     right: 0px;
     // z-index: 2;
+    overflow: auto;
   }
 
   .animated {
