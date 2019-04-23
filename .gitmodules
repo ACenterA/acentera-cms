@@ -1,0 +1,3 @@
+[submodule "vfg-field-array"]
+	path = vfg-field-array
+	url = https://github.com/ACenterAInc/vfg-field-array.git
