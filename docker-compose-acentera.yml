@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+    build-helper-web:
+        build:
+          context: .
+          dockerfile: .docker/acentera/Dockerfile-nginx
+        ports:
+          - 8087:80
