@@ -225,10 +225,12 @@ export default {
         'type': 'no_git',
         'theme': self.template.Name,
         'template_repo': self.template.Repository, // 'https://github.com/FLavalliere/my-first-blog',
-        'template_branch': 'master'
+        'template_branch': 'master',
+        'acentera_type': 'hugo',
+        'simple_git': 'true'
       }
 
-      var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create?createSiteModal=1'
+      var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create?createSiteModal=1&hugo'
 
       self.toggleRepoState(0) // Reset state for creating, to disable any messages... until it got created.
       self.$store.state.app.websiteInCreationMode = true // prevent navbar messages
@@ -238,8 +240,8 @@ export default {
       self.$http.post(initSiteRepoCall, initSite, {
         headers: h
       }).then((response) => {
-        if (response && response.data && response.data.type) {
-          if (!(response.data.type.startsWith('error'))) {
+        if (response && response.data && response.data.typeid) {
+          if (!(response.data.typeid.startsWith('error'))) {
             self.processing = false
             self.$emit('changePage', response.data)
           } else {
@@ -386,7 +388,7 @@ export default {
           'template_branch': 'master'
         }
 
-        var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create?createSiteModal=2'
+        var initSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/create?createSiteModal=2&hugo'
 
         self.toggleRepoState(0) // Reset state for creating, to disable any messages... until it got created.
         self.$store.state.app.websiteInCreationMode = true // prevent navbar messages
@@ -414,12 +416,12 @@ export default {
         self.$http.post(initSiteRepoCall, initSite, {
           headers: h
         }).then((response) => {
-          if (response && response.data && response.data.type) {
-            if (!(response.data.type.startsWith('error'))) {
+          if (response && response.data && response.data.typeid) {
+            if (!(response.data.typeid.startsWith('error'))) {
               self.processing = false
               self.$emit('changePage', response.data)
             } else {
-              rollback(response.data.type)
+              rollback(response.data.typeid)
             }
           } else {
             rollback('Invalid response..')

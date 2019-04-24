@@ -257,6 +257,10 @@
        */
       get: function (uri, params, fillIn, errorCb) {
         // verifying what user sends to fill in
+        if (uri.startsWith(apiUrl)) {
+          uri = uri.replace(apiUrl, '')
+        }
+
         if (this._verifyFillIn(fillIn) !== true) {
           return
         }

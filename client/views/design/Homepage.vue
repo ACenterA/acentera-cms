@@ -428,6 +428,7 @@ export default {
 .rightSide.active {
   right: 0px;
   z-index: 800;
+  overflow: auto;
 }
 
 .rightSide {

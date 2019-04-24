@@ -17,7 +17,7 @@
         </div>
       </nav>
       <nav class="nav" v-if="loaded">
-        <div class="nav-left">
+        <div class="nav-left issue-save-not-show" style="max-width: 300px; overflow:hidden;">
           <a class="nav-item is-hidden-tablet" @click="toggleSidebar(!sidebar.opened)">
             <i class="fa fa-bars" aria-hidden="true"></i>
           </a>
@@ -104,7 +104,7 @@
           </a>
         </div>
         <div class="nav-right is-flex">
-          <a v-if="session" class="nav-item is-hidden-mobile">
+          <a v-if="session" class="nav-item is-hidden-mobile is-hidden-not-4k" style="display:none;">
             Logged in as: {{session.display_name}}
           </a>
 
@@ -676,5 +676,9 @@ export default {
   .admin {
     color: #28374B;
   }
+}
+.nav-left.issue-save-not-show {
+  max-width: 300px!important;
+  overflow:hidden;
 }
 </style>

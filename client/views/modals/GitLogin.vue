@@ -159,6 +159,13 @@ export default {
     ]),
     noGitSelect () {
       var self = this
+      if (self.template) {
+        self.template['no_git'] = true
+      } else {
+        self.template = {
+          no_git: true
+        }
+      }
       self.$emit('nextStep', self.template)
     },
     close () {
@@ -166,6 +173,14 @@ export default {
     },
     nextStep () {
       var self = this
+      if (self.template) {
+        delete self.template['no_git']
+      } else {
+        // just to ensure that it will work..
+        self.template = {
+
+        }
+      }
       self.$emit('nextStep', self.template)
     },
     confirmed () {
