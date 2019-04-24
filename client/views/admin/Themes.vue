@@ -94,7 +94,7 @@ export default {
   mounted: function () {
     var self = this
     // TODO: Fetch from github, if fail get local file?
-    this.$http.get('./assets/themes.json').then((response) => {
+    this.$http.get(window.currentUrl + '/assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
       self.themes = response.data
       this.switchTab(0)

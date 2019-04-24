@@ -2,11 +2,13 @@ import Vue from 'vue'
 import moment from 'moment'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import VueSelect from 'vue-select'
 import VueAuthenticate from 'vue-authenticate'
 import NProgress from 'vue-nprogress'
 import { sync } from 'vuex-router-sync'
 import App from './App.vue'
 import AppOauth from './AppOauth.vue'
+import AppPwReset from './AppPwReset.vue'
 import plekan from './plekan/index.js'
 import store from './store'
 import * as filters from './filters'
@@ -20,6 +22,26 @@ import GitHubAPI from './GitHubAPI'
 import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
 import VueCookie from 'vue-cookie'
+
+Vue.component('v-select', VueSelect)
+//
+// or register the whole module with vue
+//
+import VueFormGenerator from 'vue-form-generator/dist/vfg-core.js'
+import 'vue-form-generator/dist/vfg-core.css'
+Vue.use(VueFormGenerator)
+
+if (typeof Array.isArray === 'undefined') {
+  Array.isArray = function (obj) {
+    return Object.prototype.toString.call(obj) === '[object Array]'
+  }
+}
+
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import locale from 'element-ui/lib/locale/lang/en'
+
+Vue.use(ElementUI, { locale })
 
 import routerImport from './router'
 var router = null
@@ -35,6 +57,7 @@ Vue.filter('formatDate', function (value) {
 var app = null
 
 var isOauthCallback = false
+var isResetCallback = false
 
 window.goApiUrl = window.goApiUrl || 'http://localhost:1313'
 window.apiUrl = window.apiUrl || 'http://localhost:8081/api'
@@ -42,6 +65,10 @@ window.apiHost = window.apiHost || 'http://localhost:8081'
 window.goHostUrl = window.goHostUrl || 'http://localhost:8081'
 
 window.websiteapiUrl = window.goHostUrl || 'http://localhost:8081'
+
+if ((window.location.href + '').indexOf('/password/reset') !== -1) {
+  isResetCallback = true
+}
 
 if ((window.location.href + '').indexOf('/oauth/') !== -1) {
   isOauthCallback = true
@@ -162,7 +189,7 @@ var bindRequestInterceptorFct = function () {
     // this screw up if we already have a authorization we should not add it again..
 
     // Check if we need to pass in SSO Token ...
-    if (window.vm.$store.state.app.website && config.url.indexOf(window.websiteapiUrl) >= 0) { // quick fix for multi-authorization header only on website mode, locally we do not  have authorization bearer....
+    if (window.vm.$store && window.vm.$store.state && window.vm.$store.state.app && window.vm.$store.state.app.website && config.url.indexOf(window.websiteapiUrl) >= 0) { // quick fix for multi-authorization header only on website mode, locally we do not  have authorization bearer....
         // ignore double Bearer
     } else {
       if (this.isAuthenticated()) {
@@ -180,7 +207,7 @@ var bindRequestInterceptorFct = function () {
       }
     }
 
-    if (window.vm.$store.state.app.website) {
+    if (window.vm.$store && window.vm.$store.state && window.vm.$store.state.app && window.vm.$store.state.app.website) {
       if (window.vm.$store.state.app.sso_token) {
         if (window.goHostUrl) {
           if (config.url.startsWith('' + window.goHostUrl)) {
@@ -227,6 +254,9 @@ if (!isOauthCallback) {
     } else {
       // Enable devtools
       // Local Dev
+      // window.websiteapiUrl = 'https://cms.acentera.net/dev' // TODO
+      // window.websiteapiUrl = 'https://3w0haaib9j.execute-api.us-east-1.amazonaws.com/dev' // TODO
+
       router = routerImport.newRouter('hash')
       Vue.config.devtools = true
       window.withCredentials = false
@@ -234,16 +264,18 @@ if (!isOauthCallback) {
       githubClientId = '830bd8b7d0520c42508d'
 
       // Local Dev with Remote
-      /*
+
+      // TODO  .. if localhost test
       Vue.config.devtools = true
-      store.commit('setWebsite', true)
+      store.commit('setWebsite', false)
       window.withCredentials = true
-      */
     }
 
     // } // end if (hosted version)
     // store.commit('setProjectSelected', false)
     var currentUrl = [location.protocol, '//', location.host, ''].join('')
+    window.currentUrl = currentUrl + '/admin'
+
     authenticateObj = {
       baseUrl: window.websiteapiUrl + '/api/oauth', // Your API domain
       storageType: 'localStorage',
@@ -394,7 +426,8 @@ if (!isOauthCallback) {
   const nprogress = new NProgress({ parent: '.nprogress-container' })
 
   const { state } = store
-  if (!isOauthCallback) {
+  console.error('test pw rset?')
+  if (!(isOauthCallback || isResetCallback)) {
     if (state.app.website) {
       Vue.prototype.$checkInet = function () {
         store.commit('setInet', true)
@@ -548,13 +581,20 @@ if (!isOauthCallback) {
     Vue.filter(key, filters[key])
   })
 
-  app = new Vue({
-    router,
-    store,
-    nprogress,
-    githubapi,
-    ...App
-  })
+  if (isResetCallback) {
+    app = new Vue({
+      router,
+      ...AppPwReset
+    })
+  } else {
+    app = new Vue({
+      router,
+      store,
+      nprogress,
+      githubapi,
+      ...App
+    })
+  }
 
   // state.vm = app
   window.vm = app

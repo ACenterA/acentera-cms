@@ -13,7 +13,6 @@
               <div>
                   <div class="center-text">
                       <h4 class="site-title">Choose a template for your website</h4>
-                      (i know its duplicated .. lack of theme right now)
                   </div>
               </div>
             </div>
@@ -164,6 +163,8 @@
     <gitModal :visible="showLoginModal" :template="selectedItem" @nextStep="nextStep($event)" @close="closeGitModal"></gitModal>
 
     <createSiteModal :visible="showCreateModal" :template="selectedItem" @changePage="changePage($event)" @close="closeCreateSiteModal"></createSiteModal>
+
+    <creteAdvanceSiteModal :visible="showAdvanceCreateModal" :template="selectedItem" @changePage="changePage($event)" @close="closeAdvdanceCreateSiteModal"></creteAdvanceSiteModal>
   </div>
 </template>
 
@@ -171,11 +172,13 @@
 import { mapActions } from 'vuex'
 import GitModal from './modals/GitLogin'
 import createSiteModal from './modals/CreateSiteModal'
+import creteAdvanceSiteModal from './modals/CreateSiteAdvanceModal'
 
 export default {
   components: {
     GitModal,
-    createSiteModal
+    createSiteModal,
+    creteAdvanceSiteModal
   },
   data () {
     return {
@@ -185,6 +188,7 @@ export default {
       selectedItemName: null,
       showLoginModal: false,
       showCreateModal: false,
+      showAdvanceCreateModal: false,
       showSiteBeingCreated: false
     }
   },
@@ -225,7 +229,7 @@ export default {
     // self.$store.state.app.sidebarglobal.hidden = true
 
     // TODO: Test github themes, then local file as fallback ?
-    this.$http.get('./assets/themes.json').then((response) => {
+    this.$http.get(window.currentUrl + '/assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
       self.themes = response.data
       this.switchTab(0)
@@ -255,6 +259,12 @@ export default {
     closeCreateSiteModal () {
       this.selectedIndex = -1
       this.showCreateModal = false
+      this.showAdvanceCreateModal = false
+    },
+    closeAdvdanceCreateSiteModal () {
+      this.selectedIndex = -1
+      this.showCreateModal = false
+      this.showAdvanceCreateModal = false
     },
     isRepoUpdating () {
       return (this.repoState.updating === 1)
@@ -275,7 +285,14 @@ export default {
 
       this.selectedIndex = -1
       this.showLoginModal = false
-      this.showCreateModal = true
+      console.error('recieved next stap data here')
+      console.error(nextStepData)
+      console.error(this.$store.state.github)
+      if (nextStepData.no_git) {
+        this.showCreateModal = true
+      } else {
+        this.showAdvanceCreateModal = true
+      }
       // work but not this .. this.$router.push({ 'path': '/templates/' + nextStepData.Name + '/edit' })
     },
     changePage (nextStepData) {
@@ -283,6 +300,7 @@ export default {
       // Theme => nextStepData.Name
       // next route => '/templates/' + nextStepData.Name + '/edit'
       this.showCreateModal = false
+      this.showAdvanceCreateModal = false
 
       this.showSiteBeingCreated = true
       self.$store.state.app.websiteInCreationMode = true // To prevent Navbar messages...
@@ -355,15 +373,10 @@ export default {
           error: function (e) {
             // error?
             try {
-              if (e.readyState === 0) {
-                // All Good but Cross Domain Error. We assume the website is alive.
-                ready()
-                return
-              }
-              if (e.response === undefined) {
+              if (e && e.response === undefined) {
                 e.response = e
               }
-              if (e.response.status === 404) {
+              if (e && e.response && e.response.status === 404) {
                 if (itr <= 30) {
                   setTimeout(function () {
                     fctCheckNewSite(++itr)
@@ -381,8 +394,15 @@ export default {
                   }, 5000)
                 }
               } else {
+                console.error(e)
+                if (e.readyState === 0) {
+                  // All Good but Cross Domain Error. We assume the website is alive.
+                  ready()
+                  return
+                }
               }
             } catch (ff) {
+              console.error(ff.stack)
               if (itr <= 30) {
                 setTimeout(function () {
                   fctCheckNewSite(++itr)

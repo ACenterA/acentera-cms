@@ -31,6 +31,11 @@ var newRouter = function (mode) {
         component: require('../views/Home')
       },
       {
+        name: 'PasswordReset',
+        path: '/password/reset/:id',
+        component: require('../views/PasswordReset')
+      },
+      {
         name: 'Templates',
         path: '/templates',
         component: require('../views/Templates')

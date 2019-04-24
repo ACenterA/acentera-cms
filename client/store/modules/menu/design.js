@@ -4,6 +4,7 @@ export default {
   meta: {
     label: 'Design',
     icon: 'fa-wrench',
+    showOnlyIf: 'isHugo',
     expanded: false
   },
   children: [
