@@ -1,9 +1,10 @@
 import lazyLoading from './lazyLoading'
-
+// this file is bad ?
 export default {
   meta: {
-    label: 'Design',
+    label: 'Desigbbadn',
     icon: 'fa-wrench',
+    showOnlyIf: 'badd not good file',
     expanded: false
   },
   children: [
@@ -19,7 +20,7 @@ export default {
     },
 */
     {
-      name: 'HomePage',
+      name: 'HomePagbbbade',
       path: '/homepage',
       component: lazyLoading('design/Homepage')
     }

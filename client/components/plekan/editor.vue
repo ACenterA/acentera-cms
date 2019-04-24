@@ -364,8 +364,11 @@ export default {
      * @return {void}
      */
     openEditElement () {
+      console.error('open edit element here ')
       if ($(this.editableModalElement).attr('parameditable') === 'sidebar') {
         this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')
+      } else if ($(this.editableModalElement).attr('parameditable') === 'jsondata') {
+        this.$bus.$emit('SHOW_ADVANCED_SETTINGS', $(this.editableModalElement)[0])
       } else if ($(this.editableModalElement).attr('parameditable') === 'sidebar-social') {
         // this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS_SOCIAL')
         this.$bus.$emit('TOGGLE_ADVANCED_SETTINGS')

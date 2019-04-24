@@ -4,7 +4,7 @@
       CMS
     </p>
     <ul class="menu-list">
-      <li v-for="(item, index) in menu">
+      <li v-for="(item, index) in getMenu(menu)">
         <router-link :to="item.path" :exact="true" :aria-expanded="isExpanded(item) ? 'true' : 'false'" v-if="item.path" @click.native="toggle(index, item)">
           <span class="icon is-small"><i :class="['fa', item.meta.icon]"></i></span>
           {{ item.meta.label || item.name }}
@@ -22,7 +22,7 @@
 
         <expanding v-if="item.children && item.children.length">
           <ul v-show="isExpanded(item)">
-            <li v-for="subItem in item.children" v-if="subItem.path">
+            <li v-for="subItem in getMenu(item.children)" v-if="subItem.path">
               <router-link :to="generatePath(item, subItem)">
                 {{ subItem.meta && subItem.meta.label || subItem.name }}
               </router-link>
@@ -46,7 +46,8 @@ export default {
   props: {
     show: Boolean,
     notLoggedIn: Boolean,
-    websiteSelected: Boolean
+    websiteSelected: Boolean,
+    websiteObject: Object
   },
 
   data () {
@@ -63,14 +64,59 @@ export default {
     }
   },
 
-  computed: mapGetters({
-    menu: 'menuitems'
-  }),
-
+  computed: {
+    ...mapGetters({
+      menu: 'menuitems'
+    }),
+    isHugo () {
+      if (!this.websiteObject) {
+        return true
+      }
+      if (!this.websiteObject.acentera_type || this.websiteObject.acentera_type === 'hugo') {
+        return true
+      }
+      return false
+    },
+    isDockerSimple () {
+      if (this.websiteObject.acentera_type && this.websiteObject.acentera_type === 'docker-simple') {
+        return true
+      }
+      return false
+    }
+  },
   methods: {
     ...mapActions([
       'expandMenu'
     ]),
+
+    getMenu (m) {
+      var mnu = m
+      var len = mnu.length
+      var mnuToDisplay = []
+      for (var i = 0; i < len; i++) {
+        var isValid = true
+        console.error('AA test...of ' + (mnu[i].name || mnu[i].meta.name))
+        console.error(mnu[i])
+        if (mnu[i].hasOwnProperty('showOnlyIf') || (mnu[i].meta && mnu[i].meta.hasOwnProperty('showOnlyIf'))) {
+          console.error('test...AD')
+          console.error(mnu[i])
+          var showIf = mnu[i].showOnlyIf || mnu[i].meta.showOnlyIf
+          if (showIf === 'isHugo') {
+            if (!this.isHugo) {
+              isValid = false
+            }
+          } else if (showIf === 'isDockerSimple') {
+            if (!this.isDockerSimple) {
+              isValid = false
+            }
+          }
+        }
+        if (isValid) {
+          mnuToDisplay.push(mnu[i])
+        }
+      }
+      return mnuToDisplay
+    },
 
     isExpanded (item) {
       return item.meta.expanded

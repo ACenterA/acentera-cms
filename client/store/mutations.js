@@ -23,6 +23,8 @@ export const clearSession = (state, origState) => {
     state.projectSelected = null
     state.session = null
     state.app.project = null
+    state.app.account = null
+    state.app.accountObject = {}
     state.app.projectId = null
     state.app.websiteId = null
 

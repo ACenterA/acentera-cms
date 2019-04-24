@@ -6,9 +6,7 @@
       <article class="tile is-child box">
 
       <div v-if="domainCount === 0">
-        Want to use your own domain name ? <br/>
-
-        Do you want to Delete this Website ?
+        <b>Warning</b> do you really want to delete your website ?
         <br/>
         <br/>
         Enter this confirmation id <b>{{getWebsiteId}}</b>
@@ -56,6 +54,9 @@ export default {
       getBasicAuth: 'getBasicAuth',
       selectedWebsite: 'selectedWebsite'
     }),
+    txt: function () {
+      return 'v=' + this.$store.state.app.account
+    },
     domainCount () {
       if (this.selectedWebsite && this.selectedWebsite.domains) {
         var keys = Object.keys(this.selectedWebsite.domains)
@@ -99,10 +100,18 @@ export default {
         if (!this.processing) {
           var projectId = this.getProjectId
 
+          var gitUrl = null
+          if (self.$store.state.app && self.$store.state.app.repoState) {
+            gitUrl = self.$store.state.app.repoState.url
+          }
+
           var deleteSite = {
             'projectId': projectId,
-            'websiteId': this.getWebsiteId
+            'websiteId': this.getWebsiteId,
+            'git': gitUrl,
+            'txt': self.txt.replace('v=', '')
           }
+
           this.processing = true
           var deleteSiteRepoCall = window.websiteapiUrl + '/sites/v1/websites/' + projectId + '/' + this.getWebsiteId + '/delete'
           var h = { 'authorization': 'Bearer ' + self.$store.state.session.token }
@@ -119,6 +128,28 @@ export default {
 
                 setTimeout(function () {
                   self.processing = false
+                  delete window.vm.$store.getters.app.project.websites[deleteSite.websiteId]
+                  self.$store.commit('SELECT_WEBSITE', {projectId: projectId, websiteId: null})
+                }, 5000)
+              } else {
+                self.processing = false
+                self.$notify({
+                  title: 'Could delete website.',
+                  message: 'We were unable to delete your website. Contact support! ',
+                  type: 'danger'
+                })
+              }
+            } else if (response && response.data && response.data.typeid) {
+              if (!(response.data.typeid.startsWith('error'))) {
+                self.$notify({
+                  title: 'Website deleted.',
+                  message: 'We successfully deleted your website from our hosting. We thank you for using it.',
+                  type: 'success'
+                })
+
+                setTimeout(function () {
+                  self.processing = false
+                  delete window.vm.$store.getters.app.project.websites[deleteSite.websiteId]
                   self.$store.commit('SELECT_WEBSITE', {projectId: projectId, websiteId: null})
                 }, 5000)
               } else {

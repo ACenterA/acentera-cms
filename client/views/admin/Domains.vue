@@ -5,17 +5,31 @@
         <div class="tile is-ancestor">
           <div class="tile is-parent">
             <article class="tile is-child box minh">
-              <div v-if="selectedWebsite">
-                <div v-if="!selectedWebsite.domains || domainCount === 0 || addNewDomain">
-                  Want to use your own domain name ? <br/>
-                  It is free, as long as you have already registered it.<br/>
+              <div v-if="selectedWebsite && (!acenteraType || acenteraType && acenteraTypeStageConfigured)">
+
+                <article class="tile is-child box scrollable floatleft marginpad fullw" v-if="(acenteraType && acenteraTypeStageConfigured)">
+
+                  <div>
+                    <label class="label floatleft">Select a stage</label><br/>
+                    <div class="control has-icons-right">
+                      <span class="select">
+                        <select v-model="selectedStage">
+                          <option v-for="(stage, index) in stages" :value='stage.stageId'>
+                            {{stage.title}}
+                          </option>
+                        </select>
+                      </span>
+                    </div>
+                  </div>
+                </article>
+                <div v-if="((!acenteraType) || (acenteraType && acenteraTypeStageConfigured && selectedStage)) && (!selectedWebsite.domains || domainCount === 0 || addNewDomain)">
 
                   <br/>
-                  Enter the domain name you want to register
+                  Enter the domain name that you already manage.
                   <br/>
                   <br/>
                   <label class="label">Enter your domain name below</label>
-                  <i>Note: you need to use a subdomain such as 'www', otherwise contact us.</i>
+                  <i>Note: You need to use add a subdomain to website.</i>
                   <div class="field has-addons">
                     <p class="control is-expanded">
                       <input class="input" type="text" placeholder="www.mydomainname.com"
@@ -35,41 +49,56 @@
                   </a>
                 </div>
                 <div v-else style="max-width: 800px">
-                  Here are your domains associated to this website.
-                  <br/>
-                  <br/>
-                  <div class="button leftfloat is-primary float-right"
-                    @click="addNewDomainClick()">
-                    Add New domain...
+
+                  <div v-if="(acenteraType && acenteraTypeStageConfigured && !selectedStage)">
+
                   </div>
+                  <div v-else>
+                    Here are your domains associated to this website.
+                    <br/>
+                    <br/>
+                    <div class="button leftfloat is-primary float-right"
+                      @click="addNewDomainClick()">
+                      Add domain...
+                    </div>
 
-                  <br/>
-                  <br/>
-                  <br/>
-                  <div v-for="(item, index) in selectedWebsite.domains">
-                      <label class="label float-left">{{ index }}</label>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <div v-for="(item, index) in selectedWebsite.domains">
+                        <div v-if="(!selectedStage || selectedStage && item.stageId === selectedStage)">
+                          <label class="label float-left">{{ index }}</label>
 
-                      <div v-if="item.primary" class="button is-success float-right minw">
-                        Primary
-                      </div>
+                          <div v-if="item.primary" class="button is-success float-right minw">
+                            Primary
+                          </div>
 
-                      <div v-if="!item.primary" class="button is-danger float-right minw"
-                        @click="setPrimary(index)">
-                        Set Primary
-                      </div>
+                          <div v-if="!item.primary" class="button is-danger float-right minw"
+                            @click="setPrimary(index)">
+                            Set Primary
+                          </div>
 
-                      <div class="button leftfloat is-primary margin-right float-right minw"
-                        @click="delDomain(index)">
-                        Delete
-                      </div>
-                     <br/>
-                     <br/>
-                     <br/>
+                          <div class="button leftfloat is-primary margin-right float-right minw"
+                            @click="delDomain(index)">
+                            Delete
+                          </div>
+                         <br/>
+                         <br/>
+                         <br/>
+                       </div>
+                    </div>
                   </div>
                 </div>
               </div>
               <div v-else>
-                No website selected.
+
+                <div v-if="selectedWebsite && !acenteraType">
+                  No website selected.
+                </div>
+                <div v-if="! (selectedWebsite && !acenteraType)">
+                  No stages configured.
+                </div>
+
               </div>
             </article>
           </div>
@@ -129,6 +158,7 @@ export default {
       showDeleteWarning: false,
       showConfirmCreatingModal: false,
       validateText: 'Validate & Create',
+      selectedStage: null,
       confirmModalTitle: '',
       txterror: null,
       cnameerror: null,
@@ -141,7 +171,7 @@ export default {
     /*
     var self = this
     // TODO: Fetch from github, if fail get local file?
-    this.$http.get('./assets/themes.json').then((response) => {
+    this.$http.get(window.currentUrl + '/assets/themes.json').then((response) => {
     // this.$http.get('https://raw.githubusercontent.com/component/clone/master/component.json').then((response) => {
       self.themes = response.data
       this.switchTab(0)
@@ -158,14 +188,37 @@ export default {
       selectedWebsite: 'selectedWebsite',
       loaded: 'loaded'
     }),
+    stages () {
+      var stageArr = []
+      if (this.acenteraTypeStageConfigured) {
+        var keys = Object.keys(this.selectedWebsite.stages)
+        var l = keys.length
+        for (var k = 0; k < l; k++) {
+          var stageObj = JSON.parse(JSON.stringify(this.selectedWebsite.stages[keys[k]]))
+          stageObj['stageId'] = keys[k]
+          stageArr.push(stageObj)
+        }
+      }
+      return stageArr
+    },
     txt: function () {
       return 'v=' + this.$store.state.app.account
+    },
+    acenteraTypeStageConfigured () {
+      if (this.selectedWebsite && this.selectedWebsite.acentera_type && this.selectedWebsite.acentera_type === 'docker-simple' && this.selectedWebsite.stages) {
+        var keys = Object.keys(this.selectedWebsite.stages)
+        return (keys.length >= 1)
+      }
+      return false
+    },
+    acenteraType () {
+      return (this.selectedWebsite && this.selectedWebsite.acentera_type && this.selectedWebsite.acentera_type === 'docker-simple')
     },
     invalidDomainName () {
       if (!this.newDomainName) {
         return true
       }
-      if (/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z0-9]{2,})+$/.test(this.newDomainName)) {
+      if (/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(this.newDomainName)) {
         // valid domain name.
         return false
       }
@@ -285,7 +338,8 @@ export default {
       var h = { 'Authorization': 'Bearer ' + self.$store.state.session.token }
       // request it with headers an param
       self.$http.post(window.websiteapiUrl + '/sites/v1/websites/' + self.selectedWebsite.projectId + '/' + self.selectedWebsite.websiteId + '/create/' + self.newDomainName, {
-        primary: primary
+        primary: primary,
+        stageId: self.selectedStage
       },
         {
           headers: h
@@ -344,7 +398,8 @@ export default {
       var h = { 'Authorization': 'Bearer ' + self.$store.state.session.token }
       // request it with headers an param
       self.$http.post(window.websiteapiUrl + '/sites/v1/websites/' + self.selectedWebsite.projectId + '/' + self.selectedWebsite.websiteId + '/delete/' + self.newDomainName, {
-        primary: primary
+        primary: primary,
+        stageId: self.selectedStage
       },
         {
           headers: h
@@ -397,6 +452,8 @@ export default {
       return new Promise(function (resolve, reject) {
         var h = { 'Authorization': 'Bearer ' + self.$store.state.session.token }
         // request it with headers an param
+        console.error('a1 - selected website test')
+        console.error(self.selectedWebsite)
         self.$http.get(window.websiteapiUrl + '/sites/v1/websites/' + self.selectedWebsite.projectId + '/' + self.selectedWebsite.websiteId + '/cname/' + self.newDomainName,
           {
             headers: h
