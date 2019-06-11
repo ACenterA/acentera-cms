@@ -218,7 +218,7 @@ export default {
       if (!this.newDomainName) {
         return true
       }
-      if (/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(this.newDomainName)) {
+      if (/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z0-9]{2,})+$/.test(this.newDomainName)) {
         // valid domain name.
         return false
       }
