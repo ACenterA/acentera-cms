@@ -40,6 +40,9 @@
       getData () {
         return 'afaf' // this.DEFAULT_CONTENT() // 'afaf'
       },
+      getBodyMeta () {
+        return 'ffzzf' // this.DEFAULT_CONTENT() // 'afaf'
+      },
       isHead: function () {
         return false
       },
