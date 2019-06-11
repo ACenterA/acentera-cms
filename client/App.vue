@@ -95,7 +95,12 @@ export default {
             bodyStartIdx01 = Data.toLowerCase().indexOf('<body>') + 1
           }
         }
-
+        var bodyEndIdxTest = Data.toLowerCase().indexOf('>', bodyStartIdx01)
+	var boddyInnerData = ''
+	try {
+		boddyInnerData = Data.substring(bodyStartIdx01+6,bodyEndIdxTest)
+	} catch (noDataExx) {
+	}
         // window.TestData = Data
         if (bodyStart < 7) {
           bodyStart = 0
@@ -120,6 +125,7 @@ export default {
         const htmlContent = body
         var headContent = head
         window.Head = headContent
+        window.BodyMeta = boddyInnerData
         window.Body = htmlContent
         if (!((document.getElementsByTagName('iframe') && document.getElementsByTagName('iframe')[0]))) {
           return
@@ -134,8 +140,12 @@ export default {
 
         var kkA = {
             tmpData: htmlContent,
+            tmpBodyMeta: boddyInnerData,
             data: function () {
               return this.tmpData
+            },
+            bodyMeta: function () {
+              return this.tmpBodyMeta
             },
             editable: function () {
               return false
@@ -177,6 +187,10 @@ export default {
                   return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].data()
                   // return kkA.data() // window.Body; //htmlContent  <-- // this is always same object
                 },
+                getBodyMeta: function () {
+                  return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].bodyMeta()
+                  // return kkA.data() // window.Body; //htmlContent  <-- // this is always same object
+                },
                 isEditable: function () {
                   return window.componentObj[this.$vnode.tag.substr(this.$vnode.tag.indexOf('-awesome')+1)].editable()
                 },
@@ -215,6 +229,9 @@ export default {
 
               if (m.newContext.hasOwnProperty('getData01')) {
                   tt['getData01'] = m.newContext['getData01']
+              }
+              if (m.newContext.hasOwnProperty('getBodyMeta')) {
+                  tt['getBodyMeta'] = m.newContext['getBodyMeta']
               }
 
               if (m.newContext.hasOwnProperty('methods')) {
