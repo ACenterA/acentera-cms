@@ -1,10 +1,16 @@
-FROM node:latest as intermediate
+FROM node:11.15.0-alpine as intermediate
 
 COPY package*.json ./code/
 
+RUN apk add --no-cache make git gcc g++ python && \
+  npm install --unsafe-perm --verbose -g node-sass  node-gyp && \
+  apk del make gcc g++ python
+
 RUN cd /code && \
     sed -ri '/file:/ s/^(.*)//g' package.json && \
-    npm i
+    apk add --no-cache make git gcc g++ python && \
+    npm i && \
+    apk del make gcc g++ python
 
 COPY forms-schema /code/forms-schema/
 RUN cd /code/ && \
