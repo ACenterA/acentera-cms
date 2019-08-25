@@ -81,10 +81,6 @@ Vue.component('i-frame', {
       }
       const children = this.$slots.default
       const body = this.$el.contentDocument.body
-   
-      console.error('MAIN....BODY CLASS NEED TO BE SET HERE??')
-      console.error(this)
-
       const el = document.createElement('DIV') // we will mount or nested app to this element
       body.appendChild(el)
 

@@ -23,6 +23,8 @@ import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
 import VueCookie from 'vue-cookie'
 
+const IS_WEBSITE_DEV=process.env.IS_WEBSITE_DEV
+
 Vue.component('v-select', VueSelect)
 //
 // or register the whole module with vue
@@ -267,7 +269,7 @@ if (!isOauthCallback) {
 
       // TODO  .. if localhost test
       Vue.config.devtools = true
-      store.commit('setWebsite', false)
+      store.commit('setWebsite', IS_WEBSITE_DEV)
       window.withCredentials = true
     }
 
