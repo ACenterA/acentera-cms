@@ -1,6 +1,3 @@
 [submodule "vfg-field-array"]
 	path = vfg-field-array
 	url = https://github.com/ACenterAInc/vfg-field-array.git
-[submodule "forms-schema"]
-	path = forms-schema
-	url = git@gitlab.com:formschema/native.git
