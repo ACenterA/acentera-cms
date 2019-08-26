@@ -23,7 +23,7 @@ import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
 import VueCookie from 'vue-cookie'
 
-const IS_WEBSITE_DEV=process.env.IS_WEBSITE_DEV
+const IS_WEBSITE_DEV = process.env.IS_WEBSITE_DEV
 
 Vue.component('v-select', VueSelect)
 //

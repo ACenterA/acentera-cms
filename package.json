@@ -20,7 +20,7 @@
   ],
   "engines": {
     "node": ">=7",
-    "npm": "6.6.0-next.1"
+    "npm": ">=6"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production node build/build.js",
@@ -81,6 +81,7 @@
     "vue-recaptcha": "^1.1.0",
     "vue-router": "^2.3.0",
     "vue-select": "^2.4.0",
+    "vue-style-loader": "^4.1.2",
     "vue2-autocomplete-js": "^0.2.2",
     "vuejs-datetimepicker": "^1.1.7",
     "vuex": "^2.2.1",
@@ -117,7 +118,7 @@
     "imports-loader": "^0.7.0",
     "jquery": "latest",
     "lodash.startcase": "^4.4.0",
-    "node-sass": "^4.1.1",
+    "node-sass": "^4.1.2",
     "opn": "^4.0.2",
     "ora": "^1.1.0",
     "popper.js": "latest",
