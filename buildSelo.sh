@@ -7,6 +7,5 @@ PID=$!
 sleep 5
 kill ${PID}
 npm i selo -S
-docker rm -f serverlesscms_cmsdev_1
+# docker rm -f serverlesscms_cmsdev_1
 # rm -f public/assets/js/app.js
-

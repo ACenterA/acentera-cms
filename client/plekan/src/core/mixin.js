@@ -40,7 +40,6 @@ export default {
       return this.store.state.rows[this.index]
     },
     _content () {
-
       const c = this.me.contents[this.displayLanguage].html
       if (!(c === undefined || c === '')) {
         return c
@@ -130,16 +129,16 @@ export default {
       }
     })
     try {
-      var parents = window.currentParents
-      var rootHtml = $(parents[parents.length - 1])
+      var parentsTmp = window.currentParents
+      var rootHtml = $(parentsTmp[parentsTmp.length - 1])
       var findElem = $(rootHtml).find('body')
       var kk = $.parseHTML('<div ' + this.getBodyMeta() + '/>')
-      var classList = $(kk).attr('class').split(/\s+/);
-      $.each(classList, function(index, item) {
+      var classList = $(kk).attr('class').split(/\s+/)
+      $.each(classList, function (index, item) {
         try {
-	   findElem.addClass(item)
+          findElem.addClass(item)
         } catch (Fa) {
-	   $(findElem).addClass(item)
+          $(findElem).addClass(item)
         }
       })
     } catch (ezz) {
@@ -156,7 +155,7 @@ export default {
     /* eslint-disable */
     _triggerMoveElement: function () {
       var self = this
-      var customIterMax = 30;
+      var customIterMax = 30
       var fct = function () {
       try {
         var parents = window.currentParents
