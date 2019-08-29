@@ -6,3 +6,5 @@ goldfish-linux-amd64
 goldfish-windows-amd64.exe
 node_modules
 vue-authenticate/node_modules
+package-lock.json
+vfg-field-array
