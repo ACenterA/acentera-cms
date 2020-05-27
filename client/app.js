@@ -1,4 +1,5 @@
 import Vue from 'vue'
+
 import moment from 'moment'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
@@ -23,7 +24,8 @@ import BitBucketAPI from './BitBucketAPI'
 import Base64 from './Base64'
 import VueCookie from 'vue-cookie'
 
-const IS_WEBSITE_DEV = process.env.IS_WEBSITE_DEV
+console.error('IS_WEBSITE_DEVIS_WEBSITE_DEV : ' + process.env.IS_WEBSITE_DEV)
+console.error('API_URLDEVIS_WEBSITE_DEV : ' + process.env.API_URL)
 
 Vue.component('v-select', VueSelect)
 //
@@ -61,12 +63,16 @@ var app = null
 var isOauthCallback = false
 var isResetCallback = false
 
-window.goApiUrl = window.goApiUrl || 'http://localhost:1313'
-window.apiUrl = window.apiUrl || 'http://localhost:8081/api'
-window.apiHost = window.apiHost || 'http://localhost:8081'
-window.goHostUrl = window.goHostUrl || 'http://localhost:8081'
-
-window.websiteapiUrl = window.goHostUrl || 'http://localhost:8081'
+window.goApiUrl = window.goApiUrl || '' + process.env.API_URL
+// || 'https://cms-hugo-v1.dev.acentera/'
+window.apiUrl = window.apiUrl || process.env.API_URL + ''
+// || 'https://cms-api-v1.dev.acentera/api'
+window.apiHost = window.apiHost || process.env.API_URL + ''
+// || 'https://cms-api-v1.dev.acentera'
+window.goHostUrl = window.goHostUrl || process.env.API_URL + ''
+// || 'https://cms-api-v1.dev.acentera'
+window.websiteapiUrl = window.goHostUrl || process.env.API_URL + ''
+// || 'https://cms-api-v1.dev.acentera'
 
 if ((window.location.href + '').indexOf('/password/reset') !== -1) {
   isResetCallback = true
@@ -190,6 +196,19 @@ var bindRequestInterceptorFct = function () {
   this.$http.interceptors.request.use((config) => {
     // this screw up if we already have a authorization we should not add it again..
 
+    /*
+    console.error('OK CLALING REQUETSHERE?')
+    config.crossDomain = true
+    config.xhrFields = {
+      withCredentials: true
+    }
+
+    config.withCredentials = window.withCredentials
+    config.headers['Access-Control-Allow-Origin'] = '*'
+    // config.headers['Origin'] = window.location.href
+    console.error(config)
+    */
+
     // Check if we need to pass in SSO Token ...
     if (window.vm.$store && window.vm.$store.state && window.vm.$store.state.app && window.vm.$store.state.app.website && config.url.indexOf(window.websiteapiUrl) >= 0) { // quick fix for multi-authorization header only on website mode, locally we do not  have authorization bearer....
         // ignore double Bearer
@@ -239,21 +258,26 @@ if (!isOauthCallback) {
   var githubClientId = ''
   if (!isOauthCallback) {
     // TODO: Use en environment variable ... build / pipeline tooling
-    if (window.location.href.indexOf('.acentera') !== -1) {
+    console.error('IS WEBSITE TEST A')
+    if (!process.env.IS_WEBSITE_DEV && window.location.href.indexOf('.acentera') !== -1) {
+      console.error('IS WEBSITE TEST B')
       // Enable devtools
       Vue.config.devtools = true
-      document.domain = 'acentera.com'
+      // TODO: CONFIG HERE?
+      document.domain = 'dev.acentera'
       store.commit('setWebsite', true)
       window.withCredentials = true
       if (window.location.href.indexOf('.acentera.com') !== -1) {
         window.websiteapiUrl = 'https://cms.acentera.com/prod'
       }
+      console.error('IS WEBSITE TEST C')
 
       router = routerImport.newRouter('history')
 
       bitbucketClientId = 'mYJjMLHBCjYn4k9Xu2'
       githubClientId = 'dd64a961127f3392159d'
     } else {
+      console.error('IS WEBSITE TEST D')
       // Enable devtools
       // Local Dev
       // window.websiteapiUrl = 'https://cms.acentera.net/dev' // TODO
@@ -261,6 +285,7 @@ if (!isOauthCallback) {
 
       router = routerImport.newRouter('hash')
       Vue.config.devtools = true
+      console.error('IS WEBSITE TEST E')
       window.withCredentials = false
       bitbucketClientId = '9BGHdNKKcppeXRQSSH'
       githubClientId = '830bd8b7d0520c42508d'
@@ -269,8 +294,14 @@ if (!isOauthCallback) {
 
       // TODO  .. if localhost test
       Vue.config.devtools = true
-      store.commit('setWebsite', IS_WEBSITE_DEV)
+      store.commit('setWebsite', process.env.IS_WEBSITE_DEV) // IS_WEBSITE_DEV)
+      console.error('website is : ' + process.env.IS_WEBSITE_DEV)
       window.withCredentials = true
+    }
+
+    if (window.location.href.indexOf('.acentera.com') !== -1) {
+      bitbucketClientId = 'mYJjMLHBCjYn4k9Xu2'
+      githubClientId = 'dd64a961127f3392159d'
     }
 
     // } // end if (hosted version)
@@ -311,6 +342,15 @@ if (!isOauthCallback) {
     }
 
     Vue.prototype.$http = axios
+    /*
+    .create({
+      crossDomain: true,
+      xhrFields: {
+        withCredentials: true
+      }
+    })
+    */
+    console.error('ADDING CROSSDOMAIN HERE')
     Vue.axios = axios
 
     Vue.use(VueAxios, axios)
@@ -332,9 +372,24 @@ if (!isOauthCallback) {
   githubClientId = 'dd64a961127f3392159d'
   */
   // DELETE
+  /*
+  Vue.prototype.$http = axios.create({
+    timeout: 90000,
+    crossDomain : true,
+    xhrFields: {
+      withCredentials: true
+    }
+    // withCredentials: window.withCredentials
+    // headers: { },
+  })
+  */
 
   Vue.prototype.$httpApi = axios.create({
     timeout: 90000,
+    // crossDomain : true,
+    // xhrFields: {
+    //  withCredentials: true
+    // }
     withCredentials: window.withCredentials
     // headers: { },
   })

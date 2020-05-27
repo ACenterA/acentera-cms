@@ -36,10 +36,10 @@ COPY . /code/.
 RUN cd /code && \
     npm run build && \
     D=$(date +%s) && \
-    mv public/assets/js/app.js public/assets/js/app-${D}.js && \
-    mv public/assets/js/vendor.js public/assets/js/vendor-${D}.js && \
-    sed -ri "s~/js/app.js~/js/app-${D}.js~g" public/index.html && \
-    sed -ri "s~/js/vendor.js~/js/vendor-${D}.js~g" public/index.html && \
+#    mv public/assets/js/app.js public/assets/js/app-${D}.js && \
+#    mv public/assets/js/vendor.js public/assets/js/vendor-${D}.js && \
+#    sed -ri "s~/js/app.js~/js/app-${D}.js~g" public/index.html && \
+#    sed -ri "s~/js/vendor.js~/js/vendor-${D}.js~g" public/index.html && \
     echo ${DT} > public/health.html
 
 # No need for this due to cloudfront ??

@@ -136,7 +136,7 @@ const mutations = {
     var state = self.$store.state
 
     // if (state.website || state.website) {
-    window.vm.$cookie.set('acentera_code_sso', '', {secure: true, expires: 1, domain: 'acentera.com'})
+    window.vm.$cookie.set('acentera_code_sso', '', {secure: true, expires: 1, domain: '' + process.env.DOMAIN})
     if (state.session && state.session.token) {
       var h = { 'Authorization': 'Bearer ' + state.session.token }
       // request it with headers an params
@@ -314,8 +314,8 @@ const mutations = {
       window.localStorage.setItem('selectedProject', state.projectId)
 
       // TODO: Get current scheme from current window...location
-      window.apiUrl = 'https://' + item.websiteId + '.workspace.acentera.com/api'
-      window.goHostUrl = 'https://' + item.websiteId + '.workspace.acentera.com'
+      window.apiUrl = 'https://' + item.websiteId + '.workspace.' + process.env.DOMAIN + '/api'
+      window.goHostUrl = 'https://' + item.websiteId + '.workspace.' + process.env.DOMAIN + ''
 
       if (!state.website) {
         window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
@@ -343,7 +343,7 @@ const mutations = {
             window.vm.$store.state.app.project['websites'][state.websiteId] = response.data
             if (response.data.sso_token) {
               self.$store.commit('SET_WEBSITE_SSO_TOKEN', {
-                domain: '.acentera.com',
+                domain: '.' + process.env.DOMAIN,
                 cookie_value: response.data.sso_token,
                 fct: function () {
                   window.vm.$store.commit('REFRESH_CONFIG', state) // we still want to refresh settings, for offline version...
@@ -581,14 +581,14 @@ const mutations = {
           }
         }
         console.error('AAAAA 01')
-        if (selWebsite && selWebsite.acentera_type && selWebsite.acentera_type === 'docker-simple') {
+        if (selWebsite && selWebsite.acentera_type && (!(selWebsite.acentera_type.toLowerCase().indexOf('hugo') >= 0))) {
           console.error('AAAAA 02')
           console.error('zz sl')
           self.$store.commit(types.REPO_STATE_UPATE, 0) // first set valid
           self.$store.commit(types.REPO_STATE_PENDING, 0) // all good
           // var basicAuth = self.$store.getters.getBasicAuth
           state.isLoaded = true
-        } else if (!selWebsite || (!selWebsite.acentera_type || selWebsite.acentera_type === 'hugo')) {
+        } else if (!selWebsite || (!selWebsite.acentera_type || selWebsite.acentera_type.toLowerCase().indexOf('hugo') >= 0)) {
           console.error('AAAAA 03')
           window.vm.$httpApi.get(window.apiUrl + '/git?action=config&loc=nav&type=refreshConfig').then((response) => {
             self.$store.commit(types.REPO_URL_UPDATE, response.data.Data)

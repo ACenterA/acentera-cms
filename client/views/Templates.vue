@@ -336,7 +336,7 @@ export default {
           window.vm.$store.commit('SELECT_INITIAL_WEBSITE', nextStepData)
 
           // TODO: change web.acentera.com by a variable
-          self.$store.commit('SET_WEBSITE_SSO_TOKEN', { secure: true, domain: '.acentera.com', cookie_value: response.data.sso_token })
+          self.$store.commit('SET_WEBSITE_SSO_TOKEN', { secure: true, domain: '.' + process.env.DOMAIN, cookie_value: response.data.sso_token })
 
           try {
             self.refreshUser()
@@ -363,7 +363,7 @@ export default {
       var fctCheckNewSite = function (itr) {
         // TODO GET SCHEME HERE ....
         $.ajax({
-          url: 'https://' + websiteId + '.web.acentera.com/?' + new Date(),
+          url: 'https://' + websiteId + '.web.' + process.env.DOMAIN + '/?' + new Date(),
           type: 'GET',
           crossDomain: true,
           // dataType: 'jsonp',

@@ -25,6 +25,13 @@ module.exports = {
     assetsSubDirectory: 'assets',
     assetsPublicPath: '/',
     proxyTable: {
+        '/api': {
+            target: 'http://cms-api-v1:8081',
+            changeOrigin: true,
+            pathRewrite: {
+                '^/api': ''
+            }
+        },
         '/admin': {
             target: 'http://localhost:8090',
             changeOrigin: true,

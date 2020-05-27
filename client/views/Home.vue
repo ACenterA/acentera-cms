@@ -245,7 +245,7 @@
 
                           <br/>
                           <br/>
-                          It happears that you have not yet created your first AWESOME website<br/>
+                          It happears that you have not yet created your first AWESOME website.<br/>
 
                           <br/>
                           <br/>
@@ -450,7 +450,7 @@ export default {
       return domain + '.' + ext
     },
     acenteraType () {
-      return (this.selectedWebsite && this.selectedWebsite.acentera_type && this.selectedWebsite.acentera_type === 'docker-simple')
+      return (this.selectedWebsite && this.selectedWebsite.acentera_type && (!((this.selectedWebsite.acentera_type.toLowerCase().indexOf('hugo') >= 0))))
     },
     txt: function () {
       return 'v=' + this.$store.state.app.account
@@ -459,7 +459,7 @@ export default {
       if (!this.newDomainName) {
         return true
       }
-      if (/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(this.newDomainName)) {
+      if (/^[a-zA-Z0-9-][a-zA-Z0-9-]{1,61}[a-zA-Z0-9-](?:\.[a-zA-Z]{2,})+$/.test(this.newDomainName)) {
         // valid domain name.
         return false
       }
@@ -469,7 +469,7 @@ export default {
       if (!this.newStageName) {
         return true
       }
-      if (/^[a-zA-Z0-9][a-zA-Z0-9- ]{1,30}[a-zA-Z0-9]$/.test(this.newStageName)) {
+      if (/^[a-zA-Z0-9-][a-zA-Z0-9- ]{1,30}[a-zA-Z0-9-]$/.test(this.newStageName)) {
         // valid domain name.
         return false
       }
@@ -491,9 +491,9 @@ export default {
             }
           }
         }
-        return window.goHostUrl.replace('.workspace.acentera.com', '.web.acentera.com')
+        return window.goHostUrl.replace('.workspace.' + process.env.DOMAIN + '', '.web.' + process.env.DOMAIN + '')
       } else {
-        return window.goHostUrl.replace('.workspace.acentera.com', '.web.acentera.com')
+        return window.goHostUrl.replace('.workspace.' + process.env.DOMAIN + '', '.web.' + process.env.DOMAIN + '')
       }
     },
     websiteUrl: function () {
@@ -506,7 +506,7 @@ export default {
       return this.selectedProject
     },
     acenteraTypeStageConfigured () {
-      if (this.selectedWebsite && this.selectedWebsite.acentera_type && this.selectedWebsite.acentera_type === 'docker-simple' && this.selectedWebsite.stages) {
+      if (this.selectedWebsite && this.selectedWebsite.acentera_type && (!((this.selectedWebsite.acentera_type.toLowerCase().indexOf('hugo') >= 0))) && this.selectedWebsite.stages) {
         var keys = Object.keys(this.selectedWebsite.stages)
         return (keys.length >= 1)
       }
@@ -926,7 +926,7 @@ export default {
           window.vm.$store.commit('SELECT_INITIAL_WEBSITE', nextStepData)
 
           // TODO: change web.acentera.com by a variable
-          self.$store.commit('SET_WEBSITE_SSO_TOKEN', { secure: true, domain: '.acentera.com', cookie_value: response.data.sso_token })
+          self.$store.commit('SET_WEBSITE_SSO_TOKEN', { secure: true, domain: '.' + process.env.DOMAIN + '', cookie_value: response.data.sso_token })
 
           try {
             self.refreshUser()
@@ -953,7 +953,7 @@ export default {
       var fctCheckNewSite = function (itr) {
         // TODO GET SCHEME HERE ....
         $.ajax({
-          url: 'https://' + websiteId + '.web.acentera.com/?' + new Date(),
+          url: 'https://' + websiteId + '.web.' + process.env.DOMAIN + '/?' + new Date(),
           type: 'GET',
           crossDomain: true,
           // dataType: 'jsonp',

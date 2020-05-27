@@ -33,6 +33,7 @@
     "test": "echo lol"
   },
   "dependencies": {
+    "@formschema/native": "^2.0.0-alpha.2",
     "animate.css": "3.5.2",
     "animejs": "^2.0.1",
     "axios": "^0.15.3",
@@ -89,7 +90,6 @@
     "wysiwyg.css": "0.0.2"
   },
   "devDependencies": {
-    "@formschema/native": "file:forms-schema",
     "autoprefixer": "^6.7.6",
     "babel-core": "^6.21.0",
     "babel-eslint": "^7.1.1",

@@ -78,7 +78,7 @@ export default {
       return false
     },
     isDockerSimple () {
-      if (this.websiteObject.acentera_type && this.websiteObject.acentera_type === 'docker-simple') {
+      if (this.websiteObject.acentera_type && (!(this.websiteObject.acentera_type.toLowerCase().indexOf('hugo') >= 0))) {
         return true
       }
       return false

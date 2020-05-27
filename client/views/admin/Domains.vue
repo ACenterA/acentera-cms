@@ -1,5 +1,4 @@
 <template>
-
     <div v-if="loaded">
       <div v-if="isWebsite">
         <div class="tile is-ancestor">
@@ -107,7 +106,6 @@
       </div>
 
       <div v-if="!isWebsite">
-
         <div class="tile is-ancestor">
           <div class="tile is-parent">
             <article class="tile is-child box">
@@ -168,6 +166,7 @@ export default {
   },
 
   mounted: function () {
+    console.error('in here mounted?')
     /*
     var self = this
     // TODO: Fetch from github, if fail get local file?
@@ -189,6 +188,7 @@ export default {
       loaded: 'loaded'
     }),
     stages () {
+      console.error('in here get stages?')
       var stageArr = []
       if (this.acenteraTypeStageConfigured) {
         var keys = Object.keys(this.selectedWebsite.stages)
@@ -205,20 +205,20 @@ export default {
       return 'v=' + this.$store.state.app.account
     },
     acenteraTypeStageConfigured () {
-      if (this.selectedWebsite && this.selectedWebsite.acentera_type && this.selectedWebsite.acentera_type === 'docker-simple' && this.selectedWebsite.stages) {
+      if (this.selectedWebsite && this.selectedWebsite.acentera_type && (!(('' + this.selectedWebsite.acentera_type).toLowerCase().indexOf('hugo') >= 0)) && this.selectedWebsite.stages) {
         var keys = Object.keys(this.selectedWebsite.stages)
         return (keys.length >= 1)
       }
       return false
     },
     acenteraType () {
-      return (this.selectedWebsite && this.selectedWebsite.acentera_type && this.selectedWebsite.acentera_type === 'docker-simple')
+      return (this.selectedWebsite && this.selectedWebsite.acentera_type && (!(this.selectedWebsite.acentera_type.toLowerCase().indexOf('hugo') >= 0)))
     },
     invalidDomainName () {
       if (!this.newDomainName) {
         return true
       }
-      if (/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z0-9]{2,})+$/.test(this.newDomainName)) {
+      if (/^[a-zA-Z0-9-][a-zA-Z0-9-]{1,61}[a-zA-Z0-9-](?:\.[a-zA-Z0-9-]{2,})+$/.test(this.newDomainName)) {
         // valid domain name.
         return false
       }

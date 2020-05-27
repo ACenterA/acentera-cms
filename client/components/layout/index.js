@@ -1,15 +1,26 @@
-export Navbar from './Navbar'
+import Navbar from './Navbar'
 
-export Sidebar from './Sidebar'
+import Sidebar from './Sidebar'
 
-export Sidebartwo from './Sidebartwo'
+import Sidebartwo from './Sidebartwo'
 
-export SidebarGlobal from './SidebarGlobal'
+import SidebarGlobal from './SidebarGlobal'
 
-export Sidebarblogs from './Sidebarblogs'
+import Sidebarblogs from './Sidebarblogs'
 
-export Sidebarrecettes from './Sidebarrecettes'
+import Sidebarrecettes from './Sidebarrecettes'
 
-export AppMain from './AppMain'
+import AppMain from './AppMain'
 
-export FooterBar from './FooterBar'
+import FooterBar from './FooterBar'
+
+export {
+  Navbar,
+  Sidebar,
+  Sidebartwo,
+  SidebarGlobal,
+  Sidebarblogs,
+  Sidebarrecettes,
+  AppMain,
+  FooterBar
+}

@@ -9,7 +9,7 @@ export const clearSession = (state, origState) => {
   // website only
   if (state.app.website) {
     // Remove cookie, user cannot see preview after this..
-    window.vm.$cookie.set('acentera_code_sso', '', {secure: true, expires: -1, domain: 'acentera.com'})
+    window.vm.$cookie.set('acentera_code_sso', '', {secure: true, expires: -1, domain: '' + process.env.DOMAIN})
 
     if (origState) {
       var newState = JSON.parse(JSON.stringify(origState))
