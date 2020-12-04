@@ -47,7 +47,7 @@
     "element-ui": "^2.4.0",
     "font-awesome": "4.7.0",
     "github-buttons": "https://github.com/ntkme/github-buttons.git",
-    "highlight.js": "^9.12.0",
+    "highlight.js": "^10.4.1",
     "jquery": "latest",
     "lodash": "^4.17.10",
     "mdi": "^1.8.36",
