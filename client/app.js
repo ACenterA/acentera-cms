@@ -268,7 +268,8 @@ if (!isOauthCallback) {
       store.commit('setWebsite', true)
       window.withCredentials = true
       if (window.location.href.indexOf('.acentera.com') !== -1) {
-        window.websiteapiUrl = 'https://cms.acentera.com/prod'
+        // window.websiteapiUrl = 'https://cms.acentera.com/prod'
+        window.websiteapiUrl = '/prod'
       }
       console.error('IS WEBSITE TEST C')
 
@@ -366,7 +367,7 @@ if (!isOauthCallback) {
   // document.domain = 'acentera.com' // TODO: Use en environment variable ...
   store.commit('setWebsite', true) // weird ?
   window.withCredentials = true
-  window.websiteapiUrl = 'https://cms.acentera.com/dev'
+  window.websiteapiUrl = '/dev'
 
   bitbucketClientId = 'mYJjMLHBCjYn4k9Xu2'
   githubClientId = 'dd64a961127f3392159d'
@@ -496,7 +497,7 @@ if (!isOauthCallback) {
       }
       Vue.prototype.$checkInetBad = function () {
         $.ajax({
-          url: 'https://cms.acentera.com/',
+          url: 'https://cms.acentera.com/', 
           type: 'GET',
           timeout: 5000,
           crossDomain: true,
